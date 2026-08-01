@@ -1,4 +1,7 @@
 # ======================= CELL 2 — THE RACE (the streaming belt) =======================
+# Loops over every question in QIDS: one full race per question, one pkl per question.
+# A question whose pkl already exists in OUT_DIR is skipped, so an interrupted sweep
+# resumes with a simple rerun (delete a pkl to redo that question from scratch).
 import json, re, time, pickle, os, queue, threading
 import numpy as np, requests
 from collections import deque
@@ -12,7 +15,7 @@ MODEL   = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 SERVER  = "http://localhost:8000"
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # where results are saved
 
-QID            = 6        # which AIME problem to run (0-29)
+QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
 SEATS          = 16       # traces in flight at once — the belt's chairs
 MAX_TRACES     = 32       # total launch cap. A departed trace frees its seat for a
                           # fresh one until this cap — or the landslide rule ends the
@@ -79,16 +82,10 @@ EOS_ID = tok.eos_token_id
 
 with open("aime25.jsonl") as f:
     data = [json.loads(l) for l in f]
-question, ground_truth = data[QID]["question"], str(data[QID]["answer"]).strip()
-if FORCE_BOXED:                        # question feeds the main prompt AND the reflection prompt
-    question += "\n\nPlease put your final answer within \\boxed{}."
-print(f"Q{QID}: {question[:80]}...\nGround truth: {ground_truth}\n")
 
 def render_chat(user_text):
     return tok.apply_chat_template([{"role": "user", "content": user_text}],
                                    tokenize=False, add_generation_prompt=True)
-
-BASE_PROMPT = render_chat(question)
 
 FINAL_CHECK_TEXT = {
     "wait": "\nWait",
@@ -144,22 +141,6 @@ class Trace:
         self.retried   = False
         self.status    = "racing"   # racing|finished|stopped|truncated|abandoned
         self.answer    = None
-
-# ---------------- shared race state (mutated ONLY by the main thread) ----------------
-traces    = [Trace(i) for i in range(SEATS)]
-launched  = SEATS
-MINS      = {}                   # {trace id: its worst full-window score EVER} — one
-                                 # entry per trace, never deleted (anchoring)
-LINE_HISTORY = []                # game tape: the line at every change, for the figure
-t_start   = time.time()
-events    = queue.Queue()        # (trace, payload|None, error|None) from worker threads
-inflight  = set()
-race_over = False
-n_events  = 0
-line_live = False
-last_line = None                 # LINE_HISTORY records only line CHANGES, so the
-                                 # game tape stays small even at STREAM_BATCH = 1
-executor  = ThreadPoolExecutor(max_workers=SEATS + 4)
 
 def current_line():
     """The line over LIVE per-trace minima; None until every opening seat has
@@ -240,6 +221,7 @@ def launch(t):
 def pour_and_judge(t, scores):
     """POUR the batch's low into the bucket, REDRAW the line, then JUDGE this trace.
     Returns the verdict: None (safe) | 'cut' | 'reflect'."""
+    global line_live, last_line
     if scores:
         m = min(scores)
         if t.id not in MINS or m < MINS[t.id]:
@@ -249,7 +231,6 @@ def pour_and_judge(t, scores):
     line = current_line()
     if line is None:
         return None
-    global line_live, last_line
     if not line_live:
         line_live = True
         print(f"Line live at {line:.3f} ({len(MINS)} trace minima)")
@@ -270,127 +251,7 @@ def pour_and_judge(t, scores):
             t.below_run = 0
     return None
 
-# ---------------- the streaming belt: pour -> redraw -> judge, live ----------------
-print(f"Race start: {SEATS} seats, streaming (report every {STREAM_BATCH} tokens), "
-      f"keep top {LINE_TOP:.0%} of the field (line = "
-      f"{(1 - LINE_TOP) * 100:.0f}th pct of trace minima)")
-for t in traces:
-    launch(t)
-
-while inflight:
-    t, payload, err = events.get()
-    n_events += 1
-
-    if err:                                               # one retry, then truncate
-        inflight.discard(t.id)
-        if not t.retried:
-            t.retried = True
-            print(f"Trace {t.id}: stream error, retrying ({err})")
-            launch(t); continue
-        t.status = "truncated"
-        print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
-    elif payload["kind"] == "batch":                      # mid-flight report
-        t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
-        if t.checking:
-            t.check_confs += payload["scores"]
-        else:
-            t.confs += payload["scores"]
-            if t.pending is None and not race_over:
-                verdict = pour_and_judge(t, payload["scores"])
-                if verdict is not None:
-                    t.dipped = True
-                    t.pending = verdict
-                    t.kill.set()                          # stream closes within a chunk
-        continue                                          # trace still in flight
-    else:                                                 # "end": the leg is over
-        inflight.discard(t.id)
-        t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
-        fin = payload["finish"]
-        if t.checking:
-            t.check_confs += payload["scores"]
-        else:
-            t.confs += payload["scores"]
-            if t.pending is None and not race_over and payload["scores"]:
-                verdict = pour_and_judge(t, payload["scores"])
-                if verdict is not None:
-                    t.dipped = True
-                    t.pending = verdict
-
-        ans = extract_answer(t.gen_text) if fin == "stop" else None
-        line = current_line()
-
-        if race_over:                                     # landed after the landslide
-            if t.checking and t.pre_check_answer is not None:
-                t.status, t.answer, t.checking = "finished", t.pre_check_answer, False
-            else:
-                t.status = "abandoned"
-        elif t.pending == "reflect":                      # rescue — INSTANTLY
-            t.prompt_text = build_reflect_prompt(t.gen_text)
-            t.gen_text    = ""
-            t.win         = None
-            t.reflected   = True
-            t.judge_from  = len(t.confs)                  # relapse looks only forward
-            t.judge_min   = float("inf")
-            t.below_run   = 0
-            print(f"Trace {t.id}: reflection fired at {t.toks_gen} tokens")
-            launch(t); continue
-        elif t.pending == "cut":                          # the kill switch landed
-            t.status = "stopped"
-            print(f"Trace {t.id}: cut at the line "
-                  + (f"{line:.3f} " if line is not None else "")
-                  + f"(its low {t.judge_min:.3f}, {t.toks_gen} tokens)")
-        elif t.checking:                                  # back from its verification leg
-            t.checking = False
-            t.status   = "finished"
-            ans2 = extract_answer(t.gen_text)             # LAST box wins, else the
-            t.answer  = ans2 if ans2 is not None else t.pre_check_answer
-            t.revised = (str(t.answer) != str(t.pre_check_answer))
-            print(f"Trace {t.id}: {FINAL_CHECK} check done at {t.toks_gen} tokens | "
-                  f"answer={t.answer}"
-                  + (f" (REVISED from {t.pre_check_answer})" if t.revised else " (confirmed)"))
-        elif ans is not None:                             # crossed the finish line
-            if FINAL_CHECK != "off" and not t.checked and t.toks_gen < MAX_TOK_TRACE:
-                t.checked, t.checking = True, True
-                t.pre_check_answer = ans
-                t.gen_text += FINAL_CHECK_TEXT[FINAL_CHECK]
-                print(f"Trace {t.id}: boxed {ans} at {t.toks_gen} tokens -> "
-                      f"{FINAL_CHECK} check fired")
-                launch(t); continue                       # verification leg, instantly
-            t.status, t.answer = "finished", ans
-            print(f"Trace {t.id}: finished at {t.toks_gen} tokens | answer={ans}"
-                  + (" | was reflected" if t.reflected else ""))
-        elif fin == "stop":                               # EOS without a boxed answer
-            t.status = "truncated"
-            print(f"Trace {t.id}: ended without a boxed answer at {t.toks_gen} "
-                  f"tokens -> truncated")
-        else:                                             # hit its budget
-            t.status = "truncated"
-            print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
-
-    # ---- this trace departed: per-trace pit stop ----
-    if CONSENSUS <= 1.0 and not race_over:
-        lead, share = consensus_check()
-        n_fin = sum(1 for x in traces if x.status == "finished")
-        if lead is not None and share >= CONSENSUS and n_fin >= 3:
-            race_over = True
-            live_ids = [x.id for x in traces if x.id in inflight]
-            for x in traces:                              # drain INSTANTLY
-                if x.id in inflight:
-                    x.kill.set()
-            print(f"Consensus after {n_fin} finishers: '{lead}' holds {share:.0%} — "
-                  f"killing {len(live_ids)} in-flight streams, no new launches")
-    if not race_over and launched < MAX_TRACES:
-        nt = Trace(launched); traces.append(nt)
-        nl = current_line()
-        print(f"Trace {launched}: seated (replacing {t.id})"
-              + (f" | line now {nl:.3f}" if nl is not None else ""))
-        launched += 1
-        launch(nt)
-
-# ---------------- results + voting table ----------------
-done   = traces
-voters = [t for t in done if t.status == "finished" and t.answer is not None]
-
+# ---------------- voting helpers (used once per question, after its race) ----------------
 def trace_measures(t):
     c = np.array(t.confs) if t.confs else np.array([0.0])
     k = max(1, int(len(c) * 0.10))
@@ -398,8 +259,6 @@ def trace_measures(t):
             "tail_conf":     float(c[-1]),
             "bottom_window": float(np.sort(c)[:k].mean()),
             "min_window":    float(c.min())}
-
-M = {t.id: trace_measures(t) for t in voters}
 
 def weighted_vote(weight_key=None, only_traces=None):
     pool = only_traces if only_traces is not None else voters
@@ -420,105 +279,262 @@ def top_filtered(measure, top_percent=0.1):
     elite = [t for t in voters if M[t.id][measure] >= thr]
     return weighted_vote(measure, only_traces=elite)
 
-print(f"\nBasic voting candidates: {len(voters)}")
-print(f"Sample voting answers: {[t.answer for t in voters][:8]}")
-voting_results = {
-    "majority":                     weighted_vote(None),
-    "mean_confidence_weighted":     weighted_vote("mean_conf"),
-    "tail_confidence_weighted":     weighted_vote("tail_conf"),
-    "bottom_window_weighted":       weighted_vote("bottom_window"),
-    "min_window_weighted":          weighted_vote("min_window"),
-    "top10_tail_filtered":          top_filtered("tail_conf", 0.10),
-    "top10_bottom_window_filtered": top_filtered("bottom_window", 0.10),
-}
-
-total_tokens = sum(t.toks_gen for t in done)
-n_status     = lambda s: sum(1 for x in done if x.status == s)
-n_reflected  = sum(1 for t in done if t.reflected)
-salvaged     = sum(1 for t in done if t.reflected and t.status == "finished"
-                   and t.answer is not None and is_correct(t.answer, ground_truth))
-n_checked    = sum(1 for t in done if t.checked)
-n_revised    = sum(1 for t in done if t.revised)
-# blind-spot guard scoring: only traces whose PRE-check answer was wrong were in
-# danger — confirming an already-correct answer is excluded from the rate entirely
-guard_done    = [t for t in done if t.checked and t.status == "finished"]
-guard_at_risk = [t for t in guard_done if not is_correct(t.pre_check_answer, ground_truth)]
-guard_rescued = sum(1 for t in guard_at_risk if is_correct(t.answer, ground_truth))
-guard_wrecked = sum(1 for t in guard_done
-                    if is_correct(t.pre_check_answer, ground_truth)
-                    and not is_correct(t.answer, ground_truth))
-# overall save rate: every trace that was ever in danger (dipped -> reflected, or
-# boxed a wrong answer) and still ended finished + correct — no double counting
-in_danger = [t for t in done if t.reflected
-             or (t.checked and t.status == "finished"
-                 and not is_correct(t.pre_check_answer, ground_truth))]
-saved     = sum(1 for t in in_danger if t.status == "finished"
-                and is_correct(t.answer, ground_truth))
-
-final_line = current_line()
-print("\n=== PeerConf Summary (streaming belt) ===")
-print(f"Dip action: {DIP_ACTION} | stop on relapse: {STOP_ON_RELAPSE} | final check: {FINAL_CHECK}")
-print(f"Final line: {final_line if final_line is None else f'{final_line:.3f}'} "
-      f"(keep top {LINE_TOP:.0%} of {len(MINS)} trace minima) | "
-      f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
-print(f"Traces: finished {n_status('finished')} | stopped {n_status('stopped')} "
-      f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
-print(f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: {n_reflected} "
-      f"| salvage rate (correct): {salvaged}/{n_reflected}" if n_reflected else
-      f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: 0 | salvage rate: 0/0")
-if FINAL_CHECK != "off":
-    print(f"Blind-spot guard ({FINAL_CHECK}): fired on {n_checked} | revised: {n_revised} | "
-          f"rescued {guard_rescued}/{len(guard_at_risk)} wrong answers | broke {guard_wrecked} correct ones")
-print(f"Overall save rate: {saved}/{len(in_danger)} in-danger traces ended correct")
-print(f"Valid answers for voting: {len(voters)}")
-print(f"Final answer: {voting_results['majority'][0]}   | ground truth: {ground_truth}")
-print(f"Total tokens generated (all traces, incl. discarded): {total_tokens}")
-print(f"Total time: {time.time()-t_start:.2f}s")
-
-print("\n=== Voting Results Summary ===")
-for m, (a, conf, v) in voting_results.items():
-    cs = f" (conf: {conf:.3f})" if conf is not None else ""
-    print(f"  {m}: {a}{cs} [{v} votes]")
-
-print("\n=== Detailed Voting Results ===")
-print("-" * 70)
-print(f"{'Method':<30}{'Answer':<12}{'Votes':<7}{'Confidence':<12}{'Correct'}")
-print("-" * 70)
-for m, (a, conf, v) in voting_results.items():
-    ok = "✓" if is_correct(a, ground_truth) else "✗"
-    cs = f"{conf:.3f}" if conf is not None else "-"
-    print(f"{m:<30}{str(a):<12}{v:<7}{cs:<12}{ok}")
-marks = ", ".join(f"{m}:{'✓' if is_correct(r[0], ground_truth) else '✗'}" for m, r in voting_results.items())
-print(f"Q{QID} done | gt={ground_truth} | {marks}")
-
-# ---------------- save (results + the confidence-timeline game tape) ----------------
+executor = ThreadPoolExecutor(max_workers=SEATS + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
-with open(f"{OUT_DIR}/q{QID}_{DIP_ACTION}_{FINAL_CHECK}_belt.pkl", "wb") as f:
-    pickle.dump({"qid": QID, "gt": ground_truth,
-                 "config": {"MODE": "server-stream-belt", "MODEL": MODEL,
-                            "LINE_TOP": LINE_TOP,
-                            "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,
-                            "DWELL_TOKENS": DWELL_TOKENS,
-                            "DIP_ACTION": DIP_ACTION,
-                            "STOP_ON_RELAPSE": STOP_ON_RELAPSE,
-                            "FINAL_CHECK": FINAL_CHECK,
-                            "FINAL_CHECK_TOKENS": FINAL_CHECK_TOKENS,
-                            "FORCE_BOXED": FORCE_BOXED,
-                            "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
-                            "CONSENSUS": CONSENSUS, "final_line": final_line},
-                 "voting": voting_results, "tokens": total_tokens, "launched": launched,
-                 "line_history": LINE_HISTORY,
-                 "mins": MINS,
-                 "salvage": (salvaged, n_reflected),
-                 "guard":   (guard_rescued, len(guard_at_risk), guard_wrecked),
-                 "saved":   (saved, len(in_danger)),
-                 "traces": [{"id": t.id, "status": t.status, "answer": t.answer,
-                             "reflected": t.reflected, "dipped": t.dipped,
-                             "checked": t.checked, "revised": t.revised,
-                             "pre_check_answer": t.pre_check_answer,
-                             "toks_gen": t.toks_gen,
-                             "confs": t.confs,
-                             "check_confs": t.check_confs,
-                             "text": t.gen_text,
-                             "prompt": t.prompt_text} for t in done]}, f)
-print(f"Saved to {OUT_DIR}/q{QID}_{DIP_ACTION}_{FINAL_CHECK}_belt.pkl")
+t_sweep = time.time()
+
+# ==================== THE SWEEP: one race per question ====================
+for QID in QIDS:
+    save_path = f"{OUT_DIR}/q{QID}_{DIP_ACTION}_{FINAL_CHECK}_belt.pkl"
+    if os.path.exists(save_path):
+        print(f"Q{QID}: already saved ({save_path}) — skipping")
+        continue
+
+    print(f"\n{'=' * 60}\n### Q{QID}  ({(time.time() - t_sweep) / 60:.0f} min into the sweep)\n{'=' * 60}")
+    question, ground_truth = data[QID]["question"], str(data[QID]["answer"]).strip()
+    if FORCE_BOXED:                    # question feeds the main prompt AND the reflection prompt
+        question += "\n\nPlease put your final answer within \\boxed{}."
+    print(f"Q{QID}: {question[:80]}...\nGround truth: {ground_truth}\n")
+    BASE_PROMPT = render_chat(question)
+
+    # -------- fresh race state (mutated ONLY by the main thread) --------
+    traces    = [Trace(i) for i in range(SEATS)]
+    launched  = SEATS
+    MINS      = {}               # {trace id: its worst full-window score EVER} — one
+                                 # entry per trace, never deleted (anchoring)
+    LINE_HISTORY = []            # game tape: the line at every change, for the figure
+    t_start   = time.time()
+    events    = queue.Queue()    # (trace, payload|None, error|None) from worker threads
+    inflight  = set()
+    race_over = False
+    n_events  = 0
+    line_live = False
+    last_line = None             # LINE_HISTORY records only line CHANGES, so the
+                                 # game tape stays small even at STREAM_BATCH = 1
+
+    # -------- the streaming belt: pour -> redraw -> judge, live --------
+    print(f"Race start: {SEATS} seats, streaming (report every {STREAM_BATCH} tokens), "
+          f"keep top {LINE_TOP:.0%} of the field (line = "
+          f"{(1 - LINE_TOP) * 100:.0f}th pct of trace minima)")
+    for t in traces:
+        launch(t)
+
+    while inflight:
+        t, payload, err = events.get()
+        n_events += 1
+
+        if err:                                               # one retry, then truncate
+            inflight.discard(t.id)
+            if not t.retried:
+                t.retried = True
+                print(f"Trace {t.id}: stream error, retrying ({err})")
+                launch(t); continue
+            t.status = "truncated"
+            print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
+        elif payload["kind"] == "batch":                      # mid-flight report
+            t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
+            if t.checking:
+                t.check_confs += payload["scores"]
+            else:
+                t.confs += payload["scores"]
+                if t.pending is None and not race_over:
+                    verdict = pour_and_judge(t, payload["scores"])
+                    if verdict is not None:
+                        t.dipped = True
+                        t.pending = verdict
+                        t.kill.set()                          # stream closes within a chunk
+            continue                                          # trace still in flight
+        else:                                                 # "end": the leg is over
+            inflight.discard(t.id)
+            t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
+            fin = payload["finish"]
+            if t.checking:
+                t.check_confs += payload["scores"]
+            else:
+                t.confs += payload["scores"]
+                if t.pending is None and not race_over and payload["scores"]:
+                    verdict = pour_and_judge(t, payload["scores"])
+                    if verdict is not None:
+                        t.dipped = True
+                        t.pending = verdict
+
+            ans = extract_answer(t.gen_text) if fin == "stop" else None
+            line = current_line()
+
+            if race_over:                                     # landed after the landslide
+                if t.checking and t.pre_check_answer is not None:
+                    t.status, t.answer, t.checking = "finished", t.pre_check_answer, False
+                else:
+                    t.status = "abandoned"
+            elif t.pending == "reflect":                      # rescue — INSTANTLY
+                t.prompt_text = build_reflect_prompt(t.gen_text)
+                t.gen_text    = ""
+                t.win         = None
+                t.reflected   = True
+                t.judge_from  = len(t.confs)                  # relapse looks only forward
+                t.judge_min   = float("inf")
+                t.below_run   = 0
+                print(f"Trace {t.id}: reflection fired at {t.toks_gen} tokens")
+                launch(t); continue
+            elif t.pending == "cut":                          # the kill switch landed
+                t.status = "stopped"
+                print(f"Trace {t.id}: cut at the line "
+                      + (f"{line:.3f} " if line is not None else "")
+                      + f"(its low {t.judge_min:.3f}, {t.toks_gen} tokens)")
+            elif t.checking:                                  # back from its verification leg
+                t.checking = False
+                t.status   = "finished"
+                ans2 = extract_answer(t.gen_text)             # LAST box wins, else the
+                t.answer  = ans2 if ans2 is not None else t.pre_check_answer
+                t.revised = (str(t.answer) != str(t.pre_check_answer))
+                print(f"Trace {t.id}: {FINAL_CHECK} check done at {t.toks_gen} tokens | "
+                      f"answer={t.answer}"
+                      + (f" (REVISED from {t.pre_check_answer})" if t.revised else " (confirmed)"))
+            elif ans is not None:                             # crossed the finish line
+                if FINAL_CHECK != "off" and not t.checked and t.toks_gen < MAX_TOK_TRACE:
+                    t.checked, t.checking = True, True
+                    t.pre_check_answer = ans
+                    t.gen_text += FINAL_CHECK_TEXT[FINAL_CHECK]
+                    print(f"Trace {t.id}: boxed {ans} at {t.toks_gen} tokens -> "
+                          f"{FINAL_CHECK} check fired")
+                    launch(t); continue                       # verification leg, instantly
+                t.status, t.answer = "finished", ans
+                print(f"Trace {t.id}: finished at {t.toks_gen} tokens | answer={ans}"
+                      + (" | was reflected" if t.reflected else ""))
+            elif fin == "stop":                               # EOS without a boxed answer
+                t.status = "truncated"
+                print(f"Trace {t.id}: ended without a boxed answer at {t.toks_gen} "
+                      f"tokens -> truncated")
+            else:                                             # hit its budget
+                t.status = "truncated"
+                print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
+
+        # ---- this trace departed: per-trace pit stop ----
+        if CONSENSUS <= 1.0 and not race_over:
+            lead, share = consensus_check()
+            n_fin = sum(1 for x in traces if x.status == "finished")
+            if lead is not None and share >= CONSENSUS and n_fin >= 3:
+                race_over = True
+                live_ids = [x.id for x in traces if x.id in inflight]
+                for x in traces:                              # drain INSTANTLY
+                    if x.id in inflight:
+                        x.kill.set()
+                print(f"Consensus after {n_fin} finishers: '{lead}' holds {share:.0%} — "
+                      f"killing {len(live_ids)} in-flight streams, no new launches")
+        if not race_over and launched < MAX_TRACES:
+            nt = Trace(launched); traces.append(nt)
+            nl = current_line()
+            print(f"Trace {launched}: seated (replacing {t.id})"
+                  + (f" | line now {nl:.3f}" if nl is not None else ""))
+            launched += 1
+            launch(nt)
+
+    # -------- results + voting table --------
+    done   = traces
+    voters = [t for t in done if t.status == "finished" and t.answer is not None]
+    M = {t.id: trace_measures(t) for t in voters}
+
+    print(f"\nBasic voting candidates: {len(voters)}")
+    print(f"Sample voting answers: {[t.answer for t in voters][:8]}")
+    voting_results = {
+        "majority":                     weighted_vote(None),
+        "mean_confidence_weighted":     weighted_vote("mean_conf"),
+        "tail_confidence_weighted":     weighted_vote("tail_conf"),
+        "bottom_window_weighted":       weighted_vote("bottom_window"),
+        "min_window_weighted":          weighted_vote("min_window"),
+        "top10_tail_filtered":          top_filtered("tail_conf", 0.10),
+        "top10_bottom_window_filtered": top_filtered("bottom_window", 0.10),
+    }
+
+    total_tokens = sum(t.toks_gen for t in done)
+    n_status     = lambda s: sum(1 for x in done if x.status == s)
+    n_reflected  = sum(1 for t in done if t.reflected)
+    salvaged     = sum(1 for t in done if t.reflected and t.status == "finished"
+                       and t.answer is not None and is_correct(t.answer, ground_truth))
+    n_checked    = sum(1 for t in done if t.checked)
+    n_revised    = sum(1 for t in done if t.revised)
+    # blind-spot guard scoring: only traces whose PRE-check answer was wrong were in
+    # danger — confirming an already-correct answer is excluded from the rate entirely
+    guard_done    = [t for t in done if t.checked and t.status == "finished"]
+    guard_at_risk = [t for t in guard_done if not is_correct(t.pre_check_answer, ground_truth)]
+    guard_rescued = sum(1 for t in guard_at_risk if is_correct(t.answer, ground_truth))
+    guard_wrecked = sum(1 for t in guard_done
+                        if is_correct(t.pre_check_answer, ground_truth)
+                        and not is_correct(t.answer, ground_truth))
+    # overall save rate: every trace that was ever in danger (dipped -> reflected, or
+    # boxed a wrong answer) and still ended finished + correct — no double counting
+    in_danger = [t for t in done if t.reflected
+                 or (t.checked and t.status == "finished"
+                     and not is_correct(t.pre_check_answer, ground_truth))]
+    saved     = sum(1 for t in in_danger if t.status == "finished"
+                    and is_correct(t.answer, ground_truth))
+
+    final_line = current_line()
+    print("\n=== PeerConf Summary (streaming belt) ===")
+    print(f"Dip action: {DIP_ACTION} | stop on relapse: {STOP_ON_RELAPSE} | final check: {FINAL_CHECK}")
+    print(f"Final line: {final_line if final_line is None else f'{final_line:.3f}'} "
+          f"(keep top {LINE_TOP:.0%} of {len(MINS)} trace minima) | "
+          f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
+    print(f"Traces: finished {n_status('finished')} | stopped {n_status('stopped')} "
+          f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
+    print(f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: {n_reflected} "
+          f"| salvage rate (correct): {salvaged}/{n_reflected}" if n_reflected else
+          f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: 0 | salvage rate: 0/0")
+    if FINAL_CHECK != "off":
+        print(f"Blind-spot guard ({FINAL_CHECK}): fired on {n_checked} | revised: {n_revised} | "
+              f"rescued {guard_rescued}/{len(guard_at_risk)} wrong answers | broke {guard_wrecked} correct ones")
+    print(f"Overall save rate: {saved}/{len(in_danger)} in-danger traces ended correct")
+    print(f"Valid answers for voting: {len(voters)}")
+    print(f"Final answer: {voting_results['majority'][0]}   | ground truth: {ground_truth}")
+    print(f"Total tokens generated (all traces, incl. discarded): {total_tokens}")
+    print(f"Total time: {time.time()-t_start:.2f}s")
+
+    print("\n=== Voting Results Summary ===")
+    for m, (a, conf, v) in voting_results.items():
+        cs = f" (conf: {conf:.3f})" if conf is not None else ""
+        print(f"  {m}: {a}{cs} [{v} votes]")
+
+    print("\n=== Detailed Voting Results ===")
+    print("-" * 70)
+    print(f"{'Method':<30}{'Answer':<12}{'Votes':<7}{'Confidence':<12}{'Correct'}")
+    print("-" * 70)
+    for m, (a, conf, v) in voting_results.items():
+        ok = "✓" if is_correct(a, ground_truth) else "✗"
+        cs = f"{conf:.3f}" if conf is not None else "-"
+        print(f"{m:<30}{str(a):<12}{v:<7}{cs:<12}{ok}")
+    marks = ", ".join(f"{m}:{'✓' if is_correct(r[0], ground_truth) else '✗'}" for m, r in voting_results.items())
+    print(f"Q{QID} done | gt={ground_truth} | {marks}")
+
+    # -------- save (results + the confidence-timeline game tape) --------
+    with open(save_path, "wb") as f:
+        pickle.dump({"qid": QID, "gt": ground_truth,
+                     "config": {"MODE": "server-stream-belt", "MODEL": MODEL,
+                                "LINE_TOP": LINE_TOP,
+                                "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,
+                                "DWELL_TOKENS": DWELL_TOKENS,
+                                "DIP_ACTION": DIP_ACTION,
+                                "STOP_ON_RELAPSE": STOP_ON_RELAPSE,
+                                "FINAL_CHECK": FINAL_CHECK,
+                                "FINAL_CHECK_TOKENS": FINAL_CHECK_TOKENS,
+                                "FORCE_BOXED": FORCE_BOXED,
+                                "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
+                                "CONSENSUS": CONSENSUS, "final_line": final_line},
+                     "voting": voting_results, "tokens": total_tokens, "launched": launched,
+                     "line_history": LINE_HISTORY,
+                     "mins": MINS,
+                     "salvage": (salvaged, n_reflected),
+                     "guard":   (guard_rescued, len(guard_at_risk), guard_wrecked),
+                     "saved":   (saved, len(in_danger)),
+                     "traces": [{"id": t.id, "status": t.status, "answer": t.answer,
+                                 "reflected": t.reflected, "dipped": t.dipped,
+                                 "checked": t.checked, "revised": t.revised,
+                                 "pre_check_answer": t.pre_check_answer,
+                                 "toks_gen": t.toks_gen,
+                                 "confs": t.confs,
+                                 "check_confs": t.check_confs,
+                                 "text": t.gen_text,
+                                 "prompt": t.prompt_text} for t in done]}, f)
+    print(f"Saved to {save_path}")
+
+print(f"\nSweep over: {len(list(QIDS))} questions requested, "
+      f"{(time.time() - t_sweep) / 60:.0f} min total")
