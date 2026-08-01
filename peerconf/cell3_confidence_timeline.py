@@ -1,9 +1,4 @@
 # ============ CELL 3 — CONFIDENCE TIMELINES (run any time after races) ============
-# Draws the game tape from saved runs: every trace's sliding-window confidence over
-# its life, colored by outcome, with the belt line's live level and end level.
-# One figure per question. Pick which questions with QIDS below.
-# Green = finished correct, red = the wrong majority, light red = other wrong answers,
-# gray + X = cut at the line, khaki dashed = ended with no answer.
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
