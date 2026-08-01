@@ -1,6 +1,5 @@
 # ======================= CELL 1 — START THE SERVER (run once) =======================
-# If another model is loaded on this GPU, free it first — one A100 cannot hold the
-# model twice.
+# If another model is loaded on this GPU, free it first.
 import subprocess, time, requests, os
 
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # CELL 2's save block writes here
