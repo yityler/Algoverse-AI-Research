@@ -27,6 +27,20 @@ LINE_TOP       = 0.95     # keep the top 95% of the field: the line sits where o
                           # Structural guarantee: the best trace's minimum is always
                           # >= the line; a zero-finisher wipeout is impossible by
                           # construction.
+
+# ---- DeepConf-style baseline (added for the PeerConf-vs-DeepConf comparison) ----
+WARMUP_MODE    = False    # False = PeerConf: the line is redrawn live, all race long.
+                          # True  = DeepConf-style: no judging at all until
+                          # WARMUP_TRACES traces have run to COMPLETION, then the line
+                          # is frozen at that moment and never moves again.
+                          # Everything else (model, questions, scorer, dwell, voting)
+                          # is identical, so a PeerConf-vs-DeepConf run differs by
+                          # exactly this one switch.
+WARMUP_TRACES  = 16       # DeepConf's published warm-up size. Only used when
+                          # WARMUP_MODE is True. MUST be < MAX_TRACES, or the
+                          # warm-up never completes, the line never freezes, and
+                          # nothing is ever judged (see the guard below).
+
 WINDOW         = 2048     # sliding window: a token's score = avg confidence of its
                           # last 2048 tokens. FULL windows only — partial-window
                           # means are startup noise.
@@ -144,9 +158,33 @@ class Trace:
 
 def current_line():
     """The line over LIVE per-trace minima; None until every opening seat has
-    poured once."""
+    poured once.
+
+    Under WARMUP_MODE the line does not exist until the warm-up finishes, and is
+    frozen from then on — that is the whole DeepConf/PeerConf difference."""
+    if WARMUP_MODE:
+        return frozen_line          # None during warm-up = nothing is judged
     if len(MINS) < SEATS: return None
     return float(np.percentile(list(MINS.values()), (1 - LINE_TOP) * 100))
+
+
+def freeze_warmup_line():
+    """Called once, when WARMUP_TRACES traces have run to completion. Draws the line
+    over the completed traces' minima and fixes it for the rest of the race."""
+    global frozen_line
+    if frozen_line is not None:
+        return
+    finished = [t for t in traces if t.status in ("finished", "truncated")]
+    vals = [MINS[t.id] for t in finished if t.id in MINS]
+    if not vals:
+        return
+    frozen_line = float(np.percentile(vals, (1 - LINE_TOP) * 100))
+    warm_toks = sum(t.toks_gen for t in finished)
+    print(f"[warm-up] complete after {len(finished)} traces / {warm_toks} tokens "
+          f"-> line FROZEN at {frozen_line:.3f} (never redrawn)")
+    LINE_HISTORY.append({"tid": -1, "line": frozen_line, "n_traces": len(vals),
+                         "t": time.time() - t_start, "event": "warmup_freeze",
+                         "warmup_tokens": warm_toks})
 
 def consensus_check():
     piles = {}
@@ -279,13 +317,23 @@ def top_filtered(measure, top_percent=0.1):
     elite = [t for t in voters if M[t.id][measure] >= thr]
     return weighted_vote(measure, only_traces=elite)
 
+if WARMUP_MODE and WARMUP_TRACES >= MAX_TRACES:
+    raise SystemExit(
+        f"WARMUP_TRACES ({WARMUP_TRACES}) must be < MAX_TRACES ({MAX_TRACES}).\n"
+        "Otherwise the warm-up never finishes, the line is never frozen, and the\n"
+        "run silently degrades into 'no judging at all' — which looks like a\n"
+        "result but is just a misconfiguration.")
+
 executor = ThreadPoolExecutor(max_workers=SEATS + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
 t_sweep = time.time()
 
 # ==================== THE SWEEP: one race per question ====================
 for QID in QIDS:
-    save_path = f"{OUT_DIR}/q{QID}_{DIP_ACTION}_{FINAL_CHECK}_belt.pkl"
+    # mode + LINE_TOP go in the filename so a sweep never overwrites its own results
+    _mode = f"deepconf{WARMUP_TRACES}" if WARMUP_MODE else "peerconf"
+    save_path = (f"{OUT_DIR}/q{QID}_{_mode}_top{int(LINE_TOP*100)}"
+                 f"_{DIP_ACTION}_{FINAL_CHECK}_belt.pkl")
     if os.path.exists(save_path):
         print(f"Q{QID}: already saved ({save_path}) — skipping")
         continue
@@ -308,6 +356,7 @@ for QID in QIDS:
     inflight  = set()
     race_over = False
     n_events  = 0
+    frozen_line = None           # set once by freeze_warmup_line() under WARMUP_MODE
     line_live = False
     last_line = None             # LINE_HISTORY records only line CHANGES, so the
                                  # game tape stays small even at STREAM_BATCH = 1
@@ -410,6 +459,11 @@ for QID in QIDS:
                 print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
 
         # ---- this trace departed: per-trace pit stop ----
+        if WARMUP_MODE and frozen_line is None:
+            n_done = sum(1 for x in traces
+                         if x.status in ("finished", "truncated"))
+            if n_done >= WARMUP_TRACES:
+                freeze_warmup_line()
         if CONSENSUS <= 1.0 and not race_over:
             lead, share = consensus_check()
             n_fin = sum(1 for x in traces if x.status == "finished")
@@ -510,6 +564,9 @@ for QID in QIDS:
         pickle.dump({"qid": QID, "gt": ground_truth,
                      "config": {"MODE": "server-stream-belt", "MODEL": MODEL,
                                 "LINE_TOP": LINE_TOP,
+                                "WARMUP_MODE": WARMUP_MODE,
+                                "WARMUP_TRACES": WARMUP_TRACES,
+                                "frozen_line": frozen_line,
                                 "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,
                                 "DWELL_TOKENS": DWELL_TOKENS,
                                 "DIP_ACTION": DIP_ACTION,
