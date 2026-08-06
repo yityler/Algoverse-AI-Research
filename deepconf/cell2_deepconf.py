@@ -632,25 +632,12 @@ saved     = sum(1 for t in in_danger if t.status == "finished"
                 and is_correct(t.answer, ground_truth))
 
 final_line = current_line()
-print("\n=== PeerConf Summary (v4 — streaming belt) ===")
-print(f"Dip action: {DIP_ACTION} | stop on relapse: {STOP_ON_RELAPSE} | final check: {FINAL_CHECK}")
-if LINE_MODE == "conformal" and ARM not in ("deepconf", "rc"):
-    print(f"Line: conformal (delta={DELTA:g}, per-trace same-age rank; "
-          f"{len(LINE_HISTORY)} recorded line moves) | "
-          f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
-else:
-    print(f"Final line: {final_line if final_line is None else f'{final_line:.3f}'} "
-          f"(keep top {CONFIDENCE_PERCENTILE}% of {len(MINS)} trace minima) | "
-          f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
-print(f"Traces: finished {n_status('finished')} | stopped {n_status('stopped')} "
+print("\n=== DeepConf Summary (v4 — streaming belt) ===")
+print(f"Frozen bar: {final_line if final_line is None else f'{final_line:.3f}'} "
+      f"(keep top {CONFIDENCE_PERCENTILE}% of the {WARMUP_N}-trace warmup minima) | "
+      f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
+print(f"Traces: finished {n_status('finished')} | cut at the bar {n_status('stopped')} "
       f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
-print(f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: {n_reflected} "
-      f"| salvage rate (correct): {salvaged}/{n_reflected}" if n_reflected else
-      f"Dipped: {sum(1 for t in done if t.dipped)} | reflections fired: 0 | salvage rate: 0/0")
-if FINAL_CHECK != "off":
-    print(f"Blind-spot guard ({FINAL_CHECK}): fired on {n_checked} | revised: {n_revised} | "
-          f"rescued {guard_rescued}/{len(guard_at_risk)} wrong answers | broke {guard_wrecked} correct ones")
-print(f"Overall save rate: {saved}/{len(in_danger)} in-danger traces ended correct")
 print(f"Valid answers for voting: {len(voters)}")
 print(f"Final answer: {voting_results['majority'][0]}   | ground truth: {ground_truth}")
 print(f"Total tokens generated (all traces, incl. discarded): {total_tokens}")
