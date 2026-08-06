@@ -47,8 +47,9 @@ STREAM_BATCH   = 1        # tokens are STREAMED. Every STREAM_BATCH tokens the w
 # pour precedes judge. No extra grace period.
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
-LOOP_ACTION      = "harvest"  # "off" | "cut" | "harvest" = force a final answer
-                              # out of the stuck trace so it still votes
+LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
+                              # (a looping trace casts NO ballot: its text is
+                              # pathology, not evidence)
 LOOP_CHECK_EVERY = 256        # tokens between checks
 LOOP_UNIT_CHARS  = 120        # repeat unit: the trace's last this-many chars
 LOOP_TAIL_CHARS  = 2400       # ...searched within this much trailing text
@@ -61,7 +62,6 @@ PROBE_MAX_TOK    = 20         # greedy tokens per probe
 PROBE_MIN_TOKS   = 2048       # no probes before the first full window
 GRAD_CONF        = 0.95       # graduate on ONE probe: answer-token conf >= this...
 GRAD_EWT         = True       # ...that also reached </think> (ready to conclude)
-HARVEST_TOKENS   = 40         # cap for a harvest leg (loop-guard exits)
 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
@@ -126,7 +126,7 @@ class Trace:
                                  # finisher donates this to the bar's calibration
         self.kill      = threading.Event()  # the kill switch: set by the main thread,
                                  # honored by the worker, which closes the stream
-        self.pending   = None    # None | "cut" | "graduate" | "harvest"
+        self.pending   = None    # None | "cut" | "graduate"
                                  # — verdict awaiting stream close
         self.retried   = False
         self.probes    = []      # graduation-probe history: one dict per probe
@@ -134,7 +134,6 @@ class Trace:
         self.probing   = False   # a probe is in flight for this trace right now
         self.last_probe_at = 0   # toks_gen at the last probe (schedule pacing)
         self.last_loop_check = 0 # toks_gen at the last loop-guard check
-        self.harvesting = False  # out on its forced-answer harvest leg right now
         self.grad_answer = None  # the answer a successful probe read out
         self.looped    = False   # loop guard fired
         self.graduated = False   # finished early via the graduation probe
@@ -280,12 +279,9 @@ def fly_stream(t, prompt_text, max_toks):
         events.put((t, None, e))
 
 def launch(t):
-    """Main thread only. One streaming leg: the whole remaining budget (race leg)
-    or the tiny forced-answer cap (harvest leg). Judgment happens live."""
-    if t.harvesting:
-        budget = min(MAX_TOK_TRACE - t.toks_gen, HARVEST_TOKENS)
-    else:
-        budget = MAX_TOK_TRACE - t.toks_gen
+    """Main thread only. One streaming leg: the whole remaining budget.
+    Judgment happens live."""
+    budget = MAX_TOK_TRACE - t.toks_gen
     t.kill = threading.Event()
     t.pending = None
     inflight.add(t.id)
@@ -397,7 +393,6 @@ for QID in QIDS:
             t.probes.append(rec)
             # graduate on ONE perfect probe: sure + closing + a real answer
             if (t.pending is None and not race_over and t.status == "racing"
-                    and not t.harvesting
                     and rec["conf"] >= GRAD_CONF and (rec["ewt"] or not GRAD_EWT)
                     and p_ans is not None):
                 t.grad_answer = p_ans
@@ -417,79 +412,55 @@ for QID in QIDS:
             print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
         elif payload["kind"] == "batch":                      # mid-flight report
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
-            if not t.harvesting:                              # harvest legs are never judged
-                t.confs += payload["scores"]
-                if t.pending is None and not race_over:
-                    verdict = pour_and_judge(t, payload["scores"])
-                    if verdict is not None:
-                        t.pending = verdict
-                        t.kill.set()                          # stream closes within a chunk
-                # the loop guard
-                if (LOOP_ACTION != "off" and t.pending is None and not race_over
-                        and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
-                    t.last_loop_check = t.toks_gen
-                    if looping(t.gen_text):
-                        t.looped = True
-                        t.pending = "harvest" if LOOP_ACTION == "harvest" else "cut"
-                        t.kill.set()
-                        print(f"Trace {t.id}: LOOPING at {t.toks_gen} tokens "
-                              f"(tail unit repeats >= {LOOP_REPEATS}x) -> {t.pending}")
-                # the probe: fixed schedule, nothing else
-                if (PROBE_EVERY > 0 and not t.probing and t.pending is None
-                        and not race_over and t.toks_gen >= PROBE_MIN_TOKS
-                        and t.toks_gen - t.last_probe_at >= PROBE_EVERY):
-                    launch_probe(t)
+            t.confs += payload["scores"]
+            if t.pending is None and not race_over:
+                verdict = pour_and_judge(t, payload["scores"])
+                if verdict is not None:
+                    t.pending = verdict
+                    t.kill.set()                              # stream closes within a chunk
+            # the loop guard
+            if (LOOP_ACTION != "off" and t.pending is None and not race_over
+                    and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
+                t.last_loop_check = t.toks_gen
+                if looping(t.gen_text):
+                    t.looped = True
+                    t.pending = "cut"
+                    t.kill.set()
+                    print(f"Trace {t.id}: LOOPING at {t.toks_gen} tokens "
+                          f"(tail unit repeats >= {LOOP_REPEATS}x) -> ended, no ballot")
+            # the probe: fixed schedule, nothing else
+            if (PROBE_EVERY > 0 and not t.probing and t.pending is None
+                    and not race_over and t.toks_gen >= PROBE_MIN_TOKS
+                    and t.toks_gen - t.last_probe_at >= PROBE_EVERY):
+                launch_probe(t)
             continue                                          # trace still in flight
         else:                                                 # "end": the leg is over
             inflight.discard(t.id)
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             fin = payload["finish"]
-            if not t.harvesting:
-                t.confs += payload["scores"]
-                if t.pending is None and not race_over and payload["scores"]:
-                    verdict = pour_and_judge(t, payload["scores"])
-                    if verdict is not None:
-                        t.pending = verdict
+            t.confs += payload["scores"]
+            if t.pending is None and not race_over and payload["scores"]:
+                verdict = pour_and_judge(t, payload["scores"])
+                if verdict is not None:
+                    t.pending = verdict
 
             ans = extract_answer(t.gen_text) if fin == "stop" else None
 
             if race_over:                                     # landed after the certificate
-                if t.harvesting:                              # keep whatever the forced
-                    t.harvesting = False                      # answer managed to say
-                    hans = extract_answer(t.gen_text)
-                    if hans is not None:
-                        t.status, t.answer = "finished", hans
-                    else:
-                        t.status = "abandoned"
-                else:
-                    t.status = "abandoned"
+                t.status = "abandoned"
             elif t.pending == "graduate":                     # the probe called it home
                 t.status, t.answer = "finished", t.grad_answer
                 t.graduated = True
                 print(f"Trace {t.id}: finished EARLY at {t.toks_gen} tokens "
                       f"(graduation probe) | answer={t.answer}")
-            elif t.pending == "harvest":                      # stuck: force the answer out
-                t.harvesting = True
-                splice = ("\n</think>" if "</think>" not in t.gen_text else "")
-                t.gen_text += splice + "\n\n**Final Answer**\n\nThe final answer is \\boxed"
-                print(f"Trace {t.id}: harvest leg fired at {t.toks_gen} tokens (loop)")
-                launch(t); continue                           # tiny leg, never judged
-            elif t.pending == "cut":                          # the bar landed
+            elif t.pending == "cut":                          # the bar (or the loop guard)
                 t.status = "stopped"
-                print(f"Trace {t.id}: cut at the bar "
-                      + (f"{bar:.3f} " if bar is not None else "")
-                      + f"(its low {t.judge_min:.3f}, {t.toks_gen} tokens)")
-            elif t.harvesting:                                # back with its forced answer
-                t.harvesting = False
-                hans = extract_answer(t.gen_text)
-                if hans is not None:
-                    t.status, t.answer = "finished", hans
-                    print(f"Trace {t.id}: harvested at {t.toks_gen} tokens | "
-                          f"answer={hans} (loop salvage)")
+                if t.looped:
+                    print(f"Trace {t.id}: loop ended at {t.toks_gen} tokens (no ballot)")
                 else:
-                    t.status = "truncated"
-                    print(f"Trace {t.id}: harvest came back empty at {t.toks_gen} "
-                          f"tokens -> truncated")
+                    print(f"Trace {t.id}: cut at the bar "
+                          + (f"{bar:.3f} " if bar is not None else "")
+                          + f"(its low {t.judge_min:.3f}, {t.toks_gen} tokens)")
             elif ans is not None:                             # crossed the finish line
                 t.status, t.answer = "finished", ans
                 print(f"Trace {t.id}: finished at {t.toks_gen} tokens | answer={ans}")
@@ -555,8 +526,6 @@ for QID in QIDS:
     n_status     = lambda s: sum(1 for x in done if x.status == s)
     n_graduated  = sum(1 for t in done if t.graduated)
     n_looped     = sum(1 for t in done if t.looped)
-    n_harvest_ok = sum(1 for t in done if t.looped
-                       and t.status == "finished" and t.answer is not None)
     print("\n=== PeerConf Summary (streaming belt) ===")
     print(f"Final bar: {bar if bar is None else f'{bar:.3f}'} "
           f"(DeepConf-low over finishers' minima, keep top {BAR_KEEP_TOP}%) | "
@@ -567,8 +536,7 @@ for QID in QIDS:
         print(f"Graduation probes: {sum(len(t.probes) for t in done)} fired "
               f"({probe_tokens} probe tokens) | graduated early: {n_graduated}")
     if LOOP_ACTION != "off":
-        print(f"Loop guard: {n_looped} loops caught | harvest salvage "
-              f"(loop -> voted): {n_harvest_ok}/{max(n_looped, 1)}")
+        print(f"Loop guard: {n_looped} loops caught and ended (no ballots cast)")
     print(f"Valid answers for voting: {len(voters)}")
     print(f"Final answer: {voting_results['majority'][0]}   | ground truth: {ground_truth}")
     print(f"Total tokens generated (traces + probes, incl. discarded): {total_tokens}"
@@ -609,7 +577,6 @@ for QID in QIDS:
                                 "PROBE_MIN_TOKS": PROBE_MIN_TOKS,
                                 "GRAD_CONF": GRAD_CONF,
                                 "GRAD_EWT": GRAD_EWT,
-                                "HARVEST_TOKENS": HARVEST_TOKENS,
                                 "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar},
