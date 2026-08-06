@@ -523,6 +523,17 @@ while inflight:
             print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
 
     # ---- this trace departed: per-trace pit stop ----
+    # Alg. 2 order: freeze the bar FIRST, check beta SECOND, and only launch
+    # the online wave if consensus hasn't already settled the race
+    just_armed = False
+    if ARM in ("deepconf", "rc") and not warmup_done:
+        if not any(x.id in inflight for x in traces[:WARMUP_N]):
+            warmup_done = True
+            just_armed = True
+            wmins = [MINS[i] for i in range(WARMUP_N) if i in MINS]
+            frozen_line = float(np.percentile(wmins, 100 - CONFIDENCE_PERCENTILE))
+            print(f"Warmup done: bar frozen at {frozen_line:.3f} "
+                  f"({len(wmins)} complete traces)")
     if CONSENSUS <= 1.0 and not race_over:
         lead, share = consensus_check()
         n_fin = sum(1 for x in traces if x.status == "finished")
@@ -535,18 +546,16 @@ while inflight:
                     x.kill.set()
             print(f"Consensus after {n_fin} finishers: '{lead}' holds {share:.0%} — "
                   f"killing {len(live_ids)} in-flight streams, no new launches")
-    if ARM in ("deepconf", "rc") and not warmup_done:
-        if not any(x.id in inflight for x in traces[:WARMUP_N]):
-            warmup_done = True
-            wmins = [MINS[i] for i in range(WARMUP_N) if i in MINS]
-            frozen_line = float(np.percentile(wmins, 100 - CONFIDENCE_PERCENTILE))
-            print(f"Warmup done: bar frozen at {frozen_line:.3f} "
-                  f"({len(wmins)} complete traces); launching the armed budget")
-            while not race_over and launched < MAX_TRACES and len(inflight) < SEATS:
+    if just_armed:
+        if race_over:
+            print("Consensus already held at warmup — online wave skipped")
+        else:
+            print("Launching the armed budget")
+            while launched < MAX_TRACES and len(inflight) < SEATS:
                 nt = Trace(launched); traces.append(nt)
                 launched += 1
                 launch(nt)
-    elif not race_over and launched < MAX_TRACES:
+    elif warmup_done and not race_over and launched < MAX_TRACES:
         nt = Trace(launched); traces.append(nt)
         nl = current_line()
         print(f"Trace {launched}: seated (replacing {t.id})"
