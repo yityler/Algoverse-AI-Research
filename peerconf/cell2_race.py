@@ -88,7 +88,14 @@ MAX_TOK_TRACE  = 30000    # total generation cap per trace, counted in tokens GE
 
 tok    = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
-with open("aime25.jsonl") as f:
+_aime_paths = ["aime25.jsonl", os.path.join("benchmarks", "aime25.jsonl"),
+               os.path.join("..", "benchmarks", "aime25.jsonl")]
+try:
+    _aime_paths.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       "..", "benchmarks", "aime25.jsonl"))
+except NameError:
+    pass                                   # exec'd without __file__ (Modal)
+with open(next(p for p in _aime_paths if os.path.exists(p))) as f:
     data = [json.loads(l) for l in f]
 
 def render_chat(user_text):
