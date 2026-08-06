@@ -1,4 +1,9 @@
 # ============ CELL 3 — CONFIDENCE TIMELINES (run any time after races) ============
+# Draws the game tape from saved runs: every trace's sliding-window confidence over
+# its life, colored by outcome, with the belt line's live level and end level.
+# One figure per question. Pick which questions with QIDS below.
+# Green = finished correct, red = the wrong majority, light red = other wrong answers,
+# gray + X = cut at the line, khaki dashed = ended with no answer.
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,19 +19,7 @@ def qid_of(fname):
 
 runs = sorted((f for f in os.listdir(OUT_DIR) if f.endswith(".pkl")),
               key=lambda f: (qid_of(f) is None, qid_of(f)))
-
-def mode_of(fname):
-    """PeerConf and DeepConf runs land in the same folder, so say which is which."""
-    try:
-        with open(f"{OUT_DIR}/{fname}", "rb") as fh:
-            cfg = pickle.load(fh).get("config", {})
-    except Exception:
-        return "?"
-    return "DeepConf" if cfg.get("WARMUP_MODE") else "PeerConf"
-
-print("saved runs:")
-for f in runs:
-    print(f"  [{mode_of(f)}] {f}")
+print("saved runs:", runs)
 if QIDS != "all":
     wanted = set(QIDS)
     runs = [f for f in runs if qid_of(f) in wanted]
@@ -89,18 +82,9 @@ def draw_timeline(fname):
                     label=label_once("no answer (truncated/abandoned)"))
             ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
 
-    # the belt line. Under WARMUP_MODE it is frozen after the warm-up and never
-    # moves, so drawing a "goes live -> race end" band would misrepresent the run.
+    # the belt line: where it went live and where it ended, with the sag band between
     lh = r.get("line_history", [])
-    if lh and cfg.get("WARMUP_MODE"):
-        frozen = cfg.get("frozen_line", lh[-1]["line"])
-        ax.axhline(frozen, color="tab:red", ls="--", lw=1.3,
-                   label=f"DeepConf line (frozen after {cfg.get('WARMUP_TRACES','?')} "
-                         f"traces, keep top {cfg['LINE_TOP']:.0%})")
-        ax.annotate(f"line frozen: {frozen:.2f}", xy=(1.0, frozen),
-                    xycoords=("axes fraction", "data"), xytext=(-8, 6),
-                    textcoords="offset points", ha="right", color="tab:red")
-    elif lh:
+    if lh:
         first, last = lh[0]["line"], lh[-1]["line"]
         ax.axhline(first, color="tab:blue", ls="--", lw=1.3,
                    label=f"belt line (keep top {cfg['LINE_TOP']:.0%}, live)")
@@ -117,8 +101,7 @@ def draw_timeline(fname):
                   f"the confidence of the previous {WINDOW} tokens)")
     ax.set_ylabel("sliding-window confidence")
     ax.set_title(
-        f"{'DeepConf' if cfg.get('WARMUP_MODE') else 'PeerConf'}, AIME25 Q{qid}: "
-        f"sliding-window confidence of all {len(r['traces'])} traces "
+        f"PeerConf, AIME25 Q{qid}: sliding-window confidence of all {len(r['traces'])} traces "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"cut = {cfg['DWELL_TOKENS']} consecutive tokens below the line "
         f"({WINDOW} x {cfg['DWELL_TOKENS']}: window x dwell) | model: {cfg['MODEL']}")
@@ -126,9 +109,7 @@ def draw_timeline(fname):
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
-    # mode in the filename, or the DeepConf chart silently overwrites the PeerConf one
-    _m = "deepconf" if cfg.get("WARMUP_MODE") else "peerconf"
-    out_png = f"{OUT_DIR}/q{qid}_{_m}_confidence_timeline.png"
+    out_png = f"{OUT_DIR}/q{qid}_confidence_timeline.png"
     fig.savefig(out_png, dpi=150, bbox_inches="tight")
     print(f"Saved {out_png}")
     plt.show()
