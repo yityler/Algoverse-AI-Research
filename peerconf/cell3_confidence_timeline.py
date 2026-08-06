@@ -1,9 +1,11 @@
 # ============ CELL 3 — CONFIDENCE TIMELINES (run any time after races) ============
 # Draws the game tape from saved runs: every trace's sliding-window confidence over
-# its life, colored by outcome, with the belt line's live level and end level.
-# One figure per question. Pick which questions with QIDS below.
-# Green = finished correct, red = the wrong majority, light red = other wrong answers,
-# gray + X = cut at the line, khaki dashed = ended with no answer.
+# its life, colored by outcome, with the self-calibrating bar's armed and final
+# levels. One figure per question. Pick which questions with QIDS below.
+# Green = finished correct, red = the wrong majority, light red = other wrong
+# answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
+# steel dotted = drained when the race closed. Stars = graduated by a commitment
+# probe; triangles = loop-guard harvests; small dots along a trace = its probes.
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -54,6 +56,17 @@ def draw_timeline(fname):
         if lab in seen_labels: return None
         seen_labels.add(lab); return lab
 
+    def end_marker(t, x_end, y_end, color):
+        """How the trace left the race: * graduated | ^ loop-harvested | o natural."""
+        if t.get("graduated"):
+            ax.plot(x_end, y_end, "*", color=color, ms=14, mec="black", mew=0.5,
+                    label=label_once("graduated (commitment probe)"))
+        elif t.get("looped"):
+            ax.plot(x_end, y_end, "^", color=color, ms=9, mec="black", mew=0.5,
+                    label=label_once("loop-guard harvest"))
+        else:
+            ax.plot(x_end, y_end, "o", color=color, ms=5)
+
     for t in r["traces"]:
         confs = t["confs"]
         if not confs: continue
@@ -61,51 +74,70 @@ def draw_timeline(fname):
         step = max(1, len(confs) // 2000)          # downsample for the figure
         xs, ys = x[::step], np.asarray(confs)[::step]
 
-        if t["status"] == "stopped":               # cut at the line
+        # the probe schedule: one small dot per probe along the trace
+        for p in t.get("probes", []):
+            at = p.get("at", 0)
+            if WINDOW <= at < len(confs) + WINDOW:
+                ax.plot(at, confs[at - WINDOW], ".", color="black", ms=2.5, alpha=0.45)
+
+        if t["status"] == "stopped":               # cut at the bar
             ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7,
-                    label=label_once("cut at the line"))
+                    label=label_once("cut at the bar"))
             ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
         elif t["status"] == "finished" and is_right(t["answer"]):
             ax.plot(xs, ys, color="forestgreen", lw=1.8,
                     label=label_once(f"correct = {gt} (n={n_right})"))
-            ax.plot(x[-1], confs[-1], "o", color="forestgreen", ms=5)
+            end_marker(t, x[-1], confs[-1], "forestgreen")
         elif t["status"] == "finished" and wrong_majority and str(t["answer"]) == wrong_majority:
             ax.plot(xs, ys, color="crimson", lw=1.8,
                     label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
-            ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
+            end_marker(t, x[-1], confs[-1], "crimson")
         elif t["status"] == "finished":
             ax.plot(xs, ys, color="lightcoral", lw=1.2, alpha=0.85,
                     label=label_once("other wrong answers"))
-            ax.plot(x[-1], confs[-1], "o", color="lightcoral", ms=4)
-        else:                                      # truncated / abandoned — no answer
+            end_marker(t, x[-1], confs[-1], "lightcoral")
+        elif t["status"] == "abandoned":           # drained when the race closed
+            ax.plot(xs, ys, color="steelblue", lw=1.1, ls=":", alpha=0.8,
+                    label=label_once("drained (race closed early)"))
+            ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
+        else:                                      # truncated — cap or EOS, no answer
             ax.plot(xs, ys, color="darkkhaki", lw=1.2, ls="--", alpha=0.9,
-                    label=label_once("no answer (truncated/abandoned)"))
+                    label=label_once("no answer (truncated)"))
             ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
 
-    # the belt line: where it went live and where it ended, with the sag band between
+    # the self-calibrating bar: armed level and final level, with the drift band.
+    # (new pkls: line_history = bar updates; old pkls: the live belt line — the
+    # same two-level rendering reads correctly for both)
     lh = r.get("line_history", [])
+    keep = cfg.get("BAR_KEEP_TOP")
+    bar_lab = (f"bar (DeepConf-low over finishers, keep top {keep}%)" if keep
+               else f"belt line (keep top {cfg.get('LINE_TOP', 0):.0%})")
     if lh:
         first, last = lh[0]["line"], lh[-1]["line"]
-        ax.axhline(first, color="tab:blue", ls="--", lw=1.3,
-                   label=f"belt line (keep top {cfg['LINE_TOP']:.0%}, live)")
+        ax.axhline(first, color="tab:blue", ls="--", lw=1.3, label=bar_lab)
         ax.axhline(last, color="tab:blue", ls="--", lw=1.3)
         ax.axhspan(min(first, last), max(first, last), color="tab:blue", alpha=0.06)
-        ax.annotate(f"line goes live: {first:.2f}", xy=(1.0, first),
+        ax.annotate(f"armed: {first:.2f}", xy=(1.0, first),
                     xycoords=("axes fraction", "data"), xytext=(-8, 6),
                     textcoords="offset points", ha="right", color="tab:blue")
-        ax.annotate(f"line at race end: {last:.2f}", xy=(1.0, last),
+        ax.annotate(f"final ({len(lh)} updates): {last:.2f}", xy=(1.0, last),
                     xycoords=("axes fraction", "data"), xytext=(-8, -14),
                     textcoords="offset points", ha="right", color="tab:blue")
 
+    probe_every = cfg.get("PROBE_EVERY")
+    sub = (f"bar cuts replacements instantly; wave 1 runs bar-free | "
+           f"probes every {probe_every} tokens, graduate at {cfg.get('GRAD_CONF')} | "
+           f"close: landslide {cfg.get('CONSENSUS', 0):.0%} or certificate"
+           if probe_every else
+           f"cut = {cfg.get('DWELL_TOKENS', '?')} consecutive tokens below the line")
     ax.set_xlabel(f"tokens generated (each point = sliding-window average: "
                   f"the confidence of the previous {WINDOW} tokens)")
     ax.set_ylabel("sliding-window confidence")
     ax.set_title(
         f"PeerConf, AIME25 Q{qid}: sliding-window confidence of all {len(r['traces'])} traces "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
-        f"cut = {cfg['DWELL_TOKENS']} consecutive tokens below the line "
-        f"({WINDOW} x {cfg['DWELL_TOKENS']}: window x dwell) | model: {cfg['MODEL']}")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=3)
+        f"{sub} | model: {cfg['MODEL']}")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=4)
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
