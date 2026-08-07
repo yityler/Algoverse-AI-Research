@@ -295,16 +295,15 @@ def conformal_line(t):
     return float(sorted(jury)[k - 1])
 
 def consensus_check():
+    # Online instantiation (paper Sec 4.1, p.8): "completed traces are aggregated
+    # with confidence-weighted majority voting" — ALL completed traces vote,
+    # weighted by lowest group confidence; T_top only sets the termination bar s.
+    # (Alg. 2's warmup-via-Alg.-1 pseudocode implies a filtered pool — the paper
+    # is internally inconsistent; the prose matches their reported experiments.)
     piles = {}
     for t in traces:
         if t.status == "finished" and t.answer is not None and t.confs:
-            w = min(t.confs)
-            # Alg. 2 (paper p.7): the vote pool T is the FILTERED set — warmup
-            # contributes only its top-eta traces (those at/above the frozen
-            # bar); online completions qualify by construction
-            if ARM in ("deepconf", "rc") and frozen_line is not None and w < frozen_line:
-                continue
-            piles[t.answer] = piles.get(t.answer, 0.0) + w
+            piles[t.answer] = piles.get(t.answer, 0.0) + min(t.confs)
     if not piles: return None, 0.0
     a = max(piles, key=piles.get)
     return a, piles[a] / sum(piles.values())
