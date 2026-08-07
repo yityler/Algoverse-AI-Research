@@ -674,6 +674,7 @@ with open(f"{OUT_DIR}/q{QID}_{ARM}_{DIP_ACTION}_{FINAL_CHECK}_{LINE_TAG}_c{int(C
                             "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
                             "CONSENSUS": CONSENSUS, "final_line": final_line},
                  "voting": voting_results, "tokens": total_tokens, "launched": launched,
+                 "time_s": round(time.time() - t_start, 2),
                  "line_history": LINE_HISTORY,
                  "mins": MINS,
                  "salvage": (salvaged, n_reflected),

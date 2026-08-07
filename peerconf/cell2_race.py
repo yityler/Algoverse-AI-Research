@@ -581,6 +581,7 @@ for QID in QIDS:
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar},
                      "voting": voting_results, "tokens": total_tokens,
+                     "time_s": round(time.time() - t_start, 2),
                      "probe_tokens": probe_tokens,
                      "launched": launched,
                      "line_history": LINE_HISTORY,
