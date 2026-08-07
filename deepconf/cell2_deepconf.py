@@ -635,7 +635,8 @@ print(f"Frozen bar: {final_line if final_line is None else f'{final_line:.3f}'} 
 print(f"Traces: finished {n_status('finished')} | cut at the bar {n_status('stopped')} "
       f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
 print(f"Valid answers for voting: {len(voters)}")
-print(f"Final answer: {voting_results['majority'][0]}   | ground truth: {ground_truth}")
+print(f"Final answer (lowest-window weighted vote, the paper's online rule): "
+      f"{voting_results['min_window_weighted'][0]} | ground truth: {ground_truth}")
 print(f"Total tokens generated (all traces, incl. discarded): {total_tokens}")
 print(f"Total time: {time.time()-t_start:.2f}s")
 
