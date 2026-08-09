@@ -60,9 +60,9 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
 
 # ----- the certificate (second close): if (leader − runner-up) > (live +
-# unlaunched), no possible future changes the winner. Exact counting = real
-# ballots against the worst case (every outstanding path voting runner-up), so
-# a fire can never call the wrong winner (MARS at gamma=1). No minimum-finishers
+# unlaunched), no possible future changes the winner: even if every path still
+# out there voted runner-up, the leader still wins. Pure vote arithmetic, no
+# statistics — it can never call the wrong winner (MARS at gamma=1). No minimum-finishers
 # knob needed: with only a few votes in, the margin can only beat the
 # outstanding count when almost nobody is left running — and those stragglers
 # couldn't flip the winner anyway, so an early fire just saves their tail tokens.
