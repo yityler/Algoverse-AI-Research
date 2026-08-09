@@ -18,8 +18,8 @@ OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # where results are saved
 QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
 SEATS          = 16       # traces in flight at once
 MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat for a
-                          # fresh one. New paths are judged on the same bar from
-                          # birth (no age
+                          # fresh one. Wave 1 is never judged; new paths face the
+                          # armed bar from their first full window (token 2048)
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the race's own finishers are the warmup. Wave 1 (the first
