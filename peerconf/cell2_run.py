@@ -59,12 +59,13 @@ GRAD_EWT         = True       # ...that also reached </think> or <|end|> (ready 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
 
-# ----- the certificate (second close): close the run the moment the leader's
-# margin over the runner-up exceeds every vote still outstanding (live +
-# unlaunched). Worst case is already counted — even if every remaining path
-# voted for the runner-up, the leader still wins — so a certificate close can
-# never pick a different winner than letting the run finish; it only saves the
-# stragglers' tail tokens (MARS's margin rule at gamma=1, its safe endpoint).
+# ----- the certificate (second close): if (leader − runner-up) > (live +
+# unlaunched), no possible future changes the winner. Exact counting = real
+# ballots against the worst case (every outstanding path voting runner-up), so
+# a fire can never call the wrong winner (MARS at gamma=1). No minimum-finishers
+# knob needed: with only a few votes in, the margin can only beat the
+# outstanding count when almost nobody is left running — and those stragglers
+# couldn't flip the winner anyway, so an early fire just saves their tail tokens.
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
