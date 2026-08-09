@@ -19,15 +19,15 @@ QIDS           = range(30)  # which AIME problems to run — all 30, or a set li
 SEATS          = 16       # traces in flight at once
 MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat for a
                           # fresh one. New paths are judged on the same bar from
-                          # birth (no age matching)
+                          # birth (no age
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the race's own finishers are the warmup. Wave 1 (the first
 # SEATS traces) runs bar-free; each finisher votes AND donates its lifetime-worst
 # window score to the calibration set. The bar = keep top BAR_KEEP_TOP% of those
-# minima, updated on every new finisher, applied instantly (no dwell) to every
-# replacement trace.
-BAR_KEEP_TOP        = 10  # 10 = PeerConf-low, 90 = PeerConf-high (DeepConf's eta)
+# minima, updated on every new finisher and applied instantly to every
+# new path 
+BAR_KEEP_TOP        = 10  # 10 = PeerConf-low, 90 = PeerConf-high 
 BAR_MIN_CALIBRATORS = 1   # the first finisher arms the bar (its worst moment IS
                           # the bar); every later finisher refines it
 
@@ -36,9 +36,8 @@ WINDOW         = 2048     # sliding window: a token's score = avg confidence of 
                           # means are startup noise.
 STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the worker
                           # reports in and the main thread judges. At 1 a cut lands
-                          # exactly at the crossing.
-# A trace is judged from its first full window (token 2048). The bar itself only
-# moves when a finisher lands and donates its minimum.
+                          # exactly at the crossing. A trace is judged from its first full window (token 2048). The bar itself only
+                          # moves when a finisher ends and sends its minimum.
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
 LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
@@ -55,7 +54,7 @@ PROBE_TEXT       = "\n**Final Answer**\n\nThe final answer is \\boxed"
 PROBE_MAX_TOK    = 20         # greedy tokens per probe
 PROBE_MIN_TOKS   = 2048       # no probes before the first full window
 GRAD_CONF        = 0.95       # graduate on ONE probe: answer-token conf >= this...
-GRAD_EWT         = True       # ...that also reached </think> (ready to conclude)
+GRAD_EWT         = True       # ...that also reached </think> or <|end|> (ready to conclude and still need to add "<|end|>")
 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
