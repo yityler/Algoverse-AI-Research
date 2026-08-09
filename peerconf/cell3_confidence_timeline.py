@@ -1,10 +1,10 @@
-# ============ CELL 3 — CONFIDENCE TIMELINES (run any time after races) ============
+# ============ CELL 3 — CONFIDENCE TIMELINES (run any time after runs) ============
 # Draws the game tape from saved runs: every trace's sliding-window confidence over
 # its life, colored by outcome, with the self-calibrating bar's armed and final
 # levels. One figure per question. Pick which questions with QIDS below.
 # Green = finished correct, red = the wrong majority, light red = other wrong
 # answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
-# steel dotted = drained when the race closed. Stars = graduated by a commitment
+# steel dotted = drained when the run closed. Stars = graduated by a commitment
 # probe; triangles = loop-guard harvests; small dots along a trace = its probes.
 import os, re, pickle
 import numpy as np
@@ -57,7 +57,7 @@ def draw_timeline(fname):
         seen_labels.add(lab); return lab
 
     def end_marker(t, x_end, y_end, color):
-        """How the trace left the race: * graduated | ^ loop-harvested | o natural."""
+        """How the trace left the run: * graduated | ^ loop-harvested | o natural."""
         if t.get("graduated"):
             ax.plot(x_end, y_end, "*", color=color, ms=14, mec="black", mew=0.5,
                     label=label_once("graduated (commitment probe)"))
@@ -96,9 +96,9 @@ def draw_timeline(fname):
             ax.plot(xs, ys, color="lightcoral", lw=1.2, alpha=0.85,
                     label=label_once("other wrong answers"))
             end_marker(t, x[-1], confs[-1], "lightcoral")
-        elif t["status"] == "abandoned":           # drained when the race closed
+        elif t["status"] == "abandoned":           # drained when the run closed
             ax.plot(xs, ys, color="steelblue", lw=1.1, ls=":", alpha=0.8,
-                    label=label_once("drained (race closed early)"))
+                    label=label_once("drained (run closed early)"))
             ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
             ax.plot(xs, ys, color="darkkhaki", lw=1.2, ls="--", alpha=0.9,

@@ -64,7 +64,7 @@ class Trace:
         self.kill     = threading.Event()
         self.pending  = False        # cut verdict awaiting stream close
         self.retried  = False
-        self.status   = "racing"     # racing|finished|stopped|truncated|abandoned
+        self.status   = "running"     # running|finished|stopped|truncated|abandoned
         self.answer   = None
     @property
     def min_conf(self):
@@ -75,7 +75,7 @@ inflight = set()
 executor = ThreadPoolExecutor(max_workers=TOTAL_BUDGET + 4)
 t_start  = time.time()
 conf_bar = None
-race_over = False
+run_over = False
 
 def fly_stream(t):
     # one streamed request: every token arrives with its top-20 logprobs, the
@@ -122,7 +122,7 @@ def launch(t):
 
 def land(t, fin):
     ans = extract_answer(t.gen_text) if fin == "stop" else None
-    if race_over and t.status == "racing" and not t.pending:
+    if run_over and t.status == "running" and not t.pending:
         t.status = "abandoned"
     elif t.pending:
         t.status = "stopped"
@@ -153,7 +153,7 @@ def consensus_check():
     return a, piles[a] / sum(piles.values())
 
 def drain(phase_traces):
-    global race_over
+    global run_over
     while any(t.id in inflight for t in phase_traces):
         t, payload, err = events.get()
         if err:
@@ -167,7 +167,7 @@ def drain(phase_traces):
         elif payload["kind"] == "tok":
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]
-            if (t.phase == "online" and not t.pending and not race_over
+            if (t.phase == "online" and not t.pending and not run_over
                     and conf_bar is not None
                     and any(sc < conf_bar for sc in payload["scores"])):
                 t.pending = True
@@ -176,10 +176,10 @@ def drain(phase_traces):
         else:
             inflight.discard(t.id)
             land(t, payload["finish"])
-            if CONSENSUS <= 1.0 and not race_over and t.status == "finished":
+            if CONSENSUS <= 1.0 and not run_over and t.status == "finished":
                 lead, share = consensus_check()
                 if lead is not None and share >= CONSENSUS and conf_bar is not None:
-                    race_over = True
+                    run_over = True
                     live = [x for x in traces if x.id in inflight]
                     for x in live: x.kill.set()
                     print(f"Consensus: '{lead}' holds {share:.0%} — "
@@ -200,9 +200,9 @@ print(f"\nWarmup done: bar frozen at {conf_bar:.3f} "
 if CONSENSUS <= 1.0:
     lead, share = consensus_check()
     if lead is not None and share >= CONSENSUS:
-        race_over = True
+        run_over = True
         print(f"Consensus already held at warmup ('{lead}' at {share:.0%}) — online wave skipped")
-if not race_over:
+if not run_over:
     wave = [Trace(WARMUP_TRACES + i, "online")
             for i in range(TOTAL_BUDGET - WARMUP_TRACES)]
     traces += wave

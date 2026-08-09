@@ -4,7 +4,7 @@
 # question. Pick which questions with QIDS below.
 # Green = finished correct, red = the wrong majority, light red = other wrong
 # answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
-# steel dotted = drained when consensus closed the race. Thin lines = warmup
+# steel dotted = drained when consensus closed the run. Thin lines = warmup
 # traces (never judged), thick lines = the online wave.
 import os, re, pickle
 import numpy as np
@@ -79,7 +79,7 @@ def draw_timeline(fname):
             ax.plot(xs, ys, color="lightcoral", lw=max(lw - 0.6, 1.0), alpha=0.85,
                     label=label_once("other wrong answers"))
             ax.plot(x[-1], confs[-1], "o", color="lightcoral", ms=5)
-        elif t["status"] == "abandoned":           # drained when consensus closed the race
+        elif t["status"] == "abandoned":           # drained when consensus closed the run
             ax.plot(xs, ys, color="steelblue", lw=1.1, ls=":", alpha=0.8,
                     label=label_once("drained (consensus stop)"))
             ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)

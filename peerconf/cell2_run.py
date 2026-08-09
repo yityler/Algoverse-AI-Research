@@ -1,5 +1,5 @@
 # ======================= CELL 2 — THE LIVE RUN (streaming) =======================
-# Loops over every question in QIDS: one full race per question, one pkl per question.
+# Loops over every question in QIDS: one full run per question, one pkl per question.
 # A question whose pkl already exists in OUT_DIR is skipped, so an interrupted sweep
 # resumes with a simple rerun (delete a pkl to redo that question from scratch).
 import json, re, time, pickle, os, queue, threading
@@ -22,7 +22,7 @@ MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat fo
                           # armed bar from their first full window (token 2048)
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
-# Self-calibrating: the race's own finishers are the warmup. Wave 1 (the first
+# Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
 # SEATS traces) runs bar-free; each finisher votes AND donates its lifetime-worst
 # window score to the calibration set. The bar = keep top BAR_KEEP_TOP% of those
 # minima, updated on every new finisher and applied instantly to every
@@ -61,8 +61,10 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner. Exact counting — cannot
-# fire wrong (MARS at gamma=1). Self-guarding: tiny-ballot fires require an
-# empty field, where the outcome is identical anyway.
+# fire wrong (MARS at gamma=1). No minimum-finishers knob needed: with only a
+# few votes in, the margin can only beat the outstanding count when almost
+# nobody is left running — and those stragglers couldn't flip the winner anyway,
+# so an early fire just saves their tail tokens.
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
@@ -130,11 +132,11 @@ class Trace:
         self.grad_answer = None  # the answer a successful probe read out
         self.looped    = False   # loop guard fired
         self.graduated = False   # finished early via the graduation probe
-        self.status    = "racing"   # racing|finished|stopped|truncated|abandoned
+        self.status    = "running"   # running|finished|stopped|truncated|abandoned
         self.answer    = None
 
 def update_bar():
-    """Recompute the bar from the finishers' lifetime minima — the race's own
+    """Recompute the bar from the finishers' lifetime minima — the run's own
     finishers are the warmup, and the calibration sharpens with every new
     vote. Called after every finish."""
     global bar
@@ -160,7 +162,7 @@ def consensus_check():
     return a, piles[a] / sum(piles.values())
 
 def certificate():
-    """Election-calling: the race is over when the leader's ballot margin
+    """Election-calling: the run is over when the leader's ballot margin
     exceeds every vote that could still arrive. Exact counting — a wrong
     early call is arithmetically impossible."""
     piles = {}
@@ -294,7 +296,7 @@ def judge(t, scores):
             return "cut"
     return None
 
-# ---------------- voting helpers (used once per question, after its race) ----------------
+# ---------------- voting helpers (used once per question, after its run) ----------------
 def trace_measures(t):
     c = np.array(t.confs) if t.confs else np.array([0.0])
     k = max(1, int(len(c) * 0.10))
@@ -326,7 +328,7 @@ executor = ThreadPoolExecutor(max_workers=SEATS + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
 t_sweep = time.time()
 
-# ==================== THE SWEEP: one race per question ====================
+# ==================== THE SWEEP: one run per question ====================
 for QID in QIDS:
     # the new arms go in the filename so a sweep never overwrites its own results
     _extras = (("_cs" if PROBE_EVERY > 0 else "")
@@ -343,7 +345,7 @@ for QID in QIDS:
     print(f"Q{QID}: {question[:80]}...\nGround truth: {ground_truth}\n")
     BASE_PROMPT = render_chat(question)
 
-    # -------- fresh race state (mutated ONLY by the main thread) --------
+    # -------- fresh run state (mutated ONLY by the main thread) --------
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
     bar       = None             # armed by update_bar() at BAR_MIN_CALIBRATORS finishers
@@ -351,11 +353,11 @@ for QID in QIDS:
     t_start   = time.time()
     events    = queue.Queue()    # (trace, payload|None, error|None) from worker threads
     inflight  = set()
-    race_over = False
+    run_over = False
     n_events  = 0
 
-    # -------- the race loop: stream in, judge live --------
-    print(f"Race start: {SEATS} seats (cap {MAX_TRACES}), streaming (report every "
+    # -------- the run loop: stream in, judge live --------
+    print(f"Run start: {SEATS} seats (cap {MAX_TRACES}), streaming (report every "
           f"{STREAM_BATCH} tokens) | wave 1 line-free; replacements face the "
           f"self-calibrating bar (keep top {BAR_KEEP_TOP}%, arms at "
           f"{BAR_MIN_CALIBRATORS} finishers, updates per finisher)"
@@ -384,7 +386,7 @@ for QID in QIDS:
                    "ewt": payload["ewt"], "answer": p_ans}
             t.probes.append(rec)
             # graduate on ONE perfect probe: sure + closing + a real answer
-            if (t.pending is None and not race_over and t.status == "racing"
+            if (t.pending is None and not run_over and t.status == "running"
                     and rec["conf"] >= GRAD_CONF and (rec["ewt"] or not GRAD_EWT)
                     and p_ans is not None):
                 t.grad_answer = p_ans
@@ -405,13 +407,13 @@ for QID in QIDS:
         elif payload["kind"] == "batch":                      # mid-flight report
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]
-            if t.pending is None and not race_over:
+            if t.pending is None and not run_over:
                 verdict = judge(t, payload["scores"])
                 if verdict is not None:
                     t.pending = verdict
                     t.kill.set()                              # stream closes within a chunk
             # the loop guard
-            if (LOOP_ACTION != "off" and t.pending is None and not race_over
+            if (LOOP_ACTION != "off" and t.pending is None and not run_over
                     and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
                 t.last_loop_check = t.toks_gen
                 if looping(t.gen_text):
@@ -422,7 +424,7 @@ for QID in QIDS:
                           f"(tail unit repeats >= {LOOP_REPEATS}x) -> ended, no ballot")
             # the probe: fixed schedule, nothing else
             if (PROBE_EVERY > 0 and not t.probing and t.pending is None
-                    and not race_over and t.toks_gen >= PROBE_MIN_TOKS
+                    and not run_over and t.toks_gen >= PROBE_MIN_TOKS
                     and t.toks_gen - t.last_probe_at >= PROBE_EVERY):
                 launch_probe(t)
             continue                                          # trace still in flight
@@ -431,14 +433,14 @@ for QID in QIDS:
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             fin = payload["finish"]
             t.confs += payload["scores"]
-            if t.pending is None and not race_over and payload["scores"]:
+            if t.pending is None and not run_over and payload["scores"]:
                 verdict = judge(t, payload["scores"])
                 if verdict is not None:
                     t.pending = verdict
 
             ans = extract_answer(t.gen_text) if fin == "stop" else None
 
-            if race_over:                                     # landed after the certificate
+            if run_over:                                     # landed after the certificate
                 t.status = "abandoned"
             elif t.pending == "graduate":                     # the probe called it home
                 t.status, t.answer = "finished", t.grad_answer
@@ -467,28 +469,28 @@ for QID in QIDS:
         # ---- this trace departed: per-trace pit stop ----
         if t.status == "finished":
             update_bar()                                      # finishers calibrate
-        if CONSENSUS <= 1.0 and not race_over:
+        if CONSENSUS <= 1.0 and not run_over:
             lead, share = consensus_check()
             n_fin = sum(1 for x in traces if x.status == "finished")
             if lead is not None and share >= CONSENSUS and n_fin >= 3:
-                race_over = True
+                run_over = True
                 live_ids = [x.id for x in traces if x.id in inflight]
                 for x in traces:                              # drain INSTANTLY
                     if x.id in inflight:
                         x.kill.set()
                 print(f"Consensus after {n_fin} finishers: '{lead}' holds {share:.0%} — "
                       f"killing {len(live_ids)} in-flight streams, no new launches")
-        if not race_over:
+        if not run_over:
             winner = certificate()
             if winner is not None:
-                race_over = True
+                run_over = True
                 live_ids = [x.id for x in traces if x.id in inflight]
                 for x in traces:                              # drain INSTANTLY
                     if x.id in inflight:
                         x.kill.set()
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
-                      f"(margin exceeds all {len(live_ids)} outstanding) — race over")
-        if not race_over and launched < MAX_TRACES:
+                      f"(margin exceeds all {len(live_ids)} outstanding) — run over")
+        if not run_over and launched < MAX_TRACES:
             nt = Trace(launched); traces.append(nt)
             print(f"Trace {launched}: seated (replacing {t.id})"
                   + (f" | bar {bar:.3f}" if bar is not None else " | bar unarmed"))
