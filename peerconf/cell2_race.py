@@ -1,4 +1,4 @@
-# ======================= CELL 2 — THE RACE (the streaming belt) =======================
+# ======================= CELL 2 — THE LIVE RUN (the streaming belt) =======================
 # Loops over every question in QIDS: one full race per question, one pkl per question.
 # A question whose pkl already exists in OUT_DIR is skipped, so an interrupted sweep
 # resumes with a simple rerun (delete a pkl to redo that question from scratch).
