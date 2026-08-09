@@ -61,8 +61,8 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner: even if every path still
-# out there voted runner-up, the leader still wins. Pure vote arithmetic, no
-# statistics — it can never call the wrong winner (MARS at gamma=1).
+# out there voted runner-up, the leader still wins — so unlike the landslide's
+# share bet, it can never call the wrong winner (MARS at gamma=1).
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
@@ -117,7 +117,7 @@ class Trace:
         self.win       = None    # window deque, carried across legs (worker-owned in flight)
         self.toks_gen  = 0       # every token the GPU generated, across all prompts
         self.judge_min = float("inf")  # lifetime low of the window score — a
-                                 # finisher donates this to the bar's calibration
+                                 # finisher sends this to the bar's calibration
         self.kill      = threading.Event()  # the kill switch: set by the main thread,
                                  # honored by the worker, which closes the stream
         self.pending   = None    # None | "cut" | "graduate"
