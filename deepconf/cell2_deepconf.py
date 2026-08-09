@@ -21,7 +21,7 @@ CONFIDENCE_PERCENTILE = 10   # keep-percent: bar = percentile(warmup minima, 100
                              # 10 = DeepConf-low, 90 = DeepConf-high
 WINDOW         = 2048   # sliding window; a token's score = mean conf of its last 2048
 CONSENSUS      = 0.95   # paper's tau: stop when the leading answer holds this share
-                        # of the min-conf-weighted votes (2.0 = disabled)
+                        # of the min-conf-weighted votes (anything > 1.0 = disabled)
 
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
