@@ -42,8 +42,8 @@ _bench = f"{DATASET}.jsonl"
 _bench_path = next((p for p in (_bench, f"../benchmarks/{_bench}",
                                 f"benchmarks/{_bench}") if os.path.exists(p)), None)
 if _bench_path is None:
-    raise FileNotFoundError(f"{_bench} not found — put it in benchmarks/ "
-                            f"(python benchmarks/fetch_benchmarks.py {DATASET})")
+    raise FileNotFoundError(f"{_bench} not found — add it to benchmarks/ "
+                            f"(one question per line, same fields as aime25.jsonl)")
 with open(_bench_path, encoding="utf-8") as f:
     data = [json.loads(l) for l in f]
 
@@ -55,9 +55,8 @@ if _bad:
     raise SystemExit(f"{DATASET} has {len(data)} questions (0-{len(data) - 1}); "
                      f"QIDS asks for {_bad}")
 
-# aime25 keeps the bare q<N>_ filenames the first sweep wrote, so those pkls still
-# count as done; every other benchmark gets its own prefix and never collides
-DS_TAG = "" if DATASET == "aime25" else f"{DATASET}_"
+DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so two
+                         # benchmarks can share an output dir without colliding
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
@@ -227,10 +226,13 @@ t_sweep = time.time()
 
 # ==================== THE SWEEP: one run per question ====================
 for QID in QIDS:
-    save_path = (f"{OUT_DIR}/{DS_TAG}q{QID}_deepconf_p{CONFIDENCE_PERCENTILE}"
-                 f"_c{int(CONSENSUS*100)}.pkl")
-    if os.path.exists(save_path):
-        print(f"Q{QID}: already saved ({save_path}) — skipping")
+    _name = f"q{QID}_deepconf_p{CONFIDENCE_PERCENTILE}_c{int(CONSENSUS*100)}.pkl"
+    save_path = f"{OUT_DIR}/{DS_TAG}{_name}"
+    # aime25 runs saved before the prefix existed are bare q<N>_ — still done
+    _legacy = f"{OUT_DIR}/{_name}" if DATASET == "aime25" else None
+    _done = next((p for p in (save_path, _legacy) if p and os.path.exists(p)), None)
+    if _done:
+        print(f"Q{QID}: already saved ({_done}) — skipping")
         continue
 
     print(f"\n{'=' * 60}\n### Q{QID}  ({(time.time() - t_sweep) / 60:.0f} min into the sweep)\n{'=' * 60}")
