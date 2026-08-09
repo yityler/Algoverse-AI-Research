@@ -41,9 +41,6 @@ outright, before anything generates, and names the valid range:
 SystemExit: hmmt25 has 30 questions (0-29); QIDS asks for [30, 99]
 ```
 
-Nothing is silently skipped, because a sweep that quietly shortened itself would
-look like a complete one afterwards.
-
 ## Output filenames
 
 `aime25` results keep the original bare names (`q6_bar_cs_looph.pkl`) so the
