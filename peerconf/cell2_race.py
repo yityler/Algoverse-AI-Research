@@ -43,8 +43,7 @@ STREAM_BATCH   = 1        # tokens are STREAMED. Every STREAM_BATCH tokens the w
                           # judge. At 1, judgment is TOKEN-EXACT: a cut lands at the
                           # crossing. (judge_min is O(1), line history records only
                           # changes, so 1 is cheap.)
-# Judgment starts the moment a trace has poured its first full window (token 2048):
-# pour precedes judge. No extra grace period.
+# Judgment starts the moment a trace has poured its first full window (token 2048)
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
 LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
@@ -69,12 +68,12 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner. Exact counting — cannot
 # fire wrong (MARS at gamma=1). Self-guarding: tiny-ballot fires require an
-# empty field, where the outcome is identical anyway. No knobs.
+# empty field, where the outcome is identical anyway.
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
                           # holds this share of the weighted votes among finished
-                          # traces (and >=3 have finished), stop launching AND kill
+                          # traces (and >=3 have finished), stop launching AND end
                           # the in-flight streams on the spot — the belt drains
                           # instantly. 2.0 = DISABLED (share caps at 1.0).
 
