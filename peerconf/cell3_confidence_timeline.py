@@ -106,12 +106,12 @@ def draw_timeline(fname):
             ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
 
     # the self-calibrating bar: armed level and final level, with the drift band.
-    # (new pkls: line_history = bar updates; old pkls: the live belt line — the
+    # (new pkls: line_history = bar updates; old pkls: the live line — the
     # same two-level rendering reads correctly for both)
     lh = r.get("line_history", [])
     keep = cfg.get("BAR_KEEP_TOP")
-    bar_lab = (f"bar (DeepConf-low over finishers, keep top {keep}%)" if keep
-               else f"belt line (keep top {cfg.get('LINE_TOP', 0):.0%})")
+    bar_lab = (f"bar (keep top {keep}% of finishers' minima)" if keep
+               else f"line (keep top {cfg.get('LINE_TOP', 0):.0%})")
     if lh:
         first, last = lh[0]["line"], lh[-1]["line"]
         ax.axhline(first, color="tab:blue", ls="--", lw=1.3, label=bar_lab)

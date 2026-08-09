@@ -1,4 +1,4 @@
-# ======================= CELL 2 — THE LIVE RUN (the streaming belt) =======================
+# ======================= CELL 2 — THE LIVE RUN (streaming) =======================
 # Loops over every question in QIDS: one full race per question, one pkl per question.
 # A question whose pkl already exists in OUT_DIR is skipped, so an interrupted sweep
 # resumes with a simple rerun (delete a pkl to redo that question from scratch).
@@ -16,34 +16,29 @@ SERVER  = "http://localhost:8000"
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # where results are saved
 
 QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
-SEATS          = 16       # traces in flight at once — the belt's chairs
+SEATS          = 16       # traces in flight at once
 MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat for a
-                          # fresh one. New paths are judged like everyone else with
-                          # the self-calibrating bar (no age matching)
-                    
+                          # fresh one. New paths are judged on the same bar from
+                          # birth (no age matching)
 
-# ----- the bar (DeepConf-low, self-calibrating: finishers are the warmup) -----
-# Wave 1 (the first SEATS traces) runs LINE-FREE. Each finisher banks a ballot
-# AND donates its lifetime-worst window score to the calibration set. Once
-# BAR_MIN_CALIBRATORS have finished, the bar = DeepConf-low's exact formula
-# (keep top BAR_KEEP_TOP% : 90th pct of finishers' minima), UPDATED on every
-# new finisher, applied instantly (their semantics, no dwell) to every
-# replacement trace from birth. Safety = banked ballots, not gentleness.
-BAR_KEEP_TOP        = 10  # their eta: keep-top-10% (DeepConf-low)
-BAR_MIN_CALIBRATORS = 1   # IMMEDIATE: the first finisher arms the bar (a
-                          # percentile of one value = that value — its worst
-                          # moment IS the bar); every later finisher repairs
-                          # the roughness via the update
+# ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
+# Self-calibrating: the race's own finishers are the warmup. Wave 1 (the first
+# SEATS traces) runs bar-free; each finisher votes AND donates its lifetime-worst
+# window score to the calibration set. The bar = keep top BAR_KEEP_TOP% of those
+# minima, updated on every new finisher, applied instantly (no dwell) to every
+# replacement trace.
+BAR_KEEP_TOP        = 10  # 10 = PeerConf-low, 90 = PeerConf-high (DeepConf's eta)
+BAR_MIN_CALIBRATORS = 1   # the first finisher arms the bar (its worst moment IS
+                          # the bar); every later finisher refines it
 
 WINDOW         = 2048     # sliding window: a token's score = avg confidence of its
                           # last 2048 tokens. FULL windows only — partial-window
                           # means are startup noise.
-STREAM_BATCH   = 1        # tokens are STREAMED. Every STREAM_BATCH tokens the worker
-                          # reports in and the main thread runs pour -> redraw ->
-                          # judge. At 1, judgment is TOKEN-EXACT: a cut lands at the
-                          # crossing. (judge_min is O(1), line history records only
-                          # changes, so 1 is cheap.)
-# Judgment starts the moment a trace has poured its first full window (token 2048)
+STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the worker
+                          # reports in and the main thread judges. At 1 a cut lands
+                          # exactly at the crossing.
+# A trace is judged from its first full window (token 2048). The bar itself only
+# moves when a finisher lands and donates its minimum.
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
 LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
@@ -74,8 +69,8 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
                           # holds this share of the weighted votes among finished
                           # traces (and >=3 have finished), stop launching AND end
-                          # the in-flight streams on the spot — the belt drains
-                          # instantly. 2.0 = DISABLED (share caps at 1.0).
+                          # the in-flight streams on the spot.
+                          # 2.0 = DISABLED (share caps at 1.0).
 
 # ----- generation -----
 TEMPERATURE    = 0.6
@@ -140,9 +135,9 @@ class Trace:
         self.answer    = None
 
 def update_bar():
-    """Recompute the DeepConf-low bar from the finishers' lifetime minima —
-    the race's own finishers are the warmup, and the calibration sharpens
-    with every new ballot. Called after every finish."""
+    """Recompute the bar from the finishers' lifetime minima — the race's own
+    finishers are the warmup, and the calibration sharpens with every new
+    vote. Called after every finish."""
     global bar
     mins = [x.judge_min for x in traces
             if x.status == "finished" and x.confs]
@@ -286,11 +281,10 @@ def launch(t):
     inflight.add(t.id)
     executor.submit(fly_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
 
-def pour_and_judge(t, scores):
+def judge(t, scores):
     """Track the lifetime low; judge REPLACEMENTS against the armed bar.
-    Wave 1 (ids < SEATS) runs line-free — its finishers ARE the calibration.
-    Bar semantics are DeepConf's: one dip below = instant cut (their online
-    exactness rule; the safety is the banked ballots, not gentleness).
+    Wave 1 (ids < SEATS) runs bar-free — its finishers ARE the calibration.
+    One dip below the bar = instant cut.
     Returns the verdict: None (safe) | 'cut'."""
     if scores and min(scores) < t.judge_min:
         t.judge_min = min(scores)
@@ -338,7 +332,7 @@ for QID in QIDS:
     # the new arms go in the filename so a sweep never overwrites its own results
     _extras = (("_cs" if PROBE_EVERY > 0 else "")
                + (f"_loop{LOOP_ACTION[0]}" if LOOP_ACTION != "off" else ""))
-    save_path = f"{OUT_DIR}/q{QID}_bar{_extras}_belt.pkl"
+    save_path = f"{OUT_DIR}/q{QID}_bar{_extras}.pkl"
     if os.path.exists(save_path):
         print(f"Q{QID}: already saved ({save_path}) — skipping")
         continue
@@ -361,10 +355,10 @@ for QID in QIDS:
     race_over = False
     n_events  = 0
 
-    # -------- the streaming belt: pour -> judge, live --------
+    # -------- the race loop: stream in, judge live --------
     print(f"Race start: {SEATS} seats (cap {MAX_TRACES}), streaming (report every "
           f"{STREAM_BATCH} tokens) | wave 1 line-free; replacements face the "
-          f"self-calibrating DeepConf-low bar (keep top {BAR_KEEP_TOP}%, arms at "
+          f"self-calibrating bar (keep top {BAR_KEEP_TOP}%, arms at "
           f"{BAR_MIN_CALIBRATORS} finishers, updates per finisher)"
           + (f" | probes every {PROBE_EVERY} (graduate at {GRAD_CONF})"
              if PROBE_EVERY > 0 else "")
@@ -413,7 +407,7 @@ for QID in QIDS:
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]
             if t.pending is None and not race_over:
-                verdict = pour_and_judge(t, payload["scores"])
+                verdict = judge(t, payload["scores"])
                 if verdict is not None:
                     t.pending = verdict
                     t.kill.set()                              # stream closes within a chunk
@@ -439,7 +433,7 @@ for QID in QIDS:
             fin = payload["finish"]
             t.confs += payload["scores"]
             if t.pending is None and not race_over and payload["scores"]:
-                verdict = pour_and_judge(t, payload["scores"])
+                verdict = judge(t, payload["scores"])
                 if verdict is not None:
                     t.pending = verdict
 
@@ -525,9 +519,9 @@ for QID in QIDS:
     n_status     = lambda s: sum(1 for x in done if x.status == s)
     n_graduated  = sum(1 for t in done if t.graduated)
     n_looped     = sum(1 for t in done if t.looped)
-    print("\n=== PeerConf Summary (streaming belt) ===")
+    print("\n=== PeerConf Summary (streaming) ===")
     print(f"Final bar: {bar if bar is None else f'{bar:.3f}'} "
-          f"(DeepConf-low over finishers' minima, keep top {BAR_KEEP_TOP}%) | "
+          f"(keep top {BAR_KEEP_TOP}% of finishers' minima) | "
           f"seats {SEATS} | launched {launched}/{MAX_TRACES} | events: {n_events}")
     print(f"Traces: finished {n_status('finished')} | stopped {n_status('stopped')} "
           f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
@@ -561,7 +555,7 @@ for QID in QIDS:
     # -------- save (results + the confidence-timeline game tape) --------
     with open(save_path, "wb") as f:
         pickle.dump({"qid": QID, "gt": ground_truth,
-                     "config": {"MODE": "server-stream-belt", "MODEL": MODEL,
+                     "config": {"MODE": "server-stream", "MODEL": MODEL,
                                 "BAR_KEEP_TOP": BAR_KEEP_TOP,
                                 "BAR_MIN_CALIBRATORS": BAR_MIN_CALIBRATORS,
                                 "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,

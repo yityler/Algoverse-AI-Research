@@ -1,14 +1,14 @@
 # ======================= CELL 1 — START THE SERVER (run once) =======================
-# If another model is loaded on this GPU, free it first.
+# Stock vLLM server. CELL 2 streams tokens over HTTP and judges the confidence
+# window client-side, so no logits processor is loaded here.
 import subprocess, time, requests, os
 
-OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # CELL 2's save block writes here
+OUT_DIR = os.environ.get("OUT_DIR", "deepconf_out")   # CELL 2's save block writes here
 os.makedirs(OUT_DIR, exist_ok=True)
 
-MODEL  = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
+MODEL  = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER = "http://localhost:8000"
 
-# stock vLLM server — PeerConf judges on the client side, no custom logits processor
 server_proc = subprocess.Popen(
     ["vllm", "serve", MODEL,
      "--port", "8000",
