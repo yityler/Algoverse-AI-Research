@@ -71,7 +71,8 @@ CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading a
                           # holds this share of the weighted votes among finished
                           # traces (and >=3 have finished), stop launching AND end
                           # the in-flight streams on the spot.
-                          # 2.0 = DISABLED (share caps at 1.0).
+                          # Anything > 1.0 = DISABLED (a share can never beat 1.0;
+                          # exactly 1.0 = stop only on unanimity).
 
 # ----- generation -----
 TEMPERATURE    = 0.6
