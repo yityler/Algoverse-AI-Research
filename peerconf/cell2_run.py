@@ -47,7 +47,6 @@ LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
                               # (a looping trace casts NO ballot: its text is
                               # pathology, not evidence)
 LOOP_CHECK_EVERY = 256        # tokens between checks
-LOOP_MIN_TOKS    = 2048       # no loop verdict until a trace reaches a full window
 LOOP_UNIT_CHARS  = 120        # repeat unit: the trace's last this-many chars
 LOOP_TAIL_CHARS  = 2400       # ...searched within this much trailing text
 LOOP_REPEATS     = 3          # fire at this many exact copies in the tail
@@ -437,7 +436,6 @@ for QID in QIDS:
                     t.kill.set()                              # stream closes within a chunk
             # the loop guard
             if (LOOP_ACTION != "off" and t.pending is None and not run_over
-                    and t.toks_gen >= LOOP_MIN_TOKS
                     and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
                 t.last_loop_check = t.toks_gen
                 if looping(t.gen_text):
@@ -588,7 +586,6 @@ for QID in QIDS:
                                 "FORCE_BOXED": FORCE_BOXED,
                                 "LOOP_ACTION": LOOP_ACTION,
                                 "LOOP_CHECK_EVERY": LOOP_CHECK_EVERY,
-                                "LOOP_MIN_TOKS": LOOP_MIN_TOKS,
                                 "LOOP_UNIT_CHARS": LOOP_UNIT_CHARS,
                                 "LOOP_TAIL_CHARS": LOOP_TAIL_CHARS,
                                 "LOOP_REPEATS": LOOP_REPEATS,
