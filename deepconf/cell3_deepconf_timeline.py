@@ -14,14 +14,21 @@ OUT_DIR = os.environ.get("OUT_DIR", "deepconf_out")
 
 QIDS = "all"     # "all" = every saved run, or a set like [6] or [6, 9, 12]
 
-def qid_of(fname):
-    m = re.match(r"q(\d+)_deepconf_", fname)
+DATASET = os.environ.get("DATASET", "aime25")   # draw one benchmark at a time: the
+                                                # same question number is a different
+                                                # question in each benchmark
+
+def qid_of(fname):                           # non-aime25 runs are <dataset>_q<N>_...
+    m = re.match(r"(?:\w+?_)?q(\d+)_deepconf_", fname)
     return int(m.group(1)) if m else None
 
+def ds_of(fname):
+    m = re.match(r"(?:(\w+?)_)?q\d+_deepconf_", fname)
+    return (m.group(1) or "aime25") if m else None
+
 runs = sorted((f for f in os.listdir(OUT_DIR)
-               if f.endswith(".pkl") and qid_of(f) is not None),
-              key=qid_of)
-print("saved runs:", runs)
+               if f.endswith(".pkl") and ds_of(f) == DATASET), key=qid_of)
+print(f"saved {DATASET} runs:", runs)
 if QIDS != "all":
     runs = [f for f in runs if qid_of(f) in set(QIDS)]
 if not runs:

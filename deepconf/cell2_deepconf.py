@@ -17,8 +17,11 @@ from dynasor.core.evaluator import math_equal
 MODEL   = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER  = "http://localhost:8000"
 OUT_DIR = globals().get("OUT_DIR") or os.environ.get("OUT_DIR", "deepconf_out")
+DATASET = os.environ.get("DATASET", "aime25")   # aime25 | math500 | gsm8k | hmmt25
+                                                # = benchmarks/<name>.jsonl; any file
+                                                # of {"question","answer"} lines works
 
-QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
+QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 WARMUP_TRACES  = 16     # offline warmup: run fully, never judged
 TOTAL_BUDGET   = 32     # warmup + online traces
 CONFIDENCE_PERCENTILE = 10   # keep-percent: bar = percentile(warmup minima, 100 - this)
@@ -35,10 +38,28 @@ MAX_TOK_TRACE  = 30000
 
 tok = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
-AIME = next(p for p in ("aime25.jsonl", "../benchmarks/aime25.jsonl",
-                        "benchmarks/aime25.jsonl") if os.path.exists(p))
-with open(AIME) as f:
+_bench = f"{DATASET}.jsonl"
+_bench_path = next((p for p in (_bench, f"../benchmarks/{_bench}",
+                                f"benchmarks/{_bench}") if os.path.exists(p)), None)
+if _bench_path is None:
+    raise FileNotFoundError(f"{_bench} not found — put it in benchmarks/ "
+                            f"(python benchmarks/fetch_benchmarks.py {DATASET})")
+with open(_bench_path, encoding="utf-8") as f:
     data = [json.loads(l) for l in f]
+
+# ask for a question the benchmark doesn't have and nothing runs: a sweep that
+# quietly shortened itself would read as a full one in the results
+QIDS = list(QIDS)
+_bad = [q for q in QIDS if not 0 <= q < len(data)]
+if _bad:
+    raise SystemExit(f"{DATASET} has {len(data)} questions (0-{len(data) - 1}); "
+                     f"QIDS asks for {_bad}")
+
+# aime25 keeps the bare q<N>_ filenames the first sweep wrote, so those pkls still
+# count as done; every other benchmark gets its own prefix and never collides
+DS_TAG = "" if DATASET == "aime25" else f"{DATASET}_"
+print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
+      f"running {len(QIDS)}")
 
 SESSION = requests.Session()
 
@@ -206,7 +227,8 @@ t_sweep = time.time()
 
 # ==================== THE SWEEP: one run per question ====================
 for QID in QIDS:
-    save_path = f"{OUT_DIR}/q{QID}_deepconf_p{CONFIDENCE_PERCENTILE}_c{int(CONSENSUS*100)}.pkl"
+    save_path = (f"{OUT_DIR}/{DS_TAG}q{QID}_deepconf_p{CONFIDENCE_PERCENTILE}"
+                 f"_c{int(CONSENSUS*100)}.pkl")
     if os.path.exists(save_path):
         print(f"Q{QID}: already saved ({save_path}) — skipping")
         continue
@@ -288,6 +310,7 @@ for QID in QIDS:
     with open(save_path, "wb") as f:
         pickle.dump({"qid": QID, "gt": ground_truth,
                      "config": {"MODE": "deepconf-online-stream", "MODEL": MODEL,
+                                "DATASET": DATASET,
                                 "CONFIDENCE_PERCENTILE": CONFIDENCE_PERCENTILE,
                                 "WARMUP_TRACES": WARMUP_TRACES,
                                 "TOTAL_BUDGET": TOTAL_BUDGET,

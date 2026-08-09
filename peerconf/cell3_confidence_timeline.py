@@ -15,13 +15,21 @@ OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")
 QIDS = "all"     # which questions to draw: "all" = every saved run,
                  # or a specific set like [6] or [6, 9, 12]
 
-def qid_of(fname):
-    m = re.match(r"q(\d+)_", fname)
+DATASET = os.environ.get("DATASET", "aime25")   # draw one benchmark at a time: the
+                                                # same question number is a different
+                                                # question in each benchmark
+
+def qid_of(fname):                           # non-aime25 runs are <dataset>_q<N>_...
+    m = re.match(r"(?:\w+?_)?q(\d+)_", fname)
     return int(m.group(1)) if m else None
 
-runs = sorted((f for f in os.listdir(OUT_DIR) if f.endswith(".pkl")),
-              key=lambda f: (qid_of(f) is None, qid_of(f)))
-print("saved runs:", runs)
+def ds_of(fname):
+    m = re.match(r"(?:(\w+?)_)?q\d+_", fname)
+    return (m.group(1) or "aime25") if m else None
+
+runs = sorted((f for f in os.listdir(OUT_DIR)
+               if f.endswith(".pkl") and ds_of(f) == DATASET), key=qid_of)
+print(f"saved {DATASET} runs:", runs)
 if QIDS != "all":
     wanted = set(QIDS)
     runs = [f for f in runs if qid_of(f) in wanted]
