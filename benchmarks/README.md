@@ -46,6 +46,22 @@ SystemExit: hmmt25 has 30 questions (0-29); QIDS asks for [30, 99]
 ```
 
 
+## Where results are saved
+
+`OUT_DIR` is the folder cell2 writes one pkl per question into and cell3 reads
+back. It defaults to `peerconf_out` / `deepconf_out` next to wherever you ran the
+script. The resume check reads it too, so it has to outlive the machine — point
+it at storage that survives the container or instance:
+
+```bash
+OUT_DIR=/out                                   # Modal: a mounted Volume
+OUT_DIR=/mnt/results                           # AWS: an attached EBS volume or mounted S3
+OUT_DIR=/content/drive/MyDrive/peerconf_out    # Colab: mounted Drive
+```
+
+On ephemeral storage the results die with the machine and every rerun starts
+from zero.
+
 ## Output filenames
 
 Every result is named for the benchmark it came from — `aime25_q6_bar_cs_looph.pkl`,
