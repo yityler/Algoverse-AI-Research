@@ -35,8 +35,8 @@ WINDOW         = 2048     # sliding window: a token's score = avg confidence of 
                           # last 2048 tokens. FULL windows only — partial-window
                           # means are startup noise.
 STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the worker
-                          # reports in and the main thread judges. At 1 a cut lands
-                          # exactly at the crossing. A trace is judged from its first full window (token 2048). The bar itself only
+                          # reports in and the main thread judges. At 1 a cut lands exactly at the crossing.
+                          # A path is judged from its first full window (token 2048). The bar itself only
                           # moves when a finisher ends and sends its minimum.
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
