@@ -24,9 +24,9 @@ MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat fo
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
 # SEATS traces) runs bar-free; each finisher votes AND donates its lifetime-worst
-# window score to the calibration set. The bar = keep top BAR_KEEP_TOP% of those
-# minima, updated on every new finisher and applied instantly to every
-# new path 
+# window score to the calibration set (finishers ONLY — a cut path's minimum
+# never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
+# every new finisher and applied instantly to every new path
 BAR_KEEP_TOP        = 10  # 10 = PeerConf-low, 90 = PeerConf-high 
 BAR_MIN_CALIBRATORS = 1   # the first finisher arms the bar (its worst moment IS
                           # the bar); every later finisher refines it
@@ -59,12 +59,12 @@ GRAD_EWT         = True       # ...that also reached </think> or <|end|> (ready 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
 
-# ----- the certificate (second close): if (leader − runner-up) > (live +
-# unlaunched), no possible future changes the winner. Exact counting — cannot
-# fire wrong (MARS at gamma=1). No minimum-finishers knob needed: with only a
-# few votes in, the margin can only beat the outstanding count when almost
-# nobody is left running — and those stragglers couldn't flip the winner anyway,
-# so an early fire just saves their tail tokens.
+# ----- the certificate (second close): close the run the moment the leader's
+# margin over the runner-up exceeds every vote still outstanding (live +
+# unlaunched). Worst case is already counted — even if every remaining path
+# voted for the runner-up, the leader still wins — so a certificate close can
+# never pick a different winner than letting the run finish; it only saves the
+# stragglers' tail tokens (MARS's margin rule at gamma=1, its safe endpoint).
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
