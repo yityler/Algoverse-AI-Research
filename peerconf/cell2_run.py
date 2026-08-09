@@ -23,7 +23,7 @@ MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat fo
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
-# SEATS traces) runs bar-free; each finisher votes AND donates its lifetime-worst
+# SEATS traces) runs bar-free; each finisher votes and sends its lifetime-worst
 # window score to the calibration set (finishers ONLY — a cut path's minimum
 # never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
 # every new finisher and applied instantly to every new path
@@ -62,10 +62,7 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner: even if every path still
 # out there voted runner-up, the leader still wins. Pure vote arithmetic, no
-# statistics — it can never call the wrong winner (MARS at gamma=1). No minimum-finishers
-# knob needed: with only a few votes in, the margin can only beat the
-# outstanding count when almost nobody is left running — and those stragglers
-# couldn't flip the winner anyway, so an early fire just saves their tail tokens.
+# statistics — it can never call the wrong winner (MARS at gamma=1).
 
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
