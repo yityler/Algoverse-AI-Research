@@ -18,9 +18,9 @@ OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # where results are saved
 QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
 SEATS          = 16       # traces in flight at once — the belt's chairs
 MAX_TRACES     = 32       # total launch cap: a departed trace frees its seat for a
-                          # fresh one. Newborns are judged like everyone else — on
-                          # the self-calibrating bar (no age matching);
-                          # the window fill + the 512 dwell cover their infancy
+                          # fresh one. New paths are judged like everyone else with
+                          # the self-calibrating bar (no age matching)
+                    
 
 # ----- the bar (DeepConf-low, self-calibrating: finishers are the warmup) -----
 # Wave 1 (the first SEATS traces) runs LINE-FREE. Each finisher banks a ballot
