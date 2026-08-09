@@ -9,7 +9,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
 MODEL  = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 SERVER = "http://localhost:8000"
 
-# eerConf judges on the client side, no custom logits processor
+# PeerConf judges on the client side, no custom logits processor
 server_proc = subprocess.Popen(
     ["vllm", "serve", MODEL,
      "--port", "8000",
