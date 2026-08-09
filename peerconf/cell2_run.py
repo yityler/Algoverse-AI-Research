@@ -14,8 +14,11 @@ from dynasor.core.evaluator import math_equal
 MODEL   = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 SERVER  = "http://localhost:8000"
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")   # where results are saved
+DATASET = os.environ.get("DATASET", "aime25")         # aime25 | math500 | gsm8k | hmmt25
+                                                      # = benchmarks/<name>.jsonl; any file
+                                                      # of {"question","answer"} lines works
 
-QIDS           = range(30)  # which AIME problems to run — all 30, or a set like [6, 9]
+QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 SEATS          = 16         # traces in flight at once
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
                             # fresh one. Wave 1 is never judged; new paths face the
@@ -81,15 +84,34 @@ MAX_TOK_TRACE  = 30000    # total generation cap per trace, counted in tokens GE
 
 tok    = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
-_aime_paths = ["aime25.jsonl", os.path.join("benchmarks", "aime25.jsonl"),
-               os.path.join("..", "benchmarks", "aime25.jsonl")]
-try:
-    _aime_paths.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                       "..", "benchmarks", "aime25.jsonl"))
+_bench = f"{DATASET}.jsonl"
+_bench_paths = [_bench, os.path.join("benchmarks", _bench),
+                os.path.join("..", "benchmarks", _bench)]
+try:                                       # repo-root benchmarks/, found from the
+    _here = os.path.dirname(os.path.abspath(__file__))   # script rather than the cwd
+    _bench_paths[:0] = [os.path.join(_here, *([".."] * up), "benchmarks", _bench)
+                        for up in (1, 2)]
 except NameError:
     pass                                   # exec'd without __file__ (Modal)
-with open(next(p for p in _aime_paths if os.path.exists(p))) as f:
+_bench_path = next((p for p in _bench_paths if os.path.exists(p)), None)
+if _bench_path is None:
+    raise FileNotFoundError(f"{_bench} not found — looked in {_bench_paths}")
+with open(_bench_path, encoding="utf-8") as f:
     data = [json.loads(l) for l in f]
+
+# ask for a question the benchmark doesn't have and nothing runs: a sweep that
+# quietly shortened itself would read as a full one in the results
+QIDS = list(QIDS)
+_bad = [q for q in QIDS if not 0 <= q < len(data)]
+if _bad:
+    raise SystemExit(f"{DATASET} has {len(data)} questions (0-{len(data) - 1}); "
+                     f"QIDS asks for {_bad}")
+
+# aime25 keeps the bare q<N>_ filenames the first sweep wrote, so those pkls still
+# count as done; every other benchmark gets its own prefix and never collides
+DS_TAG = "" if DATASET == "aime25" else f"{DATASET}_"
+print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
+      f"running {len(QIDS)}")
 
 def render_chat(user_text):
     return tok.apply_chat_template([{"role": "user", "content": user_text}],
@@ -331,7 +353,7 @@ for QID in QIDS:
     # the new arms go in the filename so a sweep never overwrites its own results
     _extras = (("_cs" if PROBE_EVERY > 0 else "")
                + (f"_loop{LOOP_ACTION[0]}" if LOOP_ACTION != "off" else ""))
-    save_path = f"{OUT_DIR}/q{QID}_bar{_extras}.pkl"
+    save_path = f"{OUT_DIR}/{DS_TAG}q{QID}_bar{_extras}.pkl"
     if os.path.exists(save_path):
         print(f"Q{QID}: already saved ({save_path}) — skipping")
         continue
@@ -555,6 +577,7 @@ for QID in QIDS:
     with open(save_path, "wb") as f:
         pickle.dump({"qid": QID, "gt": ground_truth,
                      "config": {"MODE": "server-stream", "MODEL": MODEL,
+                                "DATASET": DATASET,
                                 "BAR_KEEP_TOP": BAR_KEEP_TOP,
                                 "BAR_MIN_CALIBRATORS": BAR_MIN_CALIBRATORS,
                                 "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,
