@@ -29,6 +29,10 @@ sampling settings:
 | Model | Temperature | Top-p | Top-k | Max seq len |
 |-------|-------------|-------|-------|-------------|
 | DeepSeek-8B | 0.6 | 0.95 | off | 64k |
+| Qwen3-8B | 0.6 | 0.95 | 20 | 32k |
+| Qwen3-32B | 0.6 | 0.95 | 20 | 32k |
+| GPT-OSS-20B | 1.0 | 1.0 | 40 | 130k |
+| GPT-OSS-120B | 1.0 | 1.0 | 40 | 130k |
 
 ## Switching benchmark
 
