@@ -32,7 +32,7 @@ CONSENSUS      = 0.95   # paper's tau: stop when the leading answer holds this s
 
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
-TOP_K          = 0
+TOP_K          = -1
 LOGPROBS       = 20
 MAX_TOK_TRACE  = 64000    # total generation cap per trace, counted in tokens GENERATED
 
