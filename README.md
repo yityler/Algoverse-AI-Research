@@ -90,7 +90,3 @@ yourself to copy before terminating.
 Every result is named for the benchmark it came from, such as `aime25_q6_bar_cs_looph.pkl` or
 `math500_q6_bar_cs_looph.pkl`, so benchmarks can share one output directory
 without colliding or falsely skipping each other.
-
-Runs saved before the prefix existed are bare (`q6_bar_cs_looph.pkl`). Those
-still count as done for `aime25`, so a rerun skips them instead of regenerating
-work you already paid for, and the cell3 viewers still read them as aime25.
