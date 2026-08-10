@@ -8,10 +8,10 @@ One jsonl per benchmark, one question per line, always the same two fields:
 
 | file | questions | source |
 |------|-----------|--------|
-| `aime25.jsonl` | 30 | [math-ai/aime25](https://huggingface.co/datasets/math-ai/aime25) — `default/test` |
-| `hmmt25.jsonl` | 30 | [MathArena/hmmt_feb_2025](https://huggingface.co/datasets/MathArena/hmmt_feb_2025) — `default/train` |
-| `math500.jsonl` | 500 | [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500) — `default/test` |
-| `gsm8k.jsonl` | 1319 | [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k) — `main/test` |
+| `aime25.jsonl` | 30 | [math-ai/aime25](https://huggingface.co/datasets/math-ai/aime25), `default/test` |
+| `hmmt25.jsonl` | 30 | [MathArena/hmmt_feb_2025](https://huggingface.co/datasets/MathArena/hmmt_feb_2025), `default/train` |
+| `math500.jsonl` | 500 | [HuggingFaceH4/MATH-500](https://huggingface.co/datasets/HuggingFaceH4/MATH-500), `default/test` |
+| `gsm8k.jsonl` | 1319 | [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k), `main/test` |
 
 GSM8K is the only one of the four that ships a train split as well; we use its
 test split (1319 questions), the held-out set results are normally reported on.
@@ -44,15 +44,15 @@ DATASET=gsm8k   python deepconf/cell2_deepconf.py   # DeepConf
 ```
 
 Adding a fifth benchmark means dropping a `<name>.jsonl` here in the same schema
-and passing `DATASET=<name>` — no code change.
+and passing `DATASET=<name>`, with no code change.
 
 ## Which questions run
 
 `QIDS` at the top of each cell2 takes `range(30)` for a span or `[6, 9]`
 for a specific set.
 
-Asking for a question the benchmark doesn't have stops the run outright —
-nothing generates, and the error names the valid range:
+Asking for a question the benchmark doesn't have stops the run outright.
+Nothing generates, and the error names the valid range:
 
 ```
 SystemExit: hmmt25 has 30 questions (0-29); QIDS asks for [30, 99]
@@ -73,7 +73,7 @@ OUT_DIR=/out                                   # Modal: a mounted Volume
 OUT_DIR=/content/drive/MyDrive/peerconf_out    # Colab: mounted Drive
 ```
 
-On a rented VM the default is already fine — an EC2 root volume survives a crash,
+On a rented VM the default is already fine. An EC2 root volume survives a crash,
 a reboot and a stop, and only dies when you terminate the instance. So copy the
 pkls down when you are done and terminate after, not before:
 
@@ -87,8 +87,8 @@ yourself to copy before terminating.
 
 ## Output filenames
 
-Every result is named for the benchmark it came from — `aime25_q6_bar_cs_looph.pkl`,
-`math500_q6_bar_cs_looph.pkl` — so benchmarks can share one output directory
+Every result is named for the benchmark it came from, such as `aime25_q6_bar_cs_looph.pkl` or
+`math500_q6_bar_cs_looph.pkl`, so benchmarks can share one output directory
 without colliding or falsely skipping each other.
 
 Runs saved before the prefix existed are bare (`q6_bar_cs_looph.pkl`). Those
