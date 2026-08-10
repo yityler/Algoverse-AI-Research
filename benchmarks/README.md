@@ -62,6 +62,17 @@ OUT_DIR=/content/drive/MyDrive/peerconf_out    # Colab: mounted Drive
 On ephemeral storage the results die with the machine and every rerun starts
 from zero.
 
+Whichever machine you rent, the pkls sit on its disk until you fetch them. Copy
+them down before deleting the instance:
+
+```bash
+scp -i your-key.pem -r ubuntu@<instance-ip>:~/peerconf_out ./
+```
+
+Stopping an instance keeps its disk; terminating destroys it. For long unattended
+sweeps, point `OUT_DIR` at a mounted bucket instead, so results land in durable
+storage as each question finishes rather than waiting for a copy at the end.
+
 ## Output filenames
 
 Every result is named for the benchmark it came from — `aime25_q6_bar_cs_looph.pkl`,
