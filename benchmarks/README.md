@@ -50,28 +50,27 @@ SystemExit: hmmt25 has 30 questions (0-29); QIDS asks for [30, 99]
 
 `OUT_DIR` is the folder cell2 writes one pkl per question into and cell3 reads
 back. It defaults to `peerconf_out` / `deepconf_out` next to wherever you ran the
-script. The resume check reads it too, so it has to outlive the machine — point
-it at storage that survives the container or instance:
+script. The resume check reads it too, so it has to outlive the machine.
+
+On a container that is wiped every run, point it at mounted storage or the
+results are gone the moment the run ends:
 
 ```bash
 OUT_DIR=/out                                   # Modal: a mounted Volume
-OUT_DIR=/mnt/results                           # AWS: an attached EBS volume or mounted S3
 OUT_DIR=/content/drive/MyDrive/peerconf_out    # Colab: mounted Drive
 ```
 
-On ephemeral storage the results die with the machine and every rerun starts
-from zero.
-
-Whichever machine you rent, the pkls sit on its disk until you fetch them. Copy
-them down before deleting the instance:
+On a rented VM the default is already fine — an EC2 root volume survives a crash,
+a reboot and a stop, and only dies when you terminate the instance. So copy the
+pkls down when you are done and terminate after, not before:
 
 ```bash
 scp -i your-key.pem -r ubuntu@<instance-ip>:~/peerconf_out ./
 ```
 
-Stopping an instance keeps its disk; terminating destroys it. For long unattended
-sweeps, point `OUT_DIR` at a mounted bucket instead, so results land in durable
-storage as each question finishes rather than waiting for a copy at the end.
+Point `OUT_DIR` at a mounted bucket there only for long unattended sweeps, where
+you want each question in durable storage as it finishes rather than trusting
+yourself to copy before terminating.
 
 ## Output filenames
 
