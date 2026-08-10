@@ -34,7 +34,7 @@ TEMPERATURE    = 0.6
 TOP_P          = 0.95
 TOP_K          = 20
 LOGPROBS       = 20
-MAX_TOK_TRACE  = 30000
+MAX_TOK_TRACE  = 64000    # total generation cap per trace, counted in tokens GENERATED
 
 tok = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 

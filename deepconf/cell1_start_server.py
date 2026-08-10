@@ -1,4 +1,6 @@
 # ======================= CELL 1 — START THE SERVER (run once) =======================
+# Stock vLLM server, sized for 4x L40S (AWS g6e.12xlarge, 192GB):
+# 16 traces at a 64k cap need ~150GB of KV cache.
 # Stock vLLM server. CELL 2 streams tokens over HTTP and judges the confidence
 # window client-side, so no logits processor is loaded here.
 import subprocess, time, requests, os
@@ -12,7 +14,8 @@ SERVER = "http://localhost:8000"
 server_proc = subprocess.Popen(
     ["vllm", "serve", MODEL,
      "--port", "8000",
-     "--max-model-len", "32768",
+     "--max-model-len", "65536",
+     "--tensor-parallel-size", "4",
      "--gpu-memory-utilization", "0.92",
      "--max-logprobs", "20"],
     stdout=open("vllm_server.log", "w"), stderr=subprocess.STDOUT)
