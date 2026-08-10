@@ -77,7 +77,7 @@ CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading a
 # ----- generation -----
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
-TOP_K          = 20
+TOP_K          = 0
 LOGPROBS       = 20       # top-20 candidates per token — the confidence data
 MAX_TOK_TRACE  = 64000    # total generation cap per trace, counted in tokens GENERATED
 # ================================================================
