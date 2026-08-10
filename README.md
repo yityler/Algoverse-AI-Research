@@ -21,6 +21,15 @@ reduced to the number after `####`, dropping the worked solution. MATH-500 and
 HMMT keep the dataset's own answer string, since `math_equal` does the grading
 and handles LaTeX.
 
+## Generation settings
+
+Matching DeepConf's Table 11, which uses each model's provider-recommended
+sampling settings:
+
+| Model | Temperature | Top-p | Top-k | Max seq len |
+|-------|-------------|-------|-------|-------------|
+| DeepSeek-8B | 0.6 | 0.95 | off | 64k |
+
 ## Switching benchmark
 
 Both run scripts read the `DATASET` env var and default to `aime25`:
