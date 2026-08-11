@@ -595,6 +595,7 @@ for QID in QIDS:
                                 "GRAD_CONF": GRAD_CONF,
                                 "GRAD_EWT": GRAD_EWT,
                                 "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
+                                "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar},
                      "voting": voting_results, "tokens": total_tokens,

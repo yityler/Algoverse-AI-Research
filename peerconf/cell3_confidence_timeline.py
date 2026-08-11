@@ -132,6 +132,15 @@ def draw_timeline(fname):
                     xycoords=("axes fraction", "data"), xytext=(-8, -14),
                     textcoords="offset points", ha="right", color="tab:blue")
 
+    # the generation cap, when the pkl recorded it: a khaki trace that ends here
+    # was truncated by the budget, not by anything the run decided
+    cap = cfg.get("MAX_TOK_TRACE")
+    if cap and any(len(t["confs"]) + WINDOW >= cap * 0.98 for t in r["traces"] if t["confs"]):
+        ax.axvline(cap, color="darkkhaki", ls=":", lw=1.2, alpha=0.8)
+        ax.annotate(f"cap {cap:,}", xy=(cap, 1.0), xycoords=("data", "axes fraction"),
+                    xytext=(-4, -12), textcoords="offset points",
+                    ha="right", color="darkkhaki", fontsize=9)
+
     probe_every = cfg.get("PROBE_EVERY")
     sub = (f"bar cuts replacements instantly; wave 1 runs bar-free | "
            f"probes every {probe_every} tokens, graduate at {cfg.get('GRAD_CONF')} | "
@@ -142,7 +151,8 @@ def draw_timeline(fname):
                   f"the confidence of the previous {WINDOW} tokens)")
     ax.set_ylabel("sliding-window confidence")
     ax.set_title(
-        f"PeerConf, AIME25 Q{qid}: sliding-window confidence of all {len(r['traces'])} traces "
+        f"PeerConf, {cfg.get('DATASET', DATASET).upper()} Q{qid}: "
+        f"sliding-window confidence of all {len(r['traces'])} traces "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"{sub} | model: {cfg['MODEL']}")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=4)

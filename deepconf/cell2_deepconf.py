@@ -317,6 +317,7 @@ for QID in QIDS:
                                 "WARMUP_TRACES": WARMUP_TRACES,
                                 "TOTAL_BUDGET": TOTAL_BUDGET,
                                 "WINDOW": WINDOW, "CONSENSUS": CONSENSUS,
+                                "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "conf_bar": conf_bar},
                      "voting": voting_results, "tokens": total_tokens,
                      "time_s": round(time.time() - t_start, 2),
