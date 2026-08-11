@@ -68,8 +68,31 @@ def is_correct(ans, gt):
     except: return str(ans) == gt
 
 def extract_answer(text):
-    hits = re.findall(r"\\boxed\{([^{}]*)\}", text)
-    return hits[-1].strip() if hits else None
+    """DeepConf's own extractor (facebookresearch/deepconf, deepconf/utils.py),
+    so both arms read answers exactly the way the baseline does. Counting braces
+    reads a nested \\boxed{\\dfrac{a}{b}}, which a [^{}] regex cannot. Empty
+    comes back as None, not "", because callers test `is not None`."""
+    if "boxed" not in text:
+        return None
+    ans = text.split("boxed")[-1]
+    if not ans:
+        return None
+    if ans[0] == "{":
+        stack, a = 1, ""
+        for c in ans[1:]:
+            if c == "{":
+                stack += 1
+                a += c
+            elif c == "}":
+                stack -= 1
+                if stack == 0:
+                    break
+                a += c
+            else:
+                a += c
+    else:
+        a = ans.split("$")[0].strip()
+    return a.strip() or None
 
 class Trace:
     def __init__(self, tid, phase):
