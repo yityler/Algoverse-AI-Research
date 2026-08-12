@@ -131,11 +131,17 @@ def draw_timeline(fname):
         ax.axhline(last, color=FINAL, ls="--", lw=1.6,
                    label=f"same bar: final, after {len(lh)} updates")
         ax.axhspan(min(first, last), max(first, last), color="0.45", alpha=0.08)
+        # the higher level is tagged above its line and the lower one below, and
+        # the two are pushed further apart when the bar barely moved, or the two
+        # tags land on top of each other and neither reads
+        y_lo, y_hi = ax.get_ylim()
+        pad = 14 if abs(first - last) < 0.05 * (y_hi - y_lo) else 5
+        dy_first, dy_last = ((pad, -pad - 9) if first >= last else (-pad - 9, pad))
         ax.annotate(f"armed: {first:.2f}", xy=(1.0, first),
-                    xycoords=("axes fraction", "data"), xytext=(-8, 6),
+                    xycoords=("axes fraction", "data"), xytext=(-8, dy_first),
                     textcoords="offset points", ha="right", color=ARMED)
         ax.annotate(f"final ({len(lh)} updates): {last:.2f}", xy=(1.0, last),
-                    xycoords=("axes fraction", "data"), xytext=(-8, -14),
+                    xycoords=("axes fraction", "data"), xytext=(-8, dy_last),
                     textcoords="offset points", ha="right", color=FINAL)
 
     # the generation cap, when the pkl recorded it: a khaki trace that ends here
