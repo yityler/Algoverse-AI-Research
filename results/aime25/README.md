@@ -1,7 +1,5 @@
 # PeerConf-low on AIME25
 
-PeerConf-low on all 30 questions.
-
 ## Results
 
 | Model | Dataset | Token | Time | Acc | Mean token/Q |
