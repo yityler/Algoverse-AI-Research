@@ -171,7 +171,7 @@ def draw_timeline(fname):
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
-    out_png = f"{OUT_DIR}/q{qid:02d}_confidence_timeline.png"   # zero-padded so they sort
+    out_png = f"{OUT_DIR}/q{qid:02d}_peerconf_confidence_timeline.png"   # zero-padded so they sort
     fig.savefig(out_png, dpi=150, bbox_inches="tight")
     print(f"Saved {out_png}")
     plt.show()
