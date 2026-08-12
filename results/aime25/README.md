@@ -1,4 +1,4 @@
-# AIME25
+# PeerConf-low on AIME25
 
 PeerConf-low on all 30 questions. DeepConf-low at the same budget is still to run.
 
