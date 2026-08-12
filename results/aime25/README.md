@@ -52,43 +52,43 @@ self-calibrating bar from armed to final.
 
 ### Q0  ground truth 70, correct, 66K tokens
 
-![Q0](timelines/q0_confidence_timeline.png)
+![Q0](timelines/q00_confidence_timeline.png)
 
 ### Q1  ground truth 588, correct, 132K tokens
 
-![Q1](timelines/q1_confidence_timeline.png)
+![Q1](timelines/q01_confidence_timeline.png)
 
 ### Q2  ground truth 16, correct, 66K tokens
 
-![Q2](timelines/q2_confidence_timeline.png)
+![Q2](timelines/q02_confidence_timeline.png)
 
 ### Q3  ground truth 117, correct, 66K tokens
 
-![Q3](timelines/q3_confidence_timeline.png)
+![Q3](timelines/q03_confidence_timeline.png)
 
 ### Q4  ground truth 279, correct, 132K tokens
 
-![Q4](timelines/q4_confidence_timeline.png)
+![Q4](timelines/q04_confidence_timeline.png)
 
 ### Q5  ground truth 504, correct, 66K tokens
 
-![Q5](timelines/q5_confidence_timeline.png)
+![Q5](timelines/q05_confidence_timeline.png)
 
 ### Q6  ground truth 821, correct, 491K tokens
 
-![Q6](timelines/q6_confidence_timeline.png)
+![Q6](timelines/q06_confidence_timeline.png)
 
 ### Q7  ground truth 77, correct, 66K tokens
 
-![Q7](timelines/q7_confidence_timeline.png)
+![Q7](timelines/q07_confidence_timeline.png)
 
 ### Q8  ground truth 62, correct, 197K tokens
 
-![Q8](timelines/q8_confidence_timeline.png)
+![Q8](timelines/q08_confidence_timeline.png)
 
 ### Q9  ground truth 81, correct, 712K tokens
 
-![Q9](timelines/q9_confidence_timeline.png)
+![Q9](timelines/q09_confidence_timeline.png)
 
 ### Q10  ground truth 259, correct, 396K tokens
 
