@@ -45,9 +45,3 @@ Every trace of every question, coloured by how it ended. The blue band is the
 self-calibrating bar from armed to final.
 
 ![confidence timelines](confidence_timelines.png)
-
-Regenerate with:
-
-```
-OUT_DIR=/path/to/pkls python results/aime25/plot_timelines.py
-```
