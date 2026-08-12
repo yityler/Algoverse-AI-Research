@@ -1,4 +1,6 @@
-# PeerConf-low on AIME25
+# AIME25
+
+peerconf-low on all 30 questions. deepconf coming soon.
 
 ## Results
 
