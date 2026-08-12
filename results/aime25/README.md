@@ -41,7 +41,126 @@ k=8 is read off these 30 questions and has not been checked on a held-out set.
 
 ## Confidence timelines
 
-Every trace of every question, coloured by how it ended. The blue band is the
+One figure per question. Each line is a trace's sliding-window confidence
+over its own life, coloured by how it ended. The blue band is the
 self-calibrating bar from armed to final.
 
-![confidence timelines](confidence_timelines.png)
+### Q0  ground truth 70, correct, 66K tokens
+
+![Q0](timelines/q0_confidence_timeline.png)
+
+### Q1  ground truth 588, correct, 132K tokens
+
+![Q1](timelines/q1_confidence_timeline.png)
+
+### Q2  ground truth 16, correct, 66K tokens
+
+![Q2](timelines/q2_confidence_timeline.png)
+
+### Q3  ground truth 117, correct, 66K tokens
+
+![Q3](timelines/q3_confidence_timeline.png)
+
+### Q4  ground truth 279, correct, 132K tokens
+
+![Q4](timelines/q4_confidence_timeline.png)
+
+### Q5  ground truth 504, correct, 66K tokens
+
+![Q5](timelines/q5_confidence_timeline.png)
+
+### Q6  ground truth 821, correct, 491K tokens
+
+![Q6](timelines/q6_confidence_timeline.png)
+
+### Q7  ground truth 77, correct, 66K tokens
+
+![Q7](timelines/q7_confidence_timeline.png)
+
+### Q8  ground truth 62, correct, 197K tokens
+
+![Q8](timelines/q8_confidence_timeline.png)
+
+### Q9  ground truth 81, correct, 712K tokens
+
+![Q9](timelines/q9_confidence_timeline.png)
+
+### Q10  ground truth 259, correct, 396K tokens
+
+![Q10](timelines/q10_confidence_timeline.png)
+
+### Q11  ground truth 510, correct, 330K tokens
+
+![Q11](timelines/q11_confidence_timeline.png)
+
+### Q12  ground truth 204, correct, 920K tokens
+
+![Q12](timelines/q12_confidence_timeline.png)
+
+### Q13  ground truth 60, WRONG, answered 71, 1792K tokens
+
+![Q13](timelines/q13_confidence_timeline.png)
+
+### Q14  ground truth 735, WRONG, answered 147, 981K tokens
+
+![Q14](timelines/q14_confidence_timeline.png)
+
+### Q15  ground truth 468, correct, 66K tokens
+
+![Q15](timelines/q15_confidence_timeline.png)
+
+### Q16  ground truth 49, correct, 66K tokens
+
+![Q16](timelines/q16_confidence_timeline.png)
+
+### Q17  ground truth 82, correct, 198K tokens
+
+![Q17](timelines/q17_confidence_timeline.png)
+
+### Q18  ground truth 106, correct, 132K tokens
+
+![Q18](timelines/q18_confidence_timeline.png)
+
+### Q19  ground truth 336, correct, 593K tokens
+
+![Q19](timelines/q19_confidence_timeline.png)
+
+### Q20  ground truth 293, correct, 132K tokens
+
+![Q20](timelines/q20_confidence_timeline.png)
+
+### Q21  ground truth 237, correct, 324K tokens
+
+![Q21](timelines/q21_confidence_timeline.png)
+
+### Q22  ground truth 610, correct, 509K tokens
+
+![Q22](timelines/q22_confidence_timeline.png)
+
+### Q23  ground truth 149, correct, 198K tokens
+
+![Q23](timelines/q23_confidence_timeline.png)
+
+### Q24  ground truth 907, correct, 264K tokens
+
+![Q24](timelines/q24_confidence_timeline.png)
+
+### Q25  ground truth 113, correct, 263K tokens
+
+![Q25](timelines/q25_confidence_timeline.png)
+
+### Q26  ground truth 19, correct, 264K tokens
+
+![Q26](timelines/q26_confidence_timeline.png)
+
+### Q27  ground truth 248, WRONG, answered 0, 1539K tokens
+
+![Q27](timelines/q27_confidence_timeline.png)
+
+### Q28  ground truth 104, correct, 198K tokens
+
+![Q28](timelines/q28_confidence_timeline.png)
+
+### Q29  ground truth 240, WRONG, answered 188, 504K tokens
+
+![Q29](timelines/q29_confidence_timeline.png)
