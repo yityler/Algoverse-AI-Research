@@ -15,10 +15,15 @@ Time = generation wall-clock on 2x H200 SXM, excludes server startup.
 The four wrong answers (Q13, Q14, Q27, Q29) cost 4.82M tokens, 41% of the run,
 so a correct answer averages 263K tokens and a wrong one averages 1.20M.
 
-## If we counted only the first k votes
+## If the run stopped after k traces finished
 
-Accuracy against the number of finished traces allowed to vote, replayed from
-the same run. Nothing else changes.
+What the run would have scored if it closed the moment the k-th trace finished
+and voted with those k, instead of running on to the landslide, the certificate
+or the 32-trace budget. Everything still in flight at that point stops
+generating, which is where the tokens are saved.
+
+Replayed from the saved traces, so the generation itself is unchanged. Only the
+point at which the run would have closed moves.
 
 | k | Acc | Voter token | Est. total | vs full run |
 |---|---|---|---|---|
