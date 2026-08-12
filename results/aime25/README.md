@@ -7,7 +7,7 @@ PeerConf-low on all 30 questions. DeepConf-low at the same budget is still to ru
 | Model | Dataset | Token | Time | Acc | Mean token/Q |
 |---|---|---|---|---|---|
 | DeepSeek-8B | AIME25 (Q0-29) | 11.66M | 145 min | 86.7% | 389K |
-| | correct subset (26 Q) | 6.85M | 72 min | - | 263K |
+| | correct subset (26 Q) | 6.85M | 72 min | 100% | 263K |
 
 Budget 32 traces/question, 16 seats, 64k-token cap, one run per question.
 Time = generation wall-clock on 2x H200 SXM, excludes server startup.
