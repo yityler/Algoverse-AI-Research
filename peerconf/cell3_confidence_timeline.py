@@ -5,7 +5,8 @@
 # Green = finished correct, red = the wrong majority, light red = other wrong
 # answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
 # steel dotted = drained when the run closed. Stars = graduated by a commitment
-# probe; triangles = loop-guard harvests; small dots along a trace = its probes.
+# probe; triangles = loop-guard harvests; small black dots along a trace mark
+# where each graduation probe fired.
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -86,7 +87,8 @@ def draw_timeline(fname):
         for p in t.get("probes", []):
             at = p.get("at", 0)
             if WINDOW <= at < len(confs) + WINDOW:
-                ax.plot(at, confs[at - WINDOW], ".", color="black", ms=2.5, alpha=0.45)
+                ax.plot(at, confs[at - WINDOW], ".", color="black", ms=2.5, alpha=0.45,
+                        label=label_once("graduation probe fired"))
 
         if t["status"] == "stopped":               # cut at the bar
             ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7,
@@ -120,17 +122,21 @@ def draw_timeline(fname):
     keep = cfg.get("BAR_KEEP_TOP")
     bar_lab = (f"bar (keep top {keep}% of finishers' minima)" if keep
                else f"line (keep top {cfg.get('LINE_TOP', 0):.0%})")
+    # armed and final get their own colours: blue is the drained traces, and one
+    # blue for both levels made the bar look like it never moved
+    ARMED, FINAL = "darkorange", "darkviolet"
     if lh:
         first, last = lh[0]["line"], lh[-1]["line"]
-        ax.axhline(first, color="tab:blue", ls="--", lw=1.3, label=bar_lab)
-        ax.axhline(last, color="tab:blue", ls="--", lw=1.3)
-        ax.axhspan(min(first, last), max(first, last), color="tab:blue", alpha=0.06)
+        ax.axhline(first, color=ARMED, ls="--", lw=1.6, label=f"{bar_lab}: armed")
+        ax.axhline(last, color=FINAL, ls="--", lw=1.6,
+                   label=f"same bar: final, after {len(lh)} updates")
+        ax.axhspan(min(first, last), max(first, last), color="0.45", alpha=0.08)
         ax.annotate(f"armed: {first:.2f}", xy=(1.0, first),
                     xycoords=("axes fraction", "data"), xytext=(-8, 6),
-                    textcoords="offset points", ha="right", color="tab:blue")
+                    textcoords="offset points", ha="right", color=ARMED)
         ax.annotate(f"final ({len(lh)} updates): {last:.2f}", xy=(1.0, last),
                     xycoords=("axes fraction", "data"), xytext=(-8, -14),
-                    textcoords="offset points", ha="right", color="tab:blue")
+                    textcoords="offset points", ha="right", color=FINAL)
 
     # the generation cap, when the pkl recorded it: a khaki trace that ends here
     # was truncated by the budget, not by anything the run decided
@@ -159,7 +165,7 @@ def draw_timeline(fname):
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
-    out_png = f"{OUT_DIR}/q{qid}_confidence_timeline.png"
+    out_png = f"{OUT_DIR}/q{qid:02d}_confidence_timeline.png"   # zero-padded so they sort
     fig.savefig(out_png, dpi=150, bbox_inches="tight")
     print(f"Saved {out_png}")
     plt.show()
