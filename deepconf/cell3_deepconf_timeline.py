@@ -9,6 +9,7 @@
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 OUT_DIR = os.environ.get("OUT_DIR", "deepconf_out")
 
@@ -68,30 +69,37 @@ def draw_timeline(fname):
         x = np.arange(len(confs)) + WINDOW         # confs[0] = the first full window
         step = max(1, len(confs) // 2000)          # downsample for the figure
         xs, ys = x[::step], np.asarray(confs)[::step]
-        lw = 1.0 if t.get("phase") == "warmup" else 1.8
+        # weight says WHICH PHASE the trace is in; colour still says how it
+        # ended. warmup runs uncut, the online wave is judged at the frozen bar
+        warm   = t.get("phase") == "warmup"
+        lw, al = (1.1, 0.55) if warm else (2.1, 0.9)
+        # broken styles blob at full weight; keep them lighter but still
+        # thin-for-warmup, thick-for-online
+        lw_dot, lw_dash = lw * 0.55, lw * 0.75
+        seen_labels.add("__warm__" if warm else "__online__")
 
         if t["status"] == "stopped":               # cut at the bar
-            ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7,
+            ax.plot(xs, ys, color="gray", lw=lw, alpha=al,
                     label=label_once("cut at the bar"))
             ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
         elif t["status"] == "finished" and is_right(t["answer"]):
-            ax.plot(xs, ys, color="forestgreen", lw=lw,
+            ax.plot(xs, ys, color="forestgreen", lw=lw, alpha=al,
                     label=label_once(f"correct = {gt} (n={n_right})"))
             ax.plot(x[-1], confs[-1], "o", color="forestgreen", ms=5)
         elif t["status"] == "finished" and wrong_majority and str(t["answer"]) == wrong_majority:
-            ax.plot(xs, ys, color="crimson", lw=lw,
+            ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
                     label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
             ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
         elif t["status"] == "finished":
-            ax.plot(xs, ys, color="lightcoral", lw=max(lw - 0.6, 1.0), alpha=0.85,
+            ax.plot(xs, ys, color="lightcoral", lw=lw, alpha=al,
                     label=label_once("other wrong answers"))
             ax.plot(x[-1], confs[-1], "o", color="lightcoral", ms=5)
         elif t["status"] == "abandoned":           # drained when consensus closed the run
-            ax.plot(xs, ys, color="steelblue", lw=1.1, ls=":", alpha=0.8,
+            ax.plot(xs, ys, color="steelblue", lw=lw_dot, ls=":", alpha=al,
                     label=label_once("drained (consensus stop)"))
             ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
-            ax.plot(xs, ys, color="darkkhaki", lw=1.2, ls="--", alpha=0.9,
+            ax.plot(xs, ys, color="darkkhaki", lw=lw_dash, ls="--", alpha=al,
                     label=label_once("no answer (truncated)"))
             ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
 
@@ -114,7 +122,21 @@ def draw_timeline(fname):
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"warmup {cfg.get('WARMUP_TRACES', '?')} (thin) -> frozen bar -> online wave (thick), "
         f"instant cut below the bar | tau = {cfg.get('CONSENSUS', '?')} | model: {cfg['MODEL']}")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=4)
+    # the group key: neutral grey, because here it is the WEIGHT that means
+    # something, not the colour
+    handles, labels = ax.get_legend_handles_labels()
+    if "__warm__" in seen_labels:
+        handles.append(Line2D([], [], color="0.35", lw=1.1, alpha=0.55))
+        labels.append(f"warmup: the {cfg.get('WARMUP_TRACES', '?')} opening traces, "
+                      f"never cut (thin)")
+    if "__online__" in seen_labels:
+        handles.append(Line2D([], [], color="0.35", lw=2.1, alpha=0.9))
+        labels.append("online wave: judged at the bar (thick)")
+    else:
+        handles.append(Line2D([], [], ls="none"))
+        labels.append("online wave never launched on this question")
+    ax.legend(handles, labels, loc="upper center",
+              bbox_to_anchor=(0.5, -0.09), ncol=4)
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
