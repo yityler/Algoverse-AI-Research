@@ -127,8 +127,9 @@ def draw_timeline(fname):
     ARMED, FINAL = "darkorange", "darkviolet"
     if lh:
         first, last = lh[0]["line"], lh[-1]["line"]
-        ax.axhline(first, color=ARMED, ls="--", lw=1.6, label=f"{bar_lab}: armed")
-        ax.axhline(last, color=FINAL, ls="--", lw=1.6,
+        ax.axhline(first, color=ARMED, ls="--", lw=1.8, zorder=6,
+                   label=f"{bar_lab}: armed")
+        ax.axhline(last, color=FINAL, ls="--", lw=1.8, zorder=6,
                    label=f"same bar: final, after {len(lh)} updates")
         ax.axhspan(min(first, last), max(first, last), color="0.45", alpha=0.08)
         # the higher level is tagged above its line and the lower one below, and
@@ -139,21 +140,25 @@ def draw_timeline(fname):
         dy_first, dy_last = ((pad, -pad - 9) if first >= last else (-pad - 9, pad))
         ax.annotate(f"armed: {first:.2f}", xy=(1.0, first),
                     xycoords=("axes fraction", "data"), xytext=(-8, dy_first),
-                    textcoords="offset points", ha="right", color=ARMED)
+                    textcoords="offset points", ha="right", color=ARMED, zorder=8,
+                    bbox=dict(fc="white", ec="none", alpha=0.75, pad=1.2))
         ax.annotate(f"final ({len(lh)} updates): {last:.2f}", xy=(1.0, last),
                     xycoords=("axes fraction", "data"), xytext=(-8, dy_last),
-                    textcoords="offset points", ha="right", color=FINAL)
+                    textcoords="offset points", ha="right", color=FINAL, zorder=8,
+                    bbox=dict(fc="white", ec="none", alpha=0.75, pad=1.2))
 
     # the vote bar, on the questions that reached it: once wave 1 has departed,
     # a wave-1 path below this line no longer votes. Absent where the run closed
     # before wave 1 was done, so nothing is drawn there.
     vbar = cfg.get("vote_bar")
     if vbar is not None:
-        ax.axhline(vbar, color="teal", ls="-.", lw=1.6,
+        ax.axhline(vbar, color="darkcyan", ls="-.", lw=2.6, zorder=7,
                    label=f"vote bar (wave 1 must clear it to vote, top {keep}%)")
         ax.annotate(f"vote bar: {vbar:.2f}", xy=(0.0, vbar),
                     xycoords=("axes fraction", "data"), xytext=(8, 6),
-                    textcoords="offset points", ha="left", color="teal")
+                    textcoords="offset points", ha="left", color="darkcyan",
+                    fontweight="bold", zorder=8,
+                    bbox=dict(fc="white", ec="darkcyan", lw=0.8, alpha=0.9, pad=1.6))
 
     # the generation cap, when the pkl recorded it: a khaki trace that ends here
     # was truncated by the budget, not by anything the run decided
