@@ -47,15 +47,11 @@ def draw_timeline(fname):
     def is_right(ans):
         return ans is not None and str(ans).strip() == gt
 
+    # one colour for every wrong answer: which wrong answer led is not the point,
+    # and two reds for "wrong" and "also wrong" only made the figure harder to read
     finished = [t for t in r["traces"] if t["status"] == "finished" and t["answer"] is not None]
-    wrong_counts = {}
-    for t in finished:
-        if not is_right(t["answer"]):
-            wrong_counts[str(t["answer"])] = wrong_counts.get(str(t["answer"]), 0) + 1
-    wrong_majority = max(wrong_counts, key=wrong_counts.get) if wrong_counts else None
-
-    n_right = sum(1 for t in finished if is_right(t["answer"]))
-    n_wmaj  = sum(1 for t in finished if str(t["answer"]) == wrong_majority) if wrong_majority else 0
+    n_right  = sum(1 for t in finished if is_right(t["answer"]))
+    n_wrong  = len(finished) - n_right
 
     fig, ax = plt.subplots(figsize=(16, 9))
     seen_labels = set()
@@ -72,10 +68,12 @@ def draw_timeline(fname):
         # weight says WHICH PHASE the trace is in; colour still says how it
         # ended. warmup runs uncut, the online wave is judged at the frozen bar
         warm   = t.get("phase") == "warmup"
-        lw, al = (1.1, 0.55) if warm else (2.1, 0.9)
-        # broken styles blob at full weight; keep them lighter but still
-        # thin-for-warmup, thick-for-online
-        lw_dot, lw_dash = lw * 0.55, lw * 0.75
+        lw, al = ((1.1, 0.55) if warm else (2.1, 0.9))
+        # a dotted line reads lighter than a solid one at the same weight, so the
+        # broken styles get a floor: thin enough not to blob at replacement
+        # weight, thick enough that a drained wave-1 path is still visible
+        lw_dot, lw_dash = max(lw * 0.7, 1.0), max(lw * 0.85, 1.1)
+        al_broken = max(al, 0.8)
         seen_labels.add("__warm__" if warm else "__online__")
 
         if t["status"] == "stopped":               # cut at the bar
@@ -86,20 +84,16 @@ def draw_timeline(fname):
             ax.plot(xs, ys, color="forestgreen", lw=lw, alpha=al,
                     label=label_once(f"correct = {gt} (n={n_right})"))
             ax.plot(x[-1], confs[-1], "o", color="forestgreen", ms=5)
-        elif t["status"] == "finished" and wrong_majority and str(t["answer"]) == wrong_majority:
-            ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
-                    label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
-            ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
         elif t["status"] == "finished":
-            ax.plot(xs, ys, color="mediumpurple", lw=lw, alpha=al,
-                    label=label_once("other wrong answers"))
-            ax.plot(x[-1], confs[-1], "o", color="mediumpurple", ms=5)
+            ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
+                    label=label_once(f"wrong (n={n_wrong})"))
+            ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
         elif t["status"] == "abandoned":           # drained when consensus closed the run
-            ax.plot(xs, ys, color="steelblue", lw=lw_dot, ls=":", alpha=al,
+            ax.plot(xs, ys, color="steelblue", lw=lw_dot, ls=":", alpha=al_broken,
                     label=label_once("drained (consensus stop)"))
             ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
-            ax.plot(xs, ys, color="darkkhaki", lw=lw_dash, ls="--", alpha=al,
+            ax.plot(xs, ys, color="darkkhaki", lw=lw_dash, ls="--", alpha=al_broken,
                     label=label_once("no answer (truncated)"))
             ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
 

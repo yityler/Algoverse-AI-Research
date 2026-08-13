@@ -49,16 +49,11 @@ def draw_timeline(fname):
     def is_right(ans):
         return ans is not None and str(ans).strip() == gt
 
-    # the wrong majority (most common wrong answer among finishers) gets its own color
+    # one colour for every wrong answer: which wrong answer led is not the point,
+    # and two reds for "wrong" and "also wrong" only made the figure harder to read
     finished = [t for t in r["traces"] if t["status"] == "finished" and t["answer"] is not None]
-    wrong_counts = {}
-    for t in finished:
-        if not is_right(t["answer"]):
-            wrong_counts[str(t["answer"])] = wrong_counts.get(str(t["answer"]), 0) + 1
-    wrong_majority = max(wrong_counts, key=wrong_counts.get) if wrong_counts else None
-
-    n_right = sum(1 for t in finished if is_right(t["answer"]))
-    n_wmaj  = sum(1 for t in finished if str(t["answer"]) == wrong_majority) if wrong_majority else 0
+    n_right  = sum(1 for t in finished if is_right(t["answer"]))
+    n_wrong  = len(finished) - n_right
 
     fig, ax = plt.subplots(figsize=(16, 9))
     seen_labels = set()
@@ -88,11 +83,12 @@ def draw_timeline(fname):
         # wave 1 = the SEATS opening paths, drawn light; a replacement takes a
         # freed seat later and is drawn heavy
         wave1  = t["id"] < cfg.get("SEATS", 0)
-        lw, al = (1.1, 0.55) if wave1 else (2.1, 0.9)
-        # a dotted or dashed line at full weight turns into blobs, so the
-        # broken styles are drawn lighter — still thin for wave 1, thick for a
-        # replacement, just not shouting over the solid lines
-        lw_dot, lw_dash = lw * 0.55, lw * 0.75
+        lw, al = ((1.1, 0.55) if wave1 else (2.1, 0.9))
+        # a dotted line reads lighter than a solid one at the same weight, so the
+        # broken styles get a floor: thin enough not to blob at replacement
+        # weight, thick enough that a drained wave-1 path is still visible
+        lw_dot, lw_dash = max(lw * 0.7, 1.0), max(lw * 0.85, 1.1)
+        al_broken = max(al, 0.8)
         seen_labels.add("__w1__" if wave1 else "__rep__")
 
         # the probe schedule: one small dot per probe along the trace
@@ -117,20 +113,16 @@ def draw_timeline(fname):
             ax.plot(xs, ys, color="forestgreen", lw=lw, alpha=al,
                     label=label_once(f"correct = {gt} (n={n_right})"))
             end_marker(t, x[-1], confs[-1], "forestgreen")
-        elif t["status"] == "finished" and wrong_majority and str(t["answer"]) == wrong_majority:
-            ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
-                    label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
-            end_marker(t, x[-1], confs[-1], "crimson")
         elif t["status"] == "finished":
-            ax.plot(xs, ys, color="mediumpurple", lw=lw, alpha=al,
-                    label=label_once("other wrong answers"))
-            end_marker(t, x[-1], confs[-1], "mediumpurple")
+            ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
+                    label=label_once(f"wrong (n={n_wrong})"))
+            end_marker(t, x[-1], confs[-1], "crimson")
         elif t["status"] == "abandoned":           # drained when the run closed
-            ax.plot(xs, ys, color="royalblue", lw=lw_dot, ls=":", alpha=al,
+            ax.plot(xs, ys, color="royalblue", lw=lw_dot, ls=":", alpha=al_broken,
                     label=label_once("drained (run closed early)"))
             ax.plot(x[-1], confs[-1], "s", color="royalblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
-            ax.plot(xs, ys, color="darkgoldenrod", lw=lw_dash, ls="--", alpha=al,
+            ax.plot(xs, ys, color="darkgoldenrod", lw=lw_dash, ls="--", alpha=al_broken,
                     label=label_once("no answer (truncated)"))
             ax.plot(x[-1], confs[-1], "o", color="darkgoldenrod", ms=4)
 
@@ -169,7 +161,9 @@ def draw_timeline(fname):
     # the vote bar, on the questions that reached it: once wave 1 has departed,
     # a wave-1 path below this line no longer votes. Absent where the run closed
     # before wave 1 was done, so nothing is drawn there.
-    vbar = cfg.get("vote_bar")
+    # a run that closes before wave 1 has departed freezes a bar that never
+    # judges anything; drawing it there implied work it did not do
+    vbar = cfg.get("vote_bar") if cfg.get("vote_bar_used") else None
     if vbar is not None:
         ax.axhline(vbar, color="darkcyan", ls="-.", lw=2.6, zorder=7,
                    label=f"vote bar (wave 1 must clear it to vote, top {keep}%)")
