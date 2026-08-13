@@ -21,8 +21,8 @@ DATASET = os.environ.get("DATASET", "aime25")         # aime25 | math500 | gsm8k
 QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 SEATS          = 16         # traces in flight at once
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
-                            # fresh one. Wave 1 is never judged; new paths face the
-                            # armed bar from their first full window (token 2048)
+                            # fresh one. Every path faces the bar from its first full
+                            # window (token 2048), once the bar has armed
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
