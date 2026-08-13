@@ -178,7 +178,7 @@ def draw_timeline(fname):
                     ha="right", color="darkgoldenrod", fontsize=9)
 
     probe_every = cfg.get("PROBE_EVERY")
-    sub = (f"bar cuts replacements instantly; wave 1 runs bar-free | "
+    sub = (f"bar cuts instantly; wave 1 is bar-free only until it arms | "
            f"probes every {probe_every} tokens, graduate at {cfg.get('GRAD_CONF')} | "
            f"close: landslide {cfg.get('CONSENSUS', 0):.0%} or certificate"
            if probe_every else

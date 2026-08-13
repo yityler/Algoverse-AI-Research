@@ -26,7 +26,8 @@ MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat 
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
-# SEATS traces) runs bar-free; each finisher votes and sends its lifetime-worst
+# SEATS traces) runs bar-free only until the bar arms, then it is judged like
+# every other path; each finisher votes and sends its lifetime-worst
 # window score to the calibration set (finishers ONLY — a cut path's minimum
 # never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
 # every new finisher and applied instantly to every new path
@@ -344,13 +345,16 @@ def launch(t):
     executor.submit(fly_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
 
 def judge(t, scores):
-    """Track the lifetime low; judge REPLACEMENTS against the armed bar.
-    Wave 1 (ids < SEATS) runs bar-free — its finishers ARE the calibration.
-    One dip below the bar = instant cut.
+    """Track the lifetime low; judge every path against the armed bar.
+    Wave 1 runs bar-free only until the bar arms: its early finishers ARE the
+    calibration, but once the bar exists a wave-1 path is judged like any other.
+    A path's lifetime low only ever falls, so one below the bar can never climb
+    back to clear the vote filter — finishing it buys an answer that gets
+    discarded. One dip below the bar = instant cut.
     Returns the verdict: None (safe) | 'cut'."""
     if scores and min(scores) < t.judge_min:
         t.judge_min = min(scores)
-    if t.id < SEATS or bar is None:
+    if bar is None:
         return None
     for sc in scores:
         if sc < bar:
