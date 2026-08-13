@@ -16,6 +16,11 @@ it out by voting method.
 Budget 32 traces/question, 16 seats, 64k-token cap, one run per question.
 Both arms on 2x H200 SXM, same model, same cap, same tau.
 
+Average length of a path:
+Peerconf - 16,388 tokens
+Deepconf - 25,356 tokens
+
+
 ## Per question
 
 | Q | GT | PeerConf | DeepConf | PeerConf tokens | DeepConf tokens | Saving |
