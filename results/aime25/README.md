@@ -20,9 +20,9 @@ Average length of a path:
 
 PeerConf - 16,458 tokens (including probe tokens)
 
-DeepConf - 25,356 tokens
+DeepConf - 25,346 tokens
 
-Average length of a path that finsihed with an asnwer:
+Average length of a path that finished with an answer:
 
 w/ graduation - 16,668 (including probe tokens)
 
