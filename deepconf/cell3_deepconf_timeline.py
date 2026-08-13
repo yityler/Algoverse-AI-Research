@@ -97,11 +97,14 @@ def draw_timeline(fname):
 
     if bar is not None:
         keep = cfg.get("CONFIDENCE_PERCENTILE", "?")
-        ax.axhline(bar, color="tab:blue", ls="--", lw=1.3,
-                   label=f"frozen bar (keep top {keep}% of warmup minima)")
-        ax.annotate(f"bar: {bar:.2f}", xy=(1.0, bar),
-                    xycoords=("axes fraction", "data"), xytext=(-8, 6),
-                    textcoords="offset points", ha="right", color="tab:blue")
+        # one line doing two jobs: it cuts the online wave, and a warmup trace
+        # below it does not get to vote
+        ax.axhline(bar, color="teal", ls="-.", lw=1.6,
+                   label=f"frozen bar: cuts the online wave, and warmup must "
+                         f"clear it to vote (top {keep}%)")
+        ax.annotate(f"bar: {bar:.2f}", xy=(0.0, bar),
+                    xycoords=("axes fraction", "data"), xytext=(8, 6),
+                    textcoords="offset points", ha="left", color="teal")
 
     ax.set_xlabel(f"tokens generated (each point = sliding-window average: "
                   f"the confidence of the previous {WINDOW} tokens)")

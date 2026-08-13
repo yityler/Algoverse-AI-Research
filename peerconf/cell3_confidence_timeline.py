@@ -144,6 +144,22 @@ def draw_timeline(fname):
                     xycoords=("axes fraction", "data"), xytext=(-8, dy_last),
                     textcoords="offset points", ha="right", color=FINAL)
 
+    # the vote bar: DeepConf's top-eta% filter. Once wave 1 has departed, only a
+    # wave-1 path whose lifetime low clears this line may vote. Replacements vote
+    # regardless. Older pkls predate the field, so derive it from wave 1's minima.
+    seats = cfg.get("SEATS")
+    vbar = cfg.get("vote_bar")
+    if vbar is None and seats and keep:
+        w1 = [min(t["confs"]) for t in r["traces"] if t["id"] < seats and t["confs"]]
+        if w1:
+            vbar = float(np.percentile(w1, 100 - keep))
+    if vbar is not None:
+        ax.axhline(vbar, color="teal", ls="-.", lw=1.6,
+                   label=f"vote bar (wave 1 must clear it to vote, top {keep}%)")
+        ax.annotate(f"vote bar: {vbar:.2f}", xy=(0.0, vbar),
+                    xycoords=("axes fraction", "data"), xytext=(8, 6),
+                    textcoords="offset points", ha="left", color="teal")
+
     # the generation cap, when the pkl recorded it: a khaki trace that ends here
     # was truncated by the budget, not by anything the run decided
     cap = cfg.get("MAX_TOK_TRACE")
