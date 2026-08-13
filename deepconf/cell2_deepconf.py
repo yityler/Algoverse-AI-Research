@@ -110,10 +110,12 @@ class Trace:
     def min_conf(self):
         return min(self.confs) if self.confs else 0.0
 
-def fly_stream(t):
+def fly_stream(t, prompt_text, max_toks):
     # one streamed request: every token arrives with its top-20 logprobs, the
-    # window mean is reported per token, the kill switch closes the stream
-    body = {"model": MODEL, "prompt": PROMPT, "max_tokens": MAX_TOK_TRACE,
+    # window mean is reported per token, the kill switch closes the stream.
+    # the prompt and the budget are arguments so a retry can pick up from what
+    # the trace already generated instead of paying for the trace twice
+    body = {"model": MODEL, "prompt": prompt_text, "max_tokens": int(max_toks),
             "temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K,
             "logprobs": LOGPROBS, "stream": True}
     try:
@@ -151,7 +153,8 @@ def launch(t):
     t.kill = threading.Event()
     t.pending = False
     inflight.add(t.id)
-    executor.submit(fly_stream, t)
+    budget = MAX_TOK_TRACE - t.toks_gen        # a first launch spends nothing yet
+    executor.submit(fly_stream, t, PROMPT + t.gen_text, max(budget, 1))
 
 def land(t, fin):
     ans = extract_answer(t.gen_text) if fin == "stop" else None
