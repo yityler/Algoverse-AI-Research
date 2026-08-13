@@ -161,9 +161,9 @@ def draw_timeline(fname):
     # the vote bar, on the questions that reached it: once wave 1 has departed,
     # a wave-1 path below this line no longer votes. Absent where the run closed
     # before wave 1 was done, so nothing is drawn there.
-    # a run that closes before wave 1 has departed freezes a bar that never
-    # judges anything; drawing it there implied work it did not do
-    vbar = cfg.get("vote_bar") if cfg.get("vote_bar_used") else None
+    # present only on runs whose wave 1 actually ran itself out; a run that
+    # closed early and drained wave 1 never has one
+    vbar = cfg.get("vote_bar")
     if vbar is not None:
         ax.axhline(vbar, color="darkcyan", ls="-.", lw=2.6, zorder=7,
                    label=f"vote bar (wave 1 must clear it to vote, top {keep}%)")

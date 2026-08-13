@@ -204,7 +204,11 @@ def freeze_vote_bar():
     global vote_bar
     if vote_bar is not None:
         return
-    if any(t.status == "running" for t in traces if t.id < SEATS):
+    # "departed" has to mean the path ended on its own terms. A run that closes
+    # on 3 finishers drains the rest of wave 1, and a drained path never reached
+    # its own worst moment — calibrating on it would invent a bar out of paths
+    # that were cut off mid-thought.
+    if any(t.status in ("running", "abandoned") for t in traces if t.id < SEATS):
         return
     mins = [min(t.confs) for t in traces if t.id < SEATS and t.confs]
     if mins:
@@ -213,12 +217,10 @@ def freeze_vote_bar():
               f"(keep top {BAR_KEEP_TOP}% of {len(mins)} wave-1 minima)")
 
 def consensus_check():
-    global vote_bar_used
     piles = {}
     for t in traces:
         if t.status == "finished" and t.answer is not None and t.confs:
             if vote_bar is not None and t.id < SEATS and min(t.confs) < vote_bar:
-                vote_bar_used = True          # it really did take a ballot away
                 continue                      # wave-1 path below the vote bar
             piles[t.answer] = piles.get(t.answer, 0.0) + min(t.confs)
     if not piles: return None, 0.0
@@ -420,10 +422,6 @@ for QID in QIDS:
     launched  = SEATS
     bar       = None             # armed by update_bar() at BAR_MIN_CALIBRATORS finishers
     vote_bar  = None             # frozen once wave 1 has departed; filters who votes
-    vote_bar_used = False        # did it ever actually remove a ballot? a run that
-                                 # closes before wave 1 departs freezes a bar that
-                                 # never judges anything, and the figure should not
-                                 # draw a line that did no work
     LINE_HISTORY = []            # game tape: the bar at every update, for the figure
     t_start   = time.time()
     events    = queue.Queue()    # (trace, payload|None, error|None) from worker threads
@@ -655,8 +653,7 @@ for QID in QIDS:
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar,
-                                "vote_bar": vote_bar,
-                                "vote_bar_used": vote_bar_used},
+                                "vote_bar": vote_bar},
                      "voting": voting_results, "tokens": total_tokens,
                      "time_s": round(time.time() - t_start, 2),
                      "probe_tokens": probe_tokens,
