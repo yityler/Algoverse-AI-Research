@@ -122,9 +122,9 @@ def draw_timeline(fname):
                     label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
             end_marker(t, x[-1], confs[-1], "crimson")
         elif t["status"] == "finished":
-            ax.plot(xs, ys, color="lightcoral", lw=lw, alpha=al,
+            ax.plot(xs, ys, color="mediumpurple", lw=lw, alpha=al,
                     label=label_once("other wrong answers"))
-            end_marker(t, x[-1], confs[-1], "lightcoral")
+            end_marker(t, x[-1], confs[-1], "mediumpurple")
         elif t["status"] == "abandoned":           # drained when the run closed
             ax.plot(xs, ys, color="royalblue", lw=lw_dot, ls=":", alpha=al,
                     label=label_once("drained (run closed early)"))
@@ -189,7 +189,8 @@ def draw_timeline(fname):
                     ha="right", color="darkgoldenrod", fontsize=9)
 
     probe_every = cfg.get("PROBE_EVERY")
-    sub = (f"bar cuts instantly; wave 1 is bar-free only until it arms | "
+    sub = (f"wave 1: {cfg.get('SEATS', 0)} opening paths (thin) -> replacements take "
+           f"freed seats (thick), bar cuts instantly | "
            f"probes every {probe_every} tokens, graduate at {cfg.get('GRAD_CONF')} | "
            f"close: landslide {cfg.get('CONSENSUS', 0):.0%} or certificate"
            if probe_every else
@@ -206,10 +207,10 @@ def draw_timeline(fname):
     # the group key: neutral grey, because here it is the WEIGHT that means
     # something, not the colour
     if "__w1__" in seen_labels:
-        handles.append(Line2D([], [], color="0.35", lw=1.1, alpha=0.55))
+        handles.append(Line2D([], [], color="black", lw=1.1, alpha=0.55))
         labels.append(f"wave 1: the {cfg.get('SEATS', 0)} opening paths (thin)")
     if "__rep__" in seen_labels:
-        handles.append(Line2D([], [], color="0.35", lw=2.1, alpha=0.9))
+        handles.append(Line2D([], [], color="black", lw=2.1, alpha=0.9))
         labels.append("replacement: took a freed seat later (thick)")
     if "__loop__" in seen_labels:
         handles.append(Line2D([], [], color="dimgray", lw=1.2, marker="^",

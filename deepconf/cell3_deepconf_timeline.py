@@ -91,9 +91,9 @@ def draw_timeline(fname):
                     label=label_once(f"wrong majority = {wrong_majority} (n={n_wmaj})"))
             ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
         elif t["status"] == "finished":
-            ax.plot(xs, ys, color="lightcoral", lw=lw, alpha=al,
+            ax.plot(xs, ys, color="mediumpurple", lw=lw, alpha=al,
                     label=label_once("other wrong answers"))
-            ax.plot(x[-1], confs[-1], "o", color="lightcoral", ms=5)
+            ax.plot(x[-1], confs[-1], "o", color="mediumpurple", ms=5)
         elif t["status"] == "abandoned":           # drained when consensus closed the run
             ax.plot(xs, ys, color="steelblue", lw=lw_dot, ls=":", alpha=al,
                     label=label_once("drained (consensus stop)"))
@@ -126,11 +126,11 @@ def draw_timeline(fname):
     # something, not the colour
     handles, labels = ax.get_legend_handles_labels()
     if "__warm__" in seen_labels:
-        handles.append(Line2D([], [], color="0.35", lw=1.1, alpha=0.55))
+        handles.append(Line2D([], [], color="black", lw=1.1, alpha=0.55))
         labels.append(f"warmup: the {cfg.get('WARMUP_TRACES', '?')} opening traces, "
                       f"never cut (thin)")
     if "__online__" in seen_labels:
-        handles.append(Line2D([], [], color="0.35", lw=2.1, alpha=0.9))
+        handles.append(Line2D([], [], color="black", lw=2.1, alpha=0.9))
         labels.append("online wave: judged at the bar (thick)")
     else:
         handles.append(Line2D([], [], ls="none"))
