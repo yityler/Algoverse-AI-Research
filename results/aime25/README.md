@@ -15,34 +15,41 @@ Time = generation wall-clock on 2x H200 SXM, excludes server startup.
 The four wrong answers (Q13, Q14, Q27, Q29) cost 4.82M tokens, 41% of the run,
 so a correct answer averages 263K tokens and a wrong one averages 1.20M.
 
-## If the run stopped after k traces finished
+## If a capped-out trace were not replaced
 
-What the run would have scored if it closed the moment the k-th trace finished
-and voted with those k, instead of running on to the landslide, the certificate
-or the 32-trace budget. Everything still in flight at that point stops
-generating, which is where the tokens are saved.
+When a trace hits the 64k cap its seat is refilled with a fresh one. But a trace
+that ran out of budget is saying this question needs more than the cap, so the
+replacement is being asked to do the thing that just failed.
 
-Replayed from the saved traces, so the generation itself is unchanged. Only the
-point at which the run would have closed moves.
+Not refilling in that case costs nothing:
 
-| k | Acc | Voter token | Est. total | vs full run |
-|---|---|---|---|---|
-| 3 | 24/30 (80%) | 1.47M | 3.67M | 31% |
-| 4 | 25/30 (83%) | 1.78M | 4.44M | 38% |
-| **8** | **26/30 (87%)** | **3.01M** | **7.52M** | **64%** |
-| 10 | 26/30 (87%) | 3.51M | 8.78M | 75% |
-| all (32) | 26/30 (87%) | 4.66M | 11.66M | 100% |
+| | as run | with the rule |
+|---|---|---|
+| accuracy | 26/30 | 26/30 |
+| tokens | 11,661,831 | 11,033,776 |
 
-Accuracy saturates at k=8: every vote after the eighth changed nothing, so
-stopping there costs about 36% fewer tokens at the same 26/30.
+5.4% fewer tokens for the same answers. Only three questions move at all:
 
-Voter token counts only the traces that voted. Those were 40% of everything the
-run generated, the rest going to traces that were cut, truncated or drained, so
-est. total scales the voter figure by that share. It is an estimate, not a
-measurement: the in-flight spend of a run that actually stopped at k was never
-observed.
+| Q | as run | with the rule | |
+|---|---|---|---|
+| 13 | 1,791,527 | 1,322,859 | -26% |
+| 27 | 1,538,774 | 1,429,064 | -7% |
+| 12 | 920,401 | 870,724 | -5% |
 
-k=8 is read off these 30 questions and has not been checked on a held-out set.
+On the other 27 nothing changes, because a trace that finishes, or is cut early,
+still gets replaced as normal. The traces this removes are ones that almost never
+voted: of the nine dropped on Q13, one finished, and it was not the winner.
+
+The change is one condition at the seat-refill site in cell2_run.py:
+
+```python
+if not run_over and launched < MAX_TRACES and t.status != "truncated":
+```
+
+Replayed from the saved traces, so this is a recount rather than a rerun. Not
+launching those traces would also change the bar's calibration and when consensus
+fires, so the exact figures would move. The direction would not: they are traces
+that overwhelmingly never cast a ballot.
 
 ## Confidence timelines
 
