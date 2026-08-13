@@ -69,11 +69,11 @@ self-calibrating bar from armed to final.
 
 ![Q11](timelines/q11_peerconf_confidence_timeline.png)
 
-### Q12  ground truth 204, correct, 920K tokens
+### Q12  ground truth 204, correct, 911K tokens
 
 ![Q12](timelines/q12_peerconf_confidence_timeline.png)
 
-### Q13  ground truth 60, WRONG, answered 71, 1792K tokens
+### Q13  ground truth 60, WRONG, answered 71, 1032K tokens
 
 ![Q13](timelines/q13_peerconf_confidence_timeline.png)
 
@@ -129,7 +129,7 @@ self-calibrating bar from armed to final.
 
 ![Q26](timelines/q26_peerconf_confidence_timeline.png)
 
-### Q27  ground truth 248, WRONG, answered 0, 1539K tokens
+### Q27  ground truth 248, WRONG, answered 208, 1031K tokens
 
 ![Q27](timelines/q27_peerconf_confidence_timeline.png)
 

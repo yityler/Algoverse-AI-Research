@@ -4,7 +4,7 @@
 # levels. One figure per question. Pick which questions with QIDS below.
 # Green = finished correct, red = the wrong majority, light red = other wrong
 # answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
-# steel dotted = drained when the run closed. Stars = graduated by a commitment
+# blue dotted = drained when the run closed. Stars = graduated by a commitment
 # probe; triangles = loop-guard harvests; small black dots along a trace mark
 # where each graduation probe fired.
 import os, re, pickle
@@ -107,13 +107,13 @@ def draw_timeline(fname):
                     label=label_once("other wrong answers"))
             end_marker(t, x[-1], confs[-1], "lightcoral")
         elif t["status"] == "abandoned":           # drained when the run closed
-            ax.plot(xs, ys, color="steelblue", lw=1.1, ls=":", alpha=0.8,
+            ax.plot(xs, ys, color="royalblue", lw=1.4, ls=":", alpha=0.95,
                     label=label_once("drained (run closed early)"))
-            ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
+            ax.plot(x[-1], confs[-1], "s", color="royalblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
-            ax.plot(xs, ys, color="darkkhaki", lw=1.2, ls="--", alpha=0.9,
+            ax.plot(xs, ys, color="darkgoldenrod", lw=1.4, ls="--", alpha=0.95,
                     label=label_once("no answer (truncated)"))
-            ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
+            ax.plot(x[-1], confs[-1], "o", color="darkgoldenrod", ms=4)
 
     # the self-calibrating bar: armed level and final level, with the drift band.
     # (new pkls: line_history = bar updates; old pkls: the live line — the
@@ -164,10 +164,10 @@ def draw_timeline(fname):
     # was truncated by the budget, not by anything the run decided
     cap = cfg.get("MAX_TOK_TRACE")
     if cap and any(len(t["confs"]) + WINDOW >= cap * 0.98 for t in r["traces"] if t["confs"]):
-        ax.axvline(cap, color="darkkhaki", ls=":", lw=1.2, alpha=0.8)
+        ax.axvline(cap, color="darkgoldenrod", ls=":", lw=1.2, alpha=0.8)
         ax.annotate(f"cap {cap:,}", xy=(cap, 1.0), xycoords=("data", "axes fraction"),
                     xytext=(-4, -12), textcoords="offset points",
-                    ha="right", color="darkkhaki", fontsize=9)
+                    ha="right", color="darkgoldenrod", fontsize=9)
 
     probe_every = cfg.get("PROBE_EVERY")
     sub = (f"bar cuts replacements instantly; wave 1 runs bar-free | "
