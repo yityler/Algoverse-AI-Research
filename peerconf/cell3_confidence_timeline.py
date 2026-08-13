@@ -90,7 +90,14 @@ def draw_timeline(fname):
                 ax.plot(at, confs[at - WINDOW], ".", color="black", ms=2.5, alpha=0.45,
                         label=label_once("graduation probe fired"))
 
-        if t["status"] == "stopped":               # cut at the bar
+        if t["status"] == "stopped" and t.get("looped"):
+            # the loop guard, not the bar: it ends a repeating trace whatever
+            # its confidence, so these can land well above the line
+            ax.plot(xs, ys, color="dimgray", lw=1.2, alpha=0.8,
+                    label=label_once("ended by the loop guard"))
+            ax.plot(x[-1], confs[-1], "^", color="black", ms=10, mew=1.0,
+                    mfc="none")
+        elif t["status"] == "stopped":             # cut at the bar
             ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7,
                     label=label_once("cut at the bar"))
             ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
