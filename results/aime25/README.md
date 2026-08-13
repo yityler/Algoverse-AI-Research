@@ -6,10 +6,10 @@ peerconf-low and deepconf-low on all 30 questions, matched settings.
 
 | Method | Model | Dataset | Token | Acc | Mean token/Q |
 |---|---|---|---|---|---|
-| PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.39M | 86.7% | 346K |
+| PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.34M | 86.7% | 345K |
 | DeepConf-low | DeepSeek-8B | AIME25 (Q0-29) | 13.38M | 83.3% | 446K |
 
-PeerConf spends 22.4% fewer tokens and answers one more question.
+PeerConf spends 22.8% fewer tokens and answers one more question.
 Accuracy is the min-window-weighted vote in both arms; the table below breaks
 it out by voting method.
 
@@ -32,8 +32,8 @@ Both arms on 2x H200 SXM, same model, same cap, same tau.
 | 9 | 81 | yes | yes | 712,392 | 631,868 | -12.7% |
 | 10 | 259 | yes | yes | 395,890 | 625,232 | 36.7% |
 | 11 | 510 | yes | yes | 329,661 | 566,452 | 41.8% |
-| 12 | 204 | yes | no (`\dfrac{487}{3}`) | 911,146 | 855,213 | -6.5% |
-| 13 | 60 | no (`71`) | no (`62`) | 1,032,306 | 914,889 | -12.8% |
+| 12 | 204 | yes | no (`\dfrac{487}{3}`) | 887,532 | 855,213 | -3.8% |
+| 13 | 60 | no (`71`) | no (`62`) | 1,029,879 | 914,889 | -12.6% |
 | 14 | 735 | no (`147`) | no (`969`) | 981,134 | 1,026,611 | 4.4% |
 | 15 | 468 | yes | yes | 65,764 | 101,064 | 34.9% |
 | 16 | 49 | yes | yes | 65,763 | 133,441 | 50.7% |
@@ -47,15 +47,15 @@ Both arms on 2x H200 SXM, same model, same cap, same tau.
 | 24 | 907 | yes | yes | 264,303 | 398,336 | 33.6% |
 | 25 | 113 | yes | yes | 263,141 | 389,264 | 32.4% |
 | 26 | 19 | yes | yes | 264,011 | 381,898 | 30.9% |
-| 27 | 248 | no (`208`) | no (`208`) | 1,031,124 | 869,331 | -18.6% |
+| 27 | 248 | no (`208`) | no (`208`) | 1,006,837 | 869,331 | -15.8% |
 | 28 | 104 | yes | yes | 197,950 | 461,639 | 57.1% |
 | 29 | 240 | no (`188`) | no (`188`) | 503,917 | 712,347 | 29.3% |
-| **overall** | | **26/30** | **25/30** | **10,385,705** | **13,382,853** | **22.4%** |
+| **overall** | | **26/30** | **25/30** | **10,335,377** | **13,382,853** | **22.8%** |
 
 Saving is PeerConf against DeepConf on that question; a negative number means
 PeerConf spent more. PeerConf is cheaper on 23 of the 30.
 
-Traces actually generated: PeerConf 22.4 per question, DeepConf 17.6.
+Traces actually generated: PeerConf 21.9 per question, DeepConf 17.6.
 DeepConf closes on its warmup wave alone on 27 of the 30 questions, because
 the traces clearing its frozen bar agree and the run stops before the online
 wave launches.
@@ -199,7 +199,7 @@ DeepConf: correct, 566K tokens
 
 ### Q12  ground truth 204
 
-PeerConf: correct, 911K tokens
+PeerConf: correct, 888K tokens
 
 ![Q12 peerconf](timelines/q12_peerconf_confidence_timeline.png)
 
@@ -209,7 +209,7 @@ DeepConf: WRONG, answered `\dfrac{487}{3}`, 855K tokens
 
 ### Q13  ground truth 60
 
-PeerConf: WRONG, answered `71`, 1,032K tokens
+PeerConf: WRONG, answered `71`, 1,030K tokens
 
 ![Q13 peerconf](timelines/q13_peerconf_confidence_timeline.png)
 
@@ -349,7 +349,7 @@ DeepConf: correct, 382K tokens
 
 ### Q27  ground truth 248
 
-PeerConf: WRONG, answered `208`, 1,031K tokens
+PeerConf: WRONG, answered `208`, 1,007K tokens
 
 ![Q27 peerconf](timelines/q27_peerconf_confidence_timeline.png)
 
