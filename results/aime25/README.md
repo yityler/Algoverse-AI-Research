@@ -1,142 +1,379 @@
 # AIME25
 
-peerconf-low on all 30 questions. deepconf coming soon.
+peerconf-low and deepconf-low on all 30 questions, matched settings.
 
 ## Results
 
-| Model | Dataset | Token | Time | Acc | Mean token/Q |
+| Method | Model | Dataset | Token | Acc | Mean token/Q |
 |---|---|---|---|---|---|
-| DeepSeek-8B | AIME25 (Q0-29) | 10.39M | 125 min | 86.7% | 346K |
-| | correct subset (26 Q) | 6.84M | 72 min | 100% | 263K |
+| PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.39M | 86.7% | 346K |
+| DeepConf-low | DeepSeek-8B | AIME25 (Q0-29) | 13.38M | 83.3% | 446K |
+
+PeerConf spends 22.4% fewer tokens and answers one more question.
+Accuracy is the min-window-weighted vote in both arms; the table below breaks
+it out by voting method.
 
 Budget 32 traces/question, 16 seats, 64k-token cap, one run per question.
-Time = generation wall-clock on 2x H200 SXM, excludes server startup.
+Both arms on 2x H200 SXM, same model, same cap, same tau.
 
-The four wrong answers (Q13, Q14, Q27, Q29) cost 3.55M tokens, 34% of the run,
-so a correct answer averages 263K tokens and a wrong one averages 887K.
+## Per question
+
+| Q | GT | PeerConf | DeepConf | PeerConf tokens | DeepConf tokens | Saving |
+|---|---|---|---|---|---|---|
+| 0 | 70 | yes | yes | 65,701 | 134,219 | 51.0% |
+| 1 | 588 | yes | yes | 131,982 | 270,972 | 51.3% |
+| 2 | 16 | yes | yes | 66,155 | 217,393 | 69.6% |
+| 3 | 117 | yes | yes | 66,186 | 267,945 | 75.3% |
+| 4 | 279 | yes | yes | 132,026 | 278,220 | 52.5% |
+| 5 | 504 | yes | yes | 65,816 | 127,427 | 48.4% |
+| 6 | 821 | yes | yes | 491,089 | 403,087 | -21.8% |
+| 7 | 77 | yes | yes | 65,753 | 264,284 | 75.1% |
+| 8 | 62 | yes | yes | 197,347 | 626,990 | 68.5% |
+| 9 | 81 | yes | yes | 712,392 | 631,868 | -12.7% |
+| 10 | 259 | yes | yes | 395,890 | 625,232 | 36.7% |
+| 11 | 510 | yes | yes | 329,661 | 566,452 | 41.8% |
+| 12 | 204 | yes | no (`\dfrac{487}{3}`) | 911,146 | 855,213 | -6.5% |
+| 13 | 60 | no (`71`) | no (`62`) | 1,032,306 | 914,889 | -12.8% |
+| 14 | 735 | no (`147`) | no (`969`) | 981,134 | 1,026,611 | 4.4% |
+| 15 | 468 | yes | yes | 65,764 | 101,064 | 34.9% |
+| 16 | 49 | yes | yes | 65,763 | 133,441 | 50.7% |
+| 17 | 82 | yes | yes | 197,704 | 334,852 | 41.0% |
+| 18 | 106 | yes | yes | 131,589 | 261,538 | 49.7% |
+| 19 | 336 | yes | yes | 593,156 | 499,008 | -18.9% |
+| 20 | 293 | yes | yes | 131,581 | 272,913 | 51.8% |
+| 21 | 237 | yes | yes | 324,269 | 262,437 | -23.6% |
+| 22 | 610 | yes | yes | 508,958 | 598,569 | 15.0% |
+| 23 | 149 | yes | yes | 197,891 | 495,414 | 60.1% |
+| 24 | 907 | yes | yes | 264,303 | 398,336 | 33.6% |
+| 25 | 113 | yes | yes | 263,141 | 389,264 | 32.4% |
+| 26 | 19 | yes | yes | 264,011 | 381,898 | 30.9% |
+| 27 | 248 | no (`208`) | no (`208`) | 1,031,124 | 869,331 | -18.6% |
+| 28 | 104 | yes | yes | 197,950 | 461,639 | 57.1% |
+| 29 | 240 | no (`188`) | no (`188`) | 503,917 | 712,347 | 29.3% |
+| **overall** | | **26/30** | **25/30** | **10,385,705** | **13,382,853** | **22.4%** |
+
+Saving is PeerConf against DeepConf on that question; a negative number means
+PeerConf spent more. PeerConf is cheaper on 23 of the 30.
+
+Traces actually generated: PeerConf 22.4 per question, DeepConf 17.6.
+DeepConf closes on its warmup wave alone on 27 of the 30 questions, because
+the traces clearing its frozen bar agree and the run stops before the online
+wave launches.
+
+## Accuracy by voting method
+
+| Method | PeerConf | DeepConf |
+|---|---|---|
+| majority | 26/30 | 25/30 |
+| mean_confidence_weighted | 26/30 | 25/30 |
+| tail_confidence_weighted | 26/30 | 25/30 |
+| bottom_window_weighted | 26/30 | 25/30 |
+| min_window_weighted | 26/30 | 25/30 |
+| top10_tail_filtered | 25/30 | 25/30 |
+| top10_bottom_window_filtered | 23/30 | 25/30 |
 
 ## Confidence timelines
 
-One figure per question. Each line is a trace's sliding-window confidence
-over its own life, coloured by how it ended. The blue band is the
-self-calibrating bar from armed to final.
+Two figures per question, PeerConf then DeepConf. Each line is a trace's
+sliding-window confidence over its own life, coloured by how it ended.
 
-### Q0  ground truth 70, correct, 66K tokens
+### Q0  ground truth 70
 
-![Q0](timelines/q00_peerconf_confidence_timeline.png)
+PeerConf: correct, 66K tokens
 
-### Q1  ground truth 588, correct, 132K tokens
+![Q0 peerconf](timelines/q00_peerconf_confidence_timeline.png)
 
-![Q1](timelines/q01_peerconf_confidence_timeline.png)
+DeepConf: correct, 134K tokens
 
-### Q2  ground truth 16, correct, 66K tokens
+![Q0 deepconf](timelines/q00_deepconf_confidence_timeline.png)
 
-![Q2](timelines/q02_peerconf_confidence_timeline.png)
+### Q1  ground truth 588
 
-### Q3  ground truth 117, correct, 66K tokens
+PeerConf: correct, 132K tokens
 
-![Q3](timelines/q03_peerconf_confidence_timeline.png)
+![Q1 peerconf](timelines/q01_peerconf_confidence_timeline.png)
 
-### Q4  ground truth 279, correct, 132K tokens
+DeepConf: correct, 271K tokens
 
-![Q4](timelines/q04_peerconf_confidence_timeline.png)
+![Q1 deepconf](timelines/q01_deepconf_confidence_timeline.png)
 
-### Q5  ground truth 504, correct, 66K tokens
+### Q2  ground truth 16
 
-![Q5](timelines/q05_peerconf_confidence_timeline.png)
+PeerConf: correct, 66K tokens
 
-### Q6  ground truth 821, correct, 491K tokens
+![Q2 peerconf](timelines/q02_peerconf_confidence_timeline.png)
 
-![Q6](timelines/q06_peerconf_confidence_timeline.png)
+DeepConf: correct, 217K tokens
 
-### Q7  ground truth 77, correct, 66K tokens
+![Q2 deepconf](timelines/q02_deepconf_confidence_timeline.png)
 
-![Q7](timelines/q07_peerconf_confidence_timeline.png)
+### Q3  ground truth 117
 
-### Q8  ground truth 62, correct, 197K tokens
+PeerConf: correct, 66K tokens
 
-![Q8](timelines/q08_peerconf_confidence_timeline.png)
+![Q3 peerconf](timelines/q03_peerconf_confidence_timeline.png)
 
-### Q9  ground truth 81, correct, 712K tokens
+DeepConf: correct, 268K tokens
 
-![Q9](timelines/q09_peerconf_confidence_timeline.png)
+![Q3 deepconf](timelines/q03_deepconf_confidence_timeline.png)
 
-### Q10  ground truth 259, correct, 396K tokens
+### Q4  ground truth 279
 
-![Q10](timelines/q10_peerconf_confidence_timeline.png)
+PeerConf: correct, 132K tokens
 
-### Q11  ground truth 510, correct, 330K tokens
+![Q4 peerconf](timelines/q04_peerconf_confidence_timeline.png)
 
-![Q11](timelines/q11_peerconf_confidence_timeline.png)
+DeepConf: correct, 278K tokens
 
-### Q12  ground truth 204, correct, 911K tokens
+![Q4 deepconf](timelines/q04_deepconf_confidence_timeline.png)
 
-![Q12](timelines/q12_peerconf_confidence_timeline.png)
+### Q5  ground truth 504
 
-### Q13  ground truth 60, WRONG, answered 71, 1032K tokens
+PeerConf: correct, 66K tokens
 
-![Q13](timelines/q13_peerconf_confidence_timeline.png)
+![Q5 peerconf](timelines/q05_peerconf_confidence_timeline.png)
 
-### Q14  ground truth 735, WRONG, answered 147, 981K tokens
+DeepConf: correct, 127K tokens
 
-![Q14](timelines/q14_peerconf_confidence_timeline.png)
+![Q5 deepconf](timelines/q05_deepconf_confidence_timeline.png)
 
-### Q15  ground truth 468, correct, 66K tokens
+### Q6  ground truth 821
 
-![Q15](timelines/q15_peerconf_confidence_timeline.png)
+PeerConf: correct, 491K tokens
 
-### Q16  ground truth 49, correct, 66K tokens
+![Q6 peerconf](timelines/q06_peerconf_confidence_timeline.png)
 
-![Q16](timelines/q16_peerconf_confidence_timeline.png)
+DeepConf: correct, 403K tokens
 
-### Q17  ground truth 82, correct, 198K tokens
+![Q6 deepconf](timelines/q06_deepconf_confidence_timeline.png)
 
-![Q17](timelines/q17_peerconf_confidence_timeline.png)
+### Q7  ground truth 77
 
-### Q18  ground truth 106, correct, 132K tokens
+PeerConf: correct, 66K tokens
 
-![Q18](timelines/q18_peerconf_confidence_timeline.png)
+![Q7 peerconf](timelines/q07_peerconf_confidence_timeline.png)
 
-### Q19  ground truth 336, correct, 593K tokens
+DeepConf: correct, 264K tokens
 
-![Q19](timelines/q19_peerconf_confidence_timeline.png)
+![Q7 deepconf](timelines/q07_deepconf_confidence_timeline.png)
 
-### Q20  ground truth 293, correct, 132K tokens
+### Q8  ground truth 62
 
-![Q20](timelines/q20_peerconf_confidence_timeline.png)
+PeerConf: correct, 197K tokens
 
-### Q21  ground truth 237, correct, 324K tokens
+![Q8 peerconf](timelines/q08_peerconf_confidence_timeline.png)
 
-![Q21](timelines/q21_peerconf_confidence_timeline.png)
+DeepConf: correct, 627K tokens
 
-### Q22  ground truth 610, correct, 509K tokens
+![Q8 deepconf](timelines/q08_deepconf_confidence_timeline.png)
 
-![Q22](timelines/q22_peerconf_confidence_timeline.png)
+### Q9  ground truth 81
 
-### Q23  ground truth 149, correct, 198K tokens
+PeerConf: correct, 712K tokens
 
-![Q23](timelines/q23_peerconf_confidence_timeline.png)
+![Q9 peerconf](timelines/q09_peerconf_confidence_timeline.png)
 
-### Q24  ground truth 907, correct, 264K tokens
+DeepConf: correct, 632K tokens
 
-![Q24](timelines/q24_peerconf_confidence_timeline.png)
+![Q9 deepconf](timelines/q09_deepconf_confidence_timeline.png)
 
-### Q25  ground truth 113, correct, 263K tokens
+### Q10  ground truth 259
 
-![Q25](timelines/q25_peerconf_confidence_timeline.png)
+PeerConf: correct, 396K tokens
 
-### Q26  ground truth 19, correct, 264K tokens
+![Q10 peerconf](timelines/q10_peerconf_confidence_timeline.png)
 
-![Q26](timelines/q26_peerconf_confidence_timeline.png)
+DeepConf: correct, 625K tokens
 
-### Q27  ground truth 248, WRONG, answered 208, 1031K tokens
+![Q10 deepconf](timelines/q10_deepconf_confidence_timeline.png)
 
-![Q27](timelines/q27_peerconf_confidence_timeline.png)
+### Q11  ground truth 510
 
-### Q28  ground truth 104, correct, 198K tokens
+PeerConf: correct, 330K tokens
 
-![Q28](timelines/q28_peerconf_confidence_timeline.png)
+![Q11 peerconf](timelines/q11_peerconf_confidence_timeline.png)
 
-### Q29  ground truth 240, WRONG, answered 188, 504K tokens
+DeepConf: correct, 566K tokens
 
-![Q29](timelines/q29_peerconf_confidence_timeline.png)
+![Q11 deepconf](timelines/q11_deepconf_confidence_timeline.png)
+
+### Q12  ground truth 204
+
+PeerConf: correct, 911K tokens
+
+![Q12 peerconf](timelines/q12_peerconf_confidence_timeline.png)
+
+DeepConf: WRONG, answered `\dfrac{487}{3}`, 855K tokens
+
+![Q12 deepconf](timelines/q12_deepconf_confidence_timeline.png)
+
+### Q13  ground truth 60
+
+PeerConf: WRONG, answered `71`, 1,032K tokens
+
+![Q13 peerconf](timelines/q13_peerconf_confidence_timeline.png)
+
+DeepConf: WRONG, answered `62`, 915K tokens
+
+![Q13 deepconf](timelines/q13_deepconf_confidence_timeline.png)
+
+### Q14  ground truth 735
+
+PeerConf: WRONG, answered `147`, 981K tokens
+
+![Q14 peerconf](timelines/q14_peerconf_confidence_timeline.png)
+
+DeepConf: WRONG, answered `969`, 1,027K tokens
+
+![Q14 deepconf](timelines/q14_deepconf_confidence_timeline.png)
+
+### Q15  ground truth 468
+
+PeerConf: correct, 66K tokens
+
+![Q15 peerconf](timelines/q15_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 101K tokens
+
+![Q15 deepconf](timelines/q15_deepconf_confidence_timeline.png)
+
+### Q16  ground truth 49
+
+PeerConf: correct, 66K tokens
+
+![Q16 peerconf](timelines/q16_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 133K tokens
+
+![Q16 deepconf](timelines/q16_deepconf_confidence_timeline.png)
+
+### Q17  ground truth 82
+
+PeerConf: correct, 198K tokens
+
+![Q17 peerconf](timelines/q17_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 335K tokens
+
+![Q17 deepconf](timelines/q17_deepconf_confidence_timeline.png)
+
+### Q18  ground truth 106
+
+PeerConf: correct, 132K tokens
+
+![Q18 peerconf](timelines/q18_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 262K tokens
+
+![Q18 deepconf](timelines/q18_deepconf_confidence_timeline.png)
+
+### Q19  ground truth 336
+
+PeerConf: correct, 593K tokens
+
+![Q19 peerconf](timelines/q19_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 499K tokens
+
+![Q19 deepconf](timelines/q19_deepconf_confidence_timeline.png)
+
+### Q20  ground truth 293
+
+PeerConf: correct, 132K tokens
+
+![Q20 peerconf](timelines/q20_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 273K tokens
+
+![Q20 deepconf](timelines/q20_deepconf_confidence_timeline.png)
+
+### Q21  ground truth 237
+
+PeerConf: correct, 324K tokens
+
+![Q21 peerconf](timelines/q21_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 262K tokens
+
+![Q21 deepconf](timelines/q21_deepconf_confidence_timeline.png)
+
+### Q22  ground truth 610
+
+PeerConf: correct, 509K tokens
+
+![Q22 peerconf](timelines/q22_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 599K tokens
+
+![Q22 deepconf](timelines/q22_deepconf_confidence_timeline.png)
+
+### Q23  ground truth 149
+
+PeerConf: correct, 198K tokens
+
+![Q23 peerconf](timelines/q23_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 495K tokens
+
+![Q23 deepconf](timelines/q23_deepconf_confidence_timeline.png)
+
+### Q24  ground truth 907
+
+PeerConf: correct, 264K tokens
+
+![Q24 peerconf](timelines/q24_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 398K tokens
+
+![Q24 deepconf](timelines/q24_deepconf_confidence_timeline.png)
+
+### Q25  ground truth 113
+
+PeerConf: correct, 263K tokens
+
+![Q25 peerconf](timelines/q25_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 389K tokens
+
+![Q25 deepconf](timelines/q25_deepconf_confidence_timeline.png)
+
+### Q26  ground truth 19
+
+PeerConf: correct, 264K tokens
+
+![Q26 peerconf](timelines/q26_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 382K tokens
+
+![Q26 deepconf](timelines/q26_deepconf_confidence_timeline.png)
+
+### Q27  ground truth 248
+
+PeerConf: WRONG, answered `208`, 1,031K tokens
+
+![Q27 peerconf](timelines/q27_peerconf_confidence_timeline.png)
+
+DeepConf: WRONG, answered `208`, 869K tokens
+
+![Q27 deepconf](timelines/q27_deepconf_confidence_timeline.png)
+
+### Q28  ground truth 104
+
+PeerConf: correct, 198K tokens
+
+![Q28 peerconf](timelines/q28_peerconf_confidence_timeline.png)
+
+DeepConf: correct, 462K tokens
+
+![Q28 deepconf](timelines/q28_deepconf_confidence_timeline.png)
+
+### Q29  ground truth 240
+
+PeerConf: WRONG, answered `188`, 504K tokens
+
+![Q29 peerconf](timelines/q29_peerconf_confidence_timeline.png)
+
+DeepConf: WRONG, answered `188`, 712K tokens
+
+![Q29 deepconf](timelines/q29_deepconf_confidence_timeline.png)
+
