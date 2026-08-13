@@ -61,16 +61,30 @@ def draw_timeline(fname):
         if lab in seen_labels: return None
         seen_labels.add(lab); return lab
 
+    # a wave-1 path whose worst moment fell under the vote bar still finishes and
+    # still has an answer — it just does not get to cast it. Filled marker = its
+    # ballot counted; hollow = it finished and was not counted.
+    VBAR = cfg.get("vote_bar")
+    def counted(t):
+        return not (VBAR is not None and t["id"] < cfg.get("SEATS", 0)
+                    and t["confs"] and min(t["confs"]) < VBAR)
+
     def end_marker(t, x_end, y_end, color):
-        """How the trace left the run: * graduated | ^ loop-harvested | o natural."""
+        """How the trace left the run: * graduated | ^ loop-harvested | o natural.
+        Hollow = finished but below the vote bar, so its answer was not counted."""
+        ok = counted(t)
+        if not ok:
+            seen_labels.add("__novote__")
+        style = (dict(color=color, mec="black", mew=0.5) if ok
+                 else dict(color="none", mfc="none", mec=color, mew=1.6))
         if t.get("graduated"):
-            ax.plot(x_end, y_end, "*", color=color, ms=14, mec="black", mew=0.5,
+            ax.plot(x_end, y_end, "*", ms=14, **style,
                     label=label_once("graduated (commitment probe)"))
         elif t.get("looped"):
-            ax.plot(x_end, y_end, "^", color=color, ms=9, mec="black", mew=0.5,
+            ax.plot(x_end, y_end, "^", ms=9, **style,
                     label=label_once("loop-guard harvest"))
         else:
-            ax.plot(x_end, y_end, "o", color=color, ms=5)
+            ax.plot(x_end, y_end, "o", ms=6, **style)
 
     for t in r["traces"]:
         confs = t["confs"]
@@ -206,6 +220,10 @@ def draw_timeline(fname):
     if "__rep__" in seen_labels:
         handles.append(Line2D([], [], color="black", lw=2.1, alpha=0.9))
         labels.append("replacement: took a freed seat later (thick)")
+    if "__novote__" in seen_labels:
+        handles.append(Line2D([], [], ls="none", marker="o", ms=7,
+                              mfc="none", mec="0.25", mew=1.6))
+        labels.append("finished but under the vote bar: not counted")
     if "__loop__" in seen_labels:
         handles.append(Line2D([], [], color="dimgray", lw=1.2, marker="^",
                               ms=9, mfc="none", mec="black", mew=1.0))
