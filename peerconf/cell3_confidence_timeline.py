@@ -10,6 +10,7 @@
 import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")
 
@@ -68,11 +69,11 @@ def draw_timeline(fname):
     def end_marker(t, x_end, y_end, color):
         """How the trace left the run: * graduated | ^ loop-harvested | o natural."""
         if t.get("graduated"):
-            ax.plot(x_end, y_end, "*", color=color, ms=14, mec="black", mew=0.5,
-                    label=label_once("graduated (commitment probe)"))
+            ax.plot(x_end, y_end, "*", color=color, ms=14, mec="black", mew=0.5)
+            seen_labels.add("__grad__")
         elif t.get("looped"):
-            ax.plot(x_end, y_end, "^", color=color, ms=9, mec="black", mew=0.5,
-                    label=label_once("loop-guard harvest"))
+            ax.plot(x_end, y_end, "^", color=color, ms=9, mec="black", mew=0.5)
+            seen_labels.add("__harvest__")
         else:
             ax.plot(x_end, y_end, "o", color=color, ms=5)
 
@@ -93,14 +94,14 @@ def draw_timeline(fname):
         if t["status"] == "stopped" and t.get("looped"):
             # the loop guard, not the bar: it ends a repeating trace whatever
             # its confidence, so these can land well above the line
-            ax.plot(xs, ys, color="dimgray", lw=1.2, alpha=0.8,
-                    label=label_once("ended by the loop guard"))
+            ax.plot(xs, ys, color="dimgray", lw=1.2, alpha=0.8)
             ax.plot(x[-1], confs[-1], "^", color="black", ms=10, mew=1.0,
                     mfc="none")
+            seen_labels.add("__loop__")
         elif t["status"] == "stopped":             # cut at the bar
-            ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7,
-                    label=label_once("cut at the bar"))
+            ax.plot(xs, ys, color="gray", lw=1.0, alpha=0.7)
             ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
+            seen_labels.add("__cut__")
         elif t["status"] == "finished" and is_right(t["answer"]):
             ax.plot(xs, ys, color="forestgreen", lw=1.8,
                     label=label_once(f"correct = {gt} (n={n_right})"))
@@ -190,7 +191,29 @@ def draw_timeline(fname):
         f"sliding-window confidence of all {len(r['traces'])} traces "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"{sub} | model: {cfg['MODEL']}")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=4)
+    # the end markers carry each trace's own colour, so their keys are drawn
+    # neutral: it is the shape that means something, not the fill
+    handles, labels = ax.get_legend_handles_labels()
+    if "__cut__" in seen_labels:
+        handles.append(Line2D([], [], color="gray", lw=1.0, marker="x",
+                              ms=9, mec="black", mew=2.0))
+        labels.append("cut at the bar")
+    if "__loop__" in seen_labels:
+        handles.append(Line2D([], [], color="dimgray", lw=1.2, marker="^",
+                              ms=9, mfc="none", mec="black", mew=1.0))
+        labels.append("ended by the loop guard")
+    if "__grad__" in seen_labels:
+        handles.append(Line2D([], [], ls="none", marker="*", ms=13, mfc="0.85",
+                              mec="black", mew=0.6))
+        labels.append("graduated (commitment probe), star in the trace's colour")
+    if "__harvest__" in seen_labels:
+        handles.append(Line2D([], [], ls="none", marker="^", ms=9, mfc="0.85",
+                              mec="black", mew=0.6))
+        labels.append("loop-guard harvest")
+    handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="0.85",
+                          mec="0.4", mew=0.6))
+    labels.append("ended on its own")
+    ax.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=4)
     ax.grid(alpha=0.25)
     fig.tight_layout()
 
