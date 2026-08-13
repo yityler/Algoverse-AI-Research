@@ -6,54 +6,14 @@ peerconf-low on all 30 questions. deepconf coming soon.
 
 | Model | Dataset | Token | Time | Acc | Mean token/Q |
 |---|---|---|---|---|---|
-| DeepSeek-8B | AIME25 (Q0-29) | 11.66M | 145 min | 86.7% | 389K |
-| | correct subset (26 Q) | 6.85M | 72 min | 100% | 263K |
-| | with the voting filter | 10.39M | - | 86.7% | 346K |
+| DeepSeek-8B | AIME25 (Q0-29) | 10.39M | 125 min | 86.7% | 346K |
+| | correct subset (26 Q) | 6.84M | 72 min | 100% | 263K |
 
 Budget 32 traces/question, 16 seats, 64k-token cap, one run per question.
 Time = generation wall-clock on 2x H200 SXM, excludes server startup.
 
-The four wrong answers (Q13, Q14, Q27, Q29) cost 4.82M tokens, 41% of the run,
-so a correct answer averages 263K tokens and a wrong one averages 1.20M.
-
-## The voting filter
-
-DeepConf does not vote with every finisher. Once its 16 warmup traces have
-departed it freezes a bar at the top 10% of their minima, and a warmup trace
-below that bar does not get to vote. Traces launched afterwards vote unfiltered.
-Our run applied the same top 10% only to cutting, never to voting, so every
-finisher had a ballot. This is not a new rule, it is the baseline's own voting
-scheme that we had left out.
-
-Adding it, computed from the saved traces:
-
-| | as run | with the filter |
-|---|---|---|
-| accuracy | 26/30 | 26/30 |
-| tokens | 11,661,831 | 10,385,293 |
-
-10.9% fewer tokens for the same answers. Three questions move:
-
-| Q | as run | with the filter | |
-|---|---|---|---|
-| 13 | 1,791,527 | 1,032,306 | -42% |
-| 27 | 1,538,774 | 1,031,124 | -33% |
-| 12 | 920,401 | 911,146 | -1% |
-
-The other 27 never set a vote bar at all, because they close on three unanimous
-finishers before wave 1 has finished departing. Only Q27 changes its answer, from
-0 to 208, and both are wrong.
-
-Spend at the close is computed rather than estimated. Traces decode at the same
-rate under continuous batching, so elapsed time can be measured in tokens: a
-wave-1 path departs at its own token count, and a replacement departs at the time
-its predecessor left plus its own. The departure order this produces matches
-run.log on 26 of 28 questions.
-
-One property worth stating. At budget 32 the filter keeps one or two traces out
-of sixteen, so these three questions close on a single voter. DeepConf reports
-eta=10 at K=512, where the same rule retains about 51 traces. The mechanism is
-identical; the sample it acts on is not.
+The four wrong answers (Q13, Q14, Q27, Q29) cost 3.55M tokens, 34% of the run,
+so a correct answer averages 263K tokens and a wrong one averages 887K.
 
 ## Confidence timelines
 

@@ -144,15 +144,10 @@ def draw_timeline(fname):
                     xycoords=("axes fraction", "data"), xytext=(-8, dy_last),
                     textcoords="offset points", ha="right", color=FINAL)
 
-    # the vote bar: DeepConf's top-eta% filter. Once wave 1 has departed, only a
-    # wave-1 path whose lifetime low clears this line may vote. Replacements vote
-    # regardless. Older pkls predate the field, so derive it from wave 1's minima.
-    seats = cfg.get("SEATS")
+    # the vote bar, on the questions that reached it: once wave 1 has departed,
+    # a wave-1 path below this line no longer votes. Absent where the run closed
+    # before wave 1 was done, so nothing is drawn there.
     vbar = cfg.get("vote_bar")
-    if vbar is None and seats and keep:
-        w1 = [min(t["confs"]) for t in r["traces"] if t["id"] < seats and t["confs"]]
-        if w1:
-            vbar = float(np.percentile(w1, 100 - keep))
     if vbar is not None:
         ax.axhline(vbar, color="teal", ls="-.", lw=1.6,
                    label=f"vote bar (wave 1 must clear it to vote, top {keep}%)")
