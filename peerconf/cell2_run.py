@@ -535,7 +535,10 @@ for QID in QIDS:
                         x.kill.set()
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
                       f"(margin exceeds all {len(live_ids)} outstanding) — run over")
-        if not run_over and launched < MAX_TRACES:
+        # a trace that hit the cap is saying this question needs more room than
+        # the budget allows, so a replacement is asked to do what just failed:
+        # let the seat stay empty instead
+        if not run_over and launched < MAX_TRACES and t.status != "truncated":
             nt = Trace(launched); traces.append(nt)
             print(f"Trace {launched}: seated (replacing {t.id})"
                   + (f" | bar {bar:.3f}" if bar is not None else " | bar unarmed"))
