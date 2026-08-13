@@ -17,10 +17,15 @@ Budget 32 traces/question, 16 seats, 64k-token cap, one run per question.
 Both arms on 2x H200 SXM, same model, same cap, same tau.
 
 Average length of a path:
+
 PeerConf - 16,388 tokens
+
 DeepConf - 25,356 tokens
+
 Average length of a path that finsihed with an asnwer:
+
 w/ graduation - 16,603
+
 w/o graduation - 27,741
 
 
