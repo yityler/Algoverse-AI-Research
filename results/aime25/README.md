@@ -18,15 +18,15 @@ Both arms on 2x H200 SXM, same model, same cap, same tau.
 
 Average length of a path:
 
-PeerConf - 16,388 tokens
+PeerConf - 16,458 tokens (including probe tokens)
 
 DeepConf - 25,356 tokens
 
 Average length of a path that finsihed with an asnwer:
 
-w/ graduation - 16,603
+w/ graduation - 16,668 (including probe tokens)
 
-w/o graduation - 27,741
+w/o graduation - 27,763 (including probe tokens)
 
 
 ## Per question
