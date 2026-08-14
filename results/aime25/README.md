@@ -141,12 +141,10 @@ The end-of-thinking marker does far more work than the threshold. At GRAD_CONF
 is right 43.5%. Turning the marker off and raising the threshold instead never
 catches up, reaching only 80.4% even at 0.999.
 
-A probe is either sure or wrong, with very little in between. Below 0.95, only 22
-of 1,914 probes had the right answer, about 1%. Below 0.50, none of 1,433 did. So
-when a trace is interrupted and the model is not confident, it is not close to the
-answer either, it is guessing. This is also why the rows from 0.90 to 0.95 are
-identical: almost no probes land in that range, so moving the threshold there
-changes nothing.
+A probe is either sure or wrong, with very little in between. Below 0.90, only 14
+of 1,879 probes had the right answer, about 0.7%. Below 0.50, none of 1,433 did.
+So when a trace is interrupted and the model is not confident, it is not close to
+the answer either, it is guessing.
 
 ## Confidence timelines
 
