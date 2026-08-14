@@ -88,24 +88,25 @@ wave launches.
 ## Graduation threshold
 
 Every path that graduated on a commitment probe, scored against the ground truth,
-as GRAD_CONF varies. The end-of-thinking marker stays on throughout. "lost"
-counts paths that graduate at 0.95 but would not at this threshold.
+as GRAD_CONF varies. The end-of-thinking marker stays on throughout. The last two
+columns split the paths that graduate at 0.95 but not at this threshold, by
+whether the answer they were carrying was right or wrong.
 
 ### All questions
 
-| GRAD_CONF | graduations | correct | accuracy | lost |
-|---|---|---|---|---|
-| 0.90 | 107 | 87 | 81.3% | 0 |
-| 0.91 | 107 | 87 | 81.3% | 0 |
-| 0.92 | 107 | 87 | 81.3% | 0 |
-| 0.93 | 107 | 87 | 81.3% | 0 |
-| 0.94 | 107 | 87 | 81.3% | 0 |
-| 0.95 | 107 | 87 | 81.3% | 0 |
-| 0.96 | 106 | 87 | 82.1% | 1 |
-| 0.97 | 105 | 87 | 82.9% | 2 |
-| 0.98 | 105 | 87 | 82.9% | 2 |
-| 0.99 | 101 | 84 | 83.2% | 6 |
-| 0.995 | 98 | 84 | 85.7% | 9 |
+| GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
+|---|---|---|---|---|---|
+| 0.90 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.91 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.92 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.93 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.94 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.95 | 107 | 87 | 81.3% | 0 | 0 |
+| 0.96 | 106 | 87 | 82.1% | 1 | 0 |
+| 0.97 | 105 | 87 | 82.9% | 2 | 0 |
+| 0.98 | 105 | 87 | 82.9% | 2 | 0 |
+| 0.99 | 101 | 84 | 83.2% | 3 | 3 |
+| 0.995 | 98 | 84 | 85.7% | 6 | 3 |
 
 ### Winnable questions
 
@@ -113,34 +114,35 @@ Q13, Q14, Q27 and Q29 produced no correct graduation at any threshold. They are
 the four questions the run answers wrong, and no threshold can rescue them, so
 they are dropped here.
 
-| GRAD_CONF | graduations | correct | accuracy | lost |
-|---|---|---|---|---|
-| 0.90 | 100 | 87 | 87.0% | 0 |
-| 0.91 | 100 | 87 | 87.0% | 0 |
-| 0.92 | 100 | 87 | 87.0% | 0 |
-| 0.93 | 100 | 87 | 87.0% | 0 |
-| 0.94 | 100 | 87 | 87.0% | 0 |
-| 0.95 | 100 | 87 | 87.0% | 0 |
-| 0.96 | 100 | 87 | 87.0% | 0 |
-| 0.97 | 99 | 87 | 87.9% | 1 |
-| 0.98 | 99 | 87 | 87.9% | 1 |
-| 0.99 | 95 | 84 | 88.4% | 5 |
-| 0.995 | 93 | 84 | 90.3% | 7 |
+| GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
+|---|---|---|---|---|---|
+| 0.90 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.91 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.92 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.93 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.94 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.95 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.96 | 100 | 87 | 87.0% | 0 | 0 |
+| 0.97 | 99 | 87 | 87.9% | 1 | 0 |
+| 0.98 | 99 | 87 | 87.9% | 1 | 0 |
+| 0.99 | 95 | 84 | 88.4% | 2 | 3 |
+| 0.995 | 93 | 84 | 90.3% | 4 | 3 |
 
-Tightening the threshold never finds a new correct graduation. The correct column
-holds at 87 all the way to 0.98, then drops to 84: past 0.99 the threshold starts
-discarding correct paths along with wrong ones, and the accuracy figure rises only
-because the denominator shrinks faster than the numerator. Since the wrong
-graduations are already outvoted on every question the run answers correctly,
-none of this moves the 26/30.
+Raising the threshold never gains a correct graduation. It can only take paths
+away. Up to 0.98 the ones it takes are all wrong, which is why the correct column
+stays at 87. From 0.99 it starts taking correct ones too, and by 0.995 it has
+thrown away 3 correct graduations to remove 6 wrong ones. The accuracy percentage
+still rises, but only because it dropped more wrong than correct, not because
+anything improved. The final answer stays 26/30 at every threshold, since those
+wrong graduations were already being outvoted.
 
-The end-of-thinking marker matters far more than the threshold. Holding GRAD_CONF
-at 0.95, a probe that has reached `</think>` is right 85.3% of the time; one that
-has not is right 43.5%. Raising GRAD_CONF with the marker off never catches up:
-even at 0.999 it reaches only 80.4%.
+The end-of-thinking marker does far more work than the threshold. At GRAD_CONF
+0.95, a probe that reached `</think>` is right 85.3% of the time; one that did not
+is right 43.5%. Turning the marker off and raising the threshold instead never
+catches up, reaching only 80.4% even at 0.999.
 
-Below GRAD_CONF 0.95 a probe is almost never right. Of the 1,433 probes that came
-back under 0.50 confidence, none had the correct answer.
+Below 0.95 a probe is almost never right. 1,433 probes came back under 0.50
+confidence and not one of them carried the correct answer.
 
 ## Confidence timelines
 
