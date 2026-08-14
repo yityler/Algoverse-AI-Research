@@ -1,20 +1,22 @@
 # MATH-500 — every question, both arms
 
-All 25 questions from the WINDOW=256 run, with the original problem, the
-gold answer, what each method answered, and both confidence timelines (50 charts).
+All 25 questions from the WINDOW=256 run: the original problem, the gold answer,
+what each method answered, and both confidence timelines (50 charts).
 
 | | PeerConf | DeepConf |
 |---|---|---|
 | total tokens | 1,928,910 | 3,215,459 |
-| correct | 23/25 | 22/25 |
+| correct | 25/25 | 24/25 |
 
-**Reading the charts.** Horizontal axis is tokens generated; vertical axis is
-confidence, a rolling average over the last 256 tokens. Each line is one trace — one
-attempt at the problem. Green finished correct, red finished wrong, grey ending in x
-was cut at the bar, khaki dashed ran out of tokens, blue dotted was drained when the
-race closed early. The dashed horizontal lines are the bar, the cutoff below which a
-trace gets killed: PeerConf redraws it as the race runs, DeepConf freezes it after
-its warm-up.
+**Reading the charts.** Horizontal axis is tokens generated; vertical is confidence,
+a rolling average over the last 256 tokens. Each line is one trace — one attempt at
+the problem. Green finished correct, red finished wrong, grey ending in x was cut at
+the bar, khaki dashed ran out of tokens, blue dotted was drained when the race closed
+early. The dashed horizontal lines are the bar, the cutoff below which a trace is
+killed: PeerConf redraws it as the race runs, DeepConf freezes it after its warm-up.
+
+Trace colours use the same lenient grading as the tables (`aws/grading.py`). With raw
+`math_equal`, 114 traces across 12 charts were drawn red despite being correct.
 
 ---
 
@@ -28,8 +30,8 @@ its warm-up.
 
 | | answered | correct | tokens | traces launched | cut at bar | ballots counted |
 |---|---|---|---|---|---|---|
-| PeerConf | `\left(3,\ \dfrac{\pi}{2}\right)` | **no** | 17,237 | 28 | 10 | 3 |
-| DeepConf | `\left(3,\ \dfrac{\pi}{2}\right)` | **no** | 22,508 | 16 | 0 | 16 |
+| PeerConf | `\left(3,\ \dfrac{\pi}{2}\right)` | yes *(math_equal says no)* | 17,237 | 28 | 10 | 3 |
+| DeepConf | `\left(3,\ \dfrac{\pi}{2}\right)` | yes *(math_equal says no)* | 22,508 | 16 | 0 | 16 |
 
 PeerConf used **23% fewer** tokens here.
 
@@ -203,8 +205,8 @@ PeerConf used **33% fewer** tokens here.
 
 | | answered | correct | tokens | traces launched | cut at bar | ballots counted |
 |---|---|---|---|---|---|---|
-| PeerConf | `90` | **no** | 65,996 | 19 | 1 | 3 |
-| DeepConf | `90` | **no** | 87,103 | 16 | 0 | 16 |
+| PeerConf | `90` | yes *(math_equal says no)* | 65,996 | 19 | 1 | 3 |
+| DeepConf | `90` | yes *(math_equal says no)* | 87,103 | 16 | 0 | 16 |
 
 PeerConf used **24% fewer** tokens here.
 
