@@ -1,0 +1,45 @@
+Benchmark: math500 — 500 questions from benchmarks/math500.jsonl, running 25
+
+============================================================
+### Q0  (0 min into the sweep)
+============================================================
+Q0: Convert the point $(0,3)$ in rectangular coordinates to polar coordinates.  Ente...
+Ground truth: \left( 3, \frac{\pi}{2} \right)
+
+Warmup: 16 traces, streaming per token
+Trace 12 (warmup): finished at 770 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 7 (warmup): finished at 1045 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 2 (warmup): finished at 1071 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 0 (warmup): finished at 1140 tokens | answer=(3,\ \dfrac{\pi}{2})
+Trace 15 (warmup): finished at 1171 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 5 (warmup): finished at 1234 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 10 (warmup): finished at 1241 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 3 (warmup): finished at 1285 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 4 (warmup): finished at 1480 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 9 (warmup): finished at 1498 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 8 (warmup): finished at 1521 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 6 (warmup): finished at 1557 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 11 (warmup): finished at 1557 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 14 (warmup): finished at 1556 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 1 (warmup): finished at 1628 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 13 (warmup): finished at 1615 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Traceback (most recent call last):
+  File "/root/repo/aws/.build/cell2_deepconf.py", line 284, in <module>
+    conf_bar = float(np.percentile(wmins, 100 - CONFIDENCE_PERCENTILE))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/numpy/lib/_function_base_impl.py", line 4273, in percentile
+    return _quantile_unchecked(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/numpy/lib/_function_base_impl.py", line 4550, in _quantile_unchecked
+    return _ureduce(a,
+           ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/numpy/lib/_function_base_impl.py", line 3894, in _ureduce
+    r = func(a, **kwargs)
+        ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/numpy/lib/_function_base_impl.py", line 4727, in _quantile_ureduce_func
+    result = _quantile(arr,
+             ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/numpy/lib/_function_base_impl.py", line 4849, in _quantile
+    slices_having_nans = np.isnan(arr[-1, ...])
+                                  ~~~^^^^^^^^^
+IndexError: index -1 is out of bounds for axis 0 with size 0

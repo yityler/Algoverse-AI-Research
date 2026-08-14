@@ -1,0 +1,1797 @@
+Benchmark: math500 — 500 questions from /root/repo/aws/.build/../../benchmarks/math500.jsonl, running 25
+
+============================================================
+### Q0  (0 min into the sweep)
+============================================================
+Q0: Convert the point $(0,3)$ in rectangular coordinates to polar coordinates.  Ente...
+Ground truth: \left( 3, \frac{\pi}{2} \right)
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 13: finished at 969 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 16: seated (replacing 13) | bar unarmed
+Trace 2: finished at 1017 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 17: seated (replacing 2) | bar unarmed
+Trace 3: finished at 1080 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 18: seated (replacing 3) | bar unarmed
+Trace 4: finished at 1128 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 19: seated (replacing 4) | bar unarmed
+Trace 6: finished at 1174 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 20: seated (replacing 6) | bar unarmed
+Trace 5: finished at 1212 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 21: seated (replacing 5) | bar unarmed
+Trace 11: finished at 1214 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 22: seated (replacing 11) | bar unarmed
+Trace 0: finished at 1216 tokens | answer=(3,\ \dfrac{\pi}{2})
+Trace 23: seated (replacing 0) | bar unarmed
+Trace 7: finished at 1329 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 24: seated (replacing 7) | bar unarmed
+Trace 12: finished at 1347 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 25: seated (replacing 12) | bar unarmed
+Trace 8: finished at 1391 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 26: seated (replacing 8) | bar unarmed
+Trace 1: finished at 1422 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 27: seated (replacing 1) | bar unarmed
+Trace 15: finished at 1454 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 28: seated (replacing 15) | bar unarmed
+Trace 14: finished at 1528 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 29: seated (replacing 14) | bar unarmed
+Trace 9: finished at 1741 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 30: seated (replacing 9) | bar unarmed
+Trace 10: finished at 1897 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 31: seated (replacing 10) | bar unarmed
+Trace 18: finished at 1082 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+Trace 17: finished at 1191 tokens | answer=\left(3,\ \dfrac{\pi}{2}\right)
+CERTIFICATE: '\left(3,\ \dfrac{\pi}{2}\right)' cannot be caught (margin exceeds all 14 outstanding) — run over
+
+Basic voting candidates: 18
+Sample voting answers: ['(3,\\ \\dfrac{\\pi}{2})', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)', '\\left(3,\\ \\dfrac{\\pi}{2}\\right)']
+
+=== PeerConf Summary (streaming) ===
+Final bar: None (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 34670
+Traces: finished 18 | stopped 0 | truncated 0 | abandoned 14
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 18
+Final answer: \left(3,\ \dfrac{\pi}{2}\right)   | ground truth: \left( 3, \frac{\pi}{2} \right)
+Total tokens generated (traces + probes, incl. discarded): 35286
+Total time: 17.53s
+
+=== Voting Results Summary ===
+  majority: \left(3,\ \dfrac{\pi}{2}\right) [18 votes]
+  mean_confidence_weighted: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+  tail_confidence_weighted: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+  bottom_window_weighted: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+  min_window_weighted: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+  top10_tail_filtered: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+  top10_bottom_window_filtered: (3,\ \dfrac{\pi}{2}) (conf: 0.000) [18 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \left(3,\ \dfrac{\pi}{2}\right)18     -           ✗
+mean_confidence_weighted      (3,\ \dfrac{\pi}{2})18     0.000       ✗
+tail_confidence_weighted      (3,\ \dfrac{\pi}{2})18     0.000       ✗
+bottom_window_weighted        (3,\ \dfrac{\pi}{2})18     0.000       ✗
+min_window_weighted           (3,\ \dfrac{\pi}{2})18     0.000       ✗
+top10_tail_filtered           (3,\ \dfrac{\pi}{2})18     0.000       ✗
+top10_bottom_window_filtered  (3,\ \dfrac{\pi}{2})18     0.000       ✗
+Q0 done | gt=\left( 3, \frac{\pi}{2} \right) | majority:✗, mean_confidence_weighted:✗, tail_confidence_weighted:✗, bottom_window_weighted:✗, min_window_weighted:✗, top10_tail_filtered:✗, top10_bottom_window_filtered:✗
+Saved to /results/math500/peerconf_out/math500_q0_bar_cs_loopc.pkl
+
+============================================================
+### Q1  (0 min into the sweep)
+============================================================
+Q1: Define
+\[p = \sum_{k = 1}^\infty \frac{1}{k^2} \quad \text{and} \quad q = \sum_{...
+Ground truth: p - q
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 4: GRADUATED at 4096 tokens — conf 1.000, answer p - q
+Trace 4: finished EARLY at 4106 tokens (graduation probe) | answer=p - q
+Bar ARMED at 14.556 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 4) | bar 14.556
+Trace 5: GRADUATED at 4096 tokens — conf 1.000, answer p - q
+Trace 5: finished EARLY at 4117 tokens (graduation probe) | answer=p - q
+Trace 17: seated (replacing 5) | bar 14.728
+Trace 9: GRADUATED at 4096 tokens — conf 1.000, answer p - q
+Trace 9: finished EARLY at 4128 tokens (graduation probe) | answer=p - q
+Consensus after 3 finishers: 'p - q' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['p - q', 'p - q', 'p - q']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.307 (keep top 10% of finishers' minima) | seats 16 | launched 18/32 | events: 64361
+Traces: finished 3 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 14 fired (196 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: p - q   | ground truth: p - q
+Total tokens generated (traces + probes, incl. discarded): 66224 (of which probes: 196)
+Total time: 33.83s
+
+=== Voting Results Summary ===
+  majority: p - q [3 votes]
+  mean_confidence_weighted: p - q (conf: 15.284) [3 votes]
+  tail_confidence_weighted: p - q (conf: 15.581) [3 votes]
+  bottom_window_weighted: p - q (conf: 14.963) [3 votes]
+  min_window_weighted: p - q (conf: 14.917) [3 votes]
+  top10_tail_filtered: p - q (conf: 16.291) [1 votes]
+  top10_bottom_window_filtered: p - q (conf: 15.481) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      p - q       3      -           ✓
+mean_confidence_weighted      p - q       3      15.284      ✓
+tail_confidence_weighted      p - q       3      15.581      ✓
+bottom_window_weighted        p - q       3      14.963      ✓
+min_window_weighted           p - q       3      14.917      ✓
+top10_tail_filtered           p - q       1      16.291      ✓
+top10_bottom_window_filtered  p - q       1      15.481      ✓
+Q1 done | gt=p - q | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q1_bar_cs_loopc.pkl
+
+============================================================
+### Q2  (1 min into the sweep)
+============================================================
+Q2: If $f(x) = \frac{3x-2}{x-2}$, what is the value of $f(-2) +f(-1)+f(0)$? Express ...
+Ground truth: \frac{14}{3}
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 3: finished at 1538 tokens | answer=\dfrac{14}{3}
+Trace 16: seated (replacing 3) | bar unarmed
+Trace 7: finished at 1671 tokens | answer=\dfrac{14}{3}
+Trace 17: seated (replacing 7) | bar unarmed
+Trace 11: finished at 1674 tokens | answer=\dfrac{14}{3}
+Trace 18: seated (replacing 11) | bar unarmed
+Trace 0: finished at 1794 tokens | answer=\dfrac{14}{3}
+Trace 19: seated (replacing 0) | bar unarmed
+Trace 5: finished at 1876 tokens | answer=\dfrac{14}{3}
+Trace 20: seated (replacing 5) | bar unarmed
+Trace 2: finished at 2016 tokens | answer=\dfrac{14}{3}
+Trace 21: seated (replacing 2) | bar unarmed
+Trace 15: finished at 2057 tokens | answer=\dfrac{14}{3}
+Bar ARMED at 17.254 (1 finishers calibrating, keep top 10%)
+Consensus after 7 finishers: '\dfrac{14}{3}' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 7
+Sample voting answers: ['\\dfrac{14}{3}', '\\dfrac{14}{3}', '\\dfrac{14}{3}', '\\dfrac{14}{3}', '\\dfrac{14}{3}', '\\dfrac{14}{3}', '\\dfrac{14}{3}']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 17.254 (keep top 10% of finishers' minima) | seats 16 | launched 22/32 | events: 31957
+Traces: finished 7 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 7
+Final answer: \dfrac{14}{3}   | ground truth: \frac{14}{3}
+Total tokens generated (traces + probes, incl. discarded): 32951
+Total time: 16.16s
+
+=== Voting Results Summary ===
+  majority: \dfrac{14}{3} [7 votes]
+  mean_confidence_weighted: \dfrac{14}{3} (conf: 2.466) [7 votes]
+  tail_confidence_weighted: \dfrac{14}{3} (conf: 2.466) [7 votes]
+  bottom_window_weighted: \dfrac{14}{3} (conf: 2.465) [7 votes]
+  min_window_weighted: \dfrac{14}{3} (conf: 2.465) [7 votes]
+  top10_tail_filtered: \dfrac{14}{3} (conf: 17.263) [1 votes]
+  top10_bottom_window_filtered: \dfrac{14}{3} (conf: 17.254) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \dfrac{14}{3}7      -           ✓
+mean_confidence_weighted      \dfrac{14}{3}7      2.466       ✓
+tail_confidence_weighted      \dfrac{14}{3}7      2.466       ✓
+bottom_window_weighted        \dfrac{14}{3}7      2.465       ✓
+min_window_weighted           \dfrac{14}{3}7      2.465       ✓
+top10_tail_filtered           \dfrac{14}{3}1      17.263      ✓
+top10_bottom_window_filtered  \dfrac{14}{3}1      17.254      ✓
+Q2 done | gt=\frac{14}{3} | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q2_bar_cs_loopc.pkl
+
+============================================================
+### Q3  (1 min into the sweep)
+============================================================
+Q3: How many positive whole-number divisors does 196 have?...
+Ground truth: 9
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 10: finished at 927 tokens | answer=9
+Trace 16: seated (replacing 10) | bar unarmed
+Trace 0: finished at 969 tokens | answer=9
+Trace 17: seated (replacing 0) | bar unarmed
+Trace 3: finished at 1012 tokens | answer=9
+Trace 18: seated (replacing 3) | bar unarmed
+Trace 1: finished at 1161 tokens | answer=9
+Trace 19: seated (replacing 1) | bar unarmed
+Trace 9: finished at 1214 tokens | answer=9
+Trace 20: seated (replacing 9) | bar unarmed
+Trace 11: finished at 1223 tokens | answer=9
+Trace 21: seated (replacing 11) | bar unarmed
+Trace 5: finished at 1490 tokens | answer=9
+Trace 22: seated (replacing 5) | bar unarmed
+Trace 4: finished at 1546 tokens | answer=9
+Trace 23: seated (replacing 4) | bar unarmed
+Trace 8: finished at 1560 tokens | answer=9
+Trace 24: seated (replacing 8) | bar unarmed
+Trace 14: finished at 1607 tokens | answer=9
+Trace 25: seated (replacing 14) | bar unarmed
+Trace 7: finished at 1703 tokens | answer=9
+Trace 26: seated (replacing 7) | bar unarmed
+Trace 16: finished at 1061 tokens | answer=9
+Trace 27: seated (replacing 16) | bar unarmed
+Trace 13: finished at 2046 tokens | answer=9
+Trace 28: seated (replacing 13) | bar unarmed
+Trace 15: finished at 2054 tokens | answer=9
+Bar ARMED at 13.576 (1 finishers calibrating, keep top 10%)
+Consensus after 14 finishers: '9' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 14
+Sample voting answers: ['9', '9', '9', '9', '9', '9', '9', '9']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 13.576 (keep top 10% of finishers' minima) | seats 16 | launched 29/32 | events: 31672
+Traces: finished 14 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 14
+Final answer: 9   | ground truth: 9
+Total tokens generated (traces + probes, incl. discarded): 32873
+Total time: 16.17s
+
+=== Voting Results Summary ===
+  majority: 9 [14 votes]
+  mean_confidence_weighted: 9 (conf: 0.970) [14 votes]
+  tail_confidence_weighted: 9 (conf: 0.971) [14 votes]
+  bottom_window_weighted: 9 (conf: 0.970) [14 votes]
+  min_window_weighted: 9 (conf: 0.970) [14 votes]
+  top10_tail_filtered: 9 (conf: 0.971) [14 votes]
+  top10_bottom_window_filtered: 9 (conf: 0.970) [14 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      9           14     -           ✓
+mean_confidence_weighted      9           14     0.970       ✓
+tail_confidence_weighted      9           14     0.971       ✓
+bottom_window_weighted        9           14     0.970       ✓
+min_window_weighted           9           14     0.970       ✓
+top10_tail_filtered           9           14     0.971       ✓
+top10_bottom_window_filtered  9           14     0.970       ✓
+Q3 done | gt=9 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q3_bar_cs_loopc.pkl
+
+============================================================
+### Q4  (1 min into the sweep)
+============================================================
+Q4: The results of a cross-country team's training run are graphed below. Which stud...
+Ground truth: \text{Evelyn}
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 14: finished at 3892 tokens | answer=\text{Evelyn}
+Bar ARMED at 11.683 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 14) | bar 11.683
+Trace 13: cut at the bar 11.683 (its low 11.134, 3893 tokens)
+Trace 17: seated (replacing 13) | bar 11.683
+Trace 9: cut at the bar 11.683 (its low 9.963, 3897 tokens)
+Trace 18: seated (replacing 9) | bar 11.683
+Trace 4: cut at the bar 11.683 (its low 11.142, 3901 tokens)
+Trace 19: seated (replacing 4) | bar 11.683
+Trace 2: cut at the bar 11.683 (its low 11.049, 3903 tokens)
+Trace 20: seated (replacing 2) | bar 11.683
+Trace 3: cut at the bar 11.683 (its low 10.338, 3902 tokens)
+Trace 21: seated (replacing 3) | bar 11.683
+Trace 10: cut at the bar 11.683 (its low 10.991, 3896 tokens)
+Trace 22: seated (replacing 10) | bar 11.683
+Trace 12: cut at the bar 11.683 (its low 11.107, 3895 tokens)
+Trace 23: seated (replacing 12) | bar 11.683
+Trace 7: cut at the bar 11.683 (its low 10.378, 3898 tokens)
+Trace 24: seated (replacing 7) | bar 11.683
+Trace 11: cut at the bar 11.683 (its low 10.636, 3896 tokens)
+Trace 25: seated (replacing 11) | bar 11.683
+Trace 0: cut at the bar 11.683 (its low 10.715, 3905 tokens)
+Trace 26: seated (replacing 0) | bar 11.683
+Trace 6: cut at the bar 11.683 (its low 10.998, 3901 tokens)
+Trace 27: seated (replacing 6) | bar 11.683
+Trace 1: cut at the bar 11.683 (its low 10.006, 3904 tokens)
+Trace 28: seated (replacing 1) | bar 11.683
+Trace 15: cut at the bar 11.683 (its low 10.306, 3896 tokens)
+Trace 29: seated (replacing 15) | bar 11.683
+Trace 8: GRADUATED at 4096 tokens — conf 0.996, answer \text{Evelyn}
+Trace 8: finished EARLY at 4109 tokens (graduation probe) | answer=\text{Evelyn}
+Trace 30: seated (replacing 8) | bar 11.787
+Trace 5: cut at the bar 11.787 (its low 11.786, 4133 tokens)
+Vote bar frozen at 11.734 (keep top 10% of 16 wave-1 minima)
+Trace 31: seated (replacing 5) | bar 11.787
+Trace 18: cut at the bar 11.787 (its low 9.966, 2069 tokens)
+Trace 24: cut at the bar 11.787 (its low 11.252, 2063 tokens)
+Trace 16: cut at the bar 11.787 (its low 10.387, 2071 tokens)
+Trace 26: cut at the bar 11.787 (its low 11.634, 2061 tokens)
+Trace 25: cut at the bar 11.787 (its low 11.507, 2062 tokens)
+Trace 29: cut at the bar 11.787 (its low 11.674, 2059 tokens)
+Trace 28: cut at the bar 11.787 (its low 10.124, 2059 tokens)
+Trace 17: cut at the bar 11.787 (its low 10.638, 2070 tokens)
+Trace 22: cut at the bar 11.787 (its low 11.623, 2065 tokens)
+Trace 23: cut at the bar 11.787 (its low 11.783, 2521 tokens)
+Trace 27: cut at the bar 11.787 (its low 11.785, 2772 tokens)
+Trace 31: cut at the bar 11.787 (its low 11.784, 2702 tokens)
+Trace 21: cut at the bar 11.787 (its low 11.783, 3000 tokens)
+Trace 30: cut at the bar 11.787 (its low 11.783, 3197 tokens)
+Trace 19: cut at the bar 11.787 (its low 11.784, 3734 tokens)
+CERTIFICATE: '\text{Evelyn}' cannot be caught (margin exceeds all 1 outstanding) — run over
+
+Basic voting candidates: 2
+Sample voting answers: ['\\text{Evelyn}', '\\text{Evelyn}']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 11.787 (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 98450
+Traces: finished 2 | stopped 29 | truncated 0 | abandoned 1
+Graduation probes: 2 fired (29 probe tokens) | graduated early: 1
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 2
+Final answer: \text{Evelyn}   | ground truth: \text{Evelyn}
+Total tokens generated (traces + probes, incl. discarded): 103089 (of which probes: 29)
+Total time: 60.33s
+
+=== Voting Results Summary ===
+  majority: \text{Evelyn} [2 votes]
+  mean_confidence_weighted: \text{Evelyn} (conf: 12.188) [2 votes]
+  tail_confidence_weighted: \text{Evelyn} (conf: 12.338) [2 votes]
+  bottom_window_weighted: \text{Evelyn} (conf: 11.774) [2 votes]
+  min_window_weighted: \text{Evelyn} (conf: 11.740) [2 votes]
+  top10_tail_filtered: \text{Evelyn} (conf: 12.344) [1 votes]
+  top10_bottom_window_filtered: \text{Evelyn} (conf: 11.834) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \text{Evelyn}2      -           ✓
+mean_confidence_weighted      \text{Evelyn}2      12.188      ✓
+tail_confidence_weighted      \text{Evelyn}2      12.338      ✓
+bottom_window_weighted        \text{Evelyn}2      11.774      ✓
+min_window_weighted           \text{Evelyn}2      11.740      ✓
+top10_tail_filtered           \text{Evelyn}1      12.344      ✓
+top10_bottom_window_filtered  \text{Evelyn}1      11.834      ✓
+Q4 done | gt=\text{Evelyn} | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q4_bar_cs_loopc.pkl
+
+============================================================
+### Q5  (2 min into the sweep)
+============================================================
+Q5: A regular hexagon can be divided into six equilateral triangles. If the perimete...
+Ground truth: 42
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 0: finished at 1461 tokens | answer=42
+Trace 16: seated (replacing 0) | bar unarmed
+Trace 9: finished at 2771 tokens | answer=42
+Bar ARMED at 12.533 (1 finishers calibrating, keep top 10%)
+Trace 17: seated (replacing 9) | bar 12.533
+Trace 15: cut at the bar 12.533 (its low 12.364, 2769 tokens)
+Trace 18: seated (replacing 15) | bar 12.533
+Trace 13: cut at the bar 12.533 (its low 11.944, 2771 tokens)
+Trace 19: seated (replacing 13) | bar 12.533
+Trace 1: cut at the bar 12.533 (its low 12.440, 2779 tokens)
+Trace 20: seated (replacing 1) | bar 12.533
+Trace 6: cut at the bar 12.533 (its low 12.285, 2778 tokens)
+Trace 21: seated (replacing 6) | bar 12.533
+Trace 8: finished at 2812 tokens | answer=42
+Consensus after 3 finishers: '42' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['42', '42', '42']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 12.510 (keep top 10% of finishers' minima) | seats 16 | launched 22/32 | events: 43015
+Traces: finished 3 | stopped 4 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 42   | ground truth: 42
+Total tokens generated (traces + probes, incl. discarded): 44953
+Total time: 22.41s
+
+=== Voting Results Summary ===
+  majority: 42 [3 votes]
+  mean_confidence_weighted: 42 (conf: 8.476) [3 votes]
+  tail_confidence_weighted: 42 (conf: 8.630) [3 votes]
+  bottom_window_weighted: 42 (conf: 8.303) [3 votes]
+  min_window_weighted: 42 (conf: 8.278) [3 votes]
+  top10_tail_filtered: 42 (conf: 13.025) [1 votes]
+  top10_bottom_window_filtered: 42 (conf: 12.567) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      42          3      -           ✓
+mean_confidence_weighted      42          3      8.476       ✓
+tail_confidence_weighted      42          3      8.630       ✓
+bottom_window_weighted        42          3      8.303       ✓
+min_window_weighted           42          3      8.278       ✓
+top10_tail_filtered           42          1      13.025      ✓
+top10_bottom_window_filtered  42          1      12.567      ✓
+Q5 done | gt=42 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q5_bar_cs_loopc.pkl
+
+============================================================
+### Q6  (3 min into the sweep)
+============================================================
+Q6: What is the smallest positive perfect cube that can be written as the sum of thr...
+Ground truth: 27
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 8: finished at 3838 tokens | answer=27
+Bar ARMED at 13.685 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 8) | bar 13.685
+Trace 7: cut at the bar 13.685 (its low 13.521, 3839 tokens)
+Trace 17: seated (replacing 7) | bar 13.685
+Trace 12: cut at the bar 13.685 (its low 13.287, 3836 tokens)
+Trace 18: seated (replacing 12) | bar 13.685
+Trace 10: finished at 4026 tokens | answer=27
+Trace 19: seated (replacing 10) | bar 13.675
+Trace 0: GRADUATED at 4096 tokens — conf 1.000, answer 27
+Trace 1: GRADUATED at 4096 tokens — conf 1.000, answer 27
+Trace 0: finished EARLY at 4105 tokens (graduation probe) | answer=27
+Consensus after 3 finishers: '27' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['27', '27', '27']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 13.664 (keep top 10% of finishers' minima) | seats 16 | launched 20/32 | events: 61804
+Traces: finished 3 | stopped 2 | truncated 0 | abandoned 15
+Graduation probes: 2 fired (10 probe tokens) | graduated early: 1
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 27   | ground truth: 27
+Total tokens generated (traces + probes, incl. discarded): 65530 (of which probes: 10)
+Total time: 33.48s
+
+=== Voting Results Summary ===
+  majority: 27 [3 votes]
+  mean_confidence_weighted: 27 (conf: 13.903) [3 votes]
+  tail_confidence_weighted: 27 (conf: 13.946) [3 votes]
+  bottom_window_weighted: 27 (conf: 13.671) [3 votes]
+  min_window_weighted: 27 (conf: 13.615) [3 votes]
+  top10_tail_filtered: 27 (conf: 14.147) [1 votes]
+  top10_bottom_window_filtered: 27 (conf: 13.747) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      27          3      -           ✓
+mean_confidence_weighted      27          3      13.903      ✓
+tail_confidence_weighted      27          3      13.946      ✓
+bottom_window_weighted        27          3      13.671      ✓
+min_window_weighted           27          3      13.615      ✓
+top10_tail_filtered           27          1      14.147      ✓
+top10_bottom_window_filtered  27          1      13.747      ✓
+Q6 done | gt=27 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q6_bar_cs_loopc.pkl
+
+============================================================
+### Q7  (3 min into the sweep)
+============================================================
+Q7: The set of points $(x,y,z)$ that satisfy
+\[2x = 3y = -z\]is a line.
+
+The set of ...
+Ground truth: 90^\circ
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 11: finished at 3841 tokens | answer=90
+Bar ARMED at 14.129 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 11) | bar 14.129
+Trace 13: cut at the bar 14.129 (its low 14.127, 4056 tokens)
+Trace 17: seated (replacing 13) | bar 14.129
+Trace 0: GRADUATED at 4096 tokens — conf 1.000, answer 90
+Trace 0: finished EARLY at 4107 tokens (graduation probe) | answer=90
+Trace 18: seated (replacing 0) | bar 14.747
+Trace 7: cut at the bar 14.747 (its low 14.190, 4106 tokens)
+Trace 19: seated (replacing 7) | bar 14.747
+Trace 1: cut at the bar 14.747 (its low 14.499, 4113 tokens)
+Trace 20: seated (replacing 1) | bar 14.747
+Trace 5: cut at the bar 14.747 (its low 14.512, 4120 tokens)
+Trace 21: seated (replacing 5) | bar 14.747
+Trace 4: GRADUATED at 4096 tokens — conf 1.000, answer 90
+Trace 4: finished EARLY at 4126 tokens (graduation probe) | answer=90
+Consensus after 3 finishers: '90' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['90', '90', '90']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.244 (keep top 10% of finishers' minima) | seats 16 | launched 22/32 | events: 62626
+Traces: finished 3 | stopped 4 | truncated 0 | abandoned 15
+Graduation probes: 13 fired (194 probe tokens) | graduated early: 2
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 90   | ground truth: 90^\circ
+Total tokens generated (traces + probes, incl. discarded): 66128 (of which probes: 194)
+Total time: 34.28s
+
+=== Voting Results Summary ===
+  majority: 90 [3 votes]
+  mean_confidence_weighted: 90 (conf: 15.550) [3 votes]
+  tail_confidence_weighted: 90 (conf: 15.034) [3 votes]
+  bottom_window_weighted: 90 (conf: 14.864) [3 votes]
+  min_window_weighted: 90 (conf: 14.765) [3 votes]
+  top10_tail_filtered: 90 (conf: 15.444) [1 votes]
+  top10_bottom_window_filtered: 90 (conf: 15.417) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      90          3      -           ✗
+mean_confidence_weighted      90          3      15.550      ✗
+tail_confidence_weighted      90          3      15.034      ✗
+bottom_window_weighted        90          3      14.864      ✗
+min_window_weighted           90          3      14.765      ✗
+top10_tail_filtered           90          1      15.444      ✗
+top10_bottom_window_filtered  90          1      15.417      ✗
+Q7 done | gt=90^\circ | majority:✗, mean_confidence_weighted:✗, tail_confidence_weighted:✗, bottom_window_weighted:✗, min_window_weighted:✗, top10_tail_filtered:✗, top10_bottom_window_filtered:✗
+Saved to /results/math500/peerconf_out/math500_q7_bar_cs_loopc.pkl
+
+============================================================
+### Q8  (4 min into the sweep)
+============================================================
+Q8: What is the distance, in units, between the points $(2, -6)$ and $(-4, 3)$? Expr...
+Ground truth: 3\sqrt{13}
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 5: finished at 1062 tokens | answer=3\sqrt{13}
+Trace 16: seated (replacing 5) | bar unarmed
+Trace 6: finished at 1128 tokens | answer=3\sqrt{13}
+Trace 17: seated (replacing 6) | bar unarmed
+Trace 4: finished at 1147 tokens | answer=3\sqrt{13}
+Trace 18: seated (replacing 4) | bar unarmed
+Trace 13: finished at 1181 tokens | answer=3\sqrt{13}
+Trace 19: seated (replacing 13) | bar unarmed
+Trace 14: finished at 1191 tokens | answer=3\sqrt{13}
+Trace 20: seated (replacing 14) | bar unarmed
+Trace 2: finished at 1274 tokens | answer=3\sqrt{13}
+Trace 21: seated (replacing 2) | bar unarmed
+Trace 15: finished at 1301 tokens | answer=3\sqrt{13}
+Trace 22: seated (replacing 15) | bar unarmed
+Trace 12: finished at 1310 tokens | answer=3\sqrt{13}
+Trace 23: seated (replacing 12) | bar unarmed
+Trace 7: finished at 1338 tokens | answer=3\sqrt{13}
+Trace 24: seated (replacing 7) | bar unarmed
+Trace 11: finished at 1346 tokens | answer=3\sqrt{13}
+Trace 25: seated (replacing 11) | bar unarmed
+Trace 10: finished at 1385 tokens | answer=3\sqrt{13}
+Trace 26: seated (replacing 10) | bar unarmed
+Trace 8: finished at 1463 tokens | answer=3\sqrt{13}
+Trace 27: seated (replacing 8) | bar unarmed
+Trace 1: finished at 1587 tokens | answer=3\sqrt{13}
+Trace 28: seated (replacing 1) | bar unarmed
+Trace 0: finished at 1678 tokens | answer=3\sqrt{13}
+Trace 29: seated (replacing 0) | bar unarmed
+Trace 3: finished at 1685 tokens | answer=3\sqrt{13}
+Trace 30: seated (replacing 3) | bar unarmed
+Trace 16: finished at 953 tokens | answer=3\sqrt{13}
+Trace 31: seated (replacing 16) | bar unarmed
+Trace 18: finished at 1044 tokens | answer=3\sqrt{13}
+CERTIFICATE: '3\sqrt{13}' cannot be caught (margin exceeds all 15 outstanding) — run over
+
+Basic voting candidates: 17
+Sample voting answers: ['3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}', '3\\sqrt{13}']
+
+=== PeerConf Summary (streaming) ===
+Final bar: None (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 34006
+Traces: finished 17 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 17
+Final answer: 3\sqrt{13}   | ground truth: 3\sqrt{13}
+Total tokens generated (traces + probes, incl. discarded): 34981
+Total time: 17.03s
+
+=== Voting Results Summary ===
+  majority: 3\sqrt{13} [17 votes]
+  mean_confidence_weighted: 3\sqrt{13} (conf: 0.000) [17 votes]
+  tail_confidence_weighted: 3\sqrt{13} (conf: 0.000) [17 votes]
+  bottom_window_weighted: 3\sqrt{13} (conf: 0.000) [17 votes]
+  min_window_weighted: 3\sqrt{13} (conf: 0.000) [17 votes]
+  top10_tail_filtered: 3\sqrt{13} (conf: 0.000) [17 votes]
+  top10_bottom_window_filtered: 3\sqrt{13} (conf: 0.000) [17 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      3\sqrt{13}  17     -           ✓
+mean_confidence_weighted      3\sqrt{13}  17     0.000       ✓
+tail_confidence_weighted      3\sqrt{13}  17     0.000       ✓
+bottom_window_weighted        3\sqrt{13}  17     0.000       ✓
+min_window_weighted           3\sqrt{13}  17     0.000       ✓
+top10_tail_filtered           3\sqrt{13}  17     0.000       ✓
+top10_bottom_window_filtered  3\sqrt{13}  17     0.000       ✓
+Q8 done | gt=3\sqrt{13} | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q8_bar_cs_loopc.pkl
+
+============================================================
+### Q9  (4 min into the sweep)
+============================================================
+Q9: The expression $2\cdot 3 \cdot 4\cdot 5+1$ is equal to 121, since multiplication...
+Ground truth: 4
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 4: GRADUATED at 16384 tokens — conf 1.000, answer 4
+Trace 4: finished EARLY at 16414 tokens (graduation probe) | answer=4
+Bar ARMED at 11.434 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 4) | bar 11.434
+Trace 5: finished at 19471 tokens | answer=4
+Trace 17: seated (replacing 5) | bar 11.789
+Trace 16: cut at the bar 11.789 (its low 11.789, 3072 tokens)
+Trace 18: seated (replacing 16) | bar 11.789
+Trace 3: finished at 20388 tokens | answer=4
+Consensus after 3 finishers: '4' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['4', '4', '4']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 11.959 (keep top 10% of finishers' minima) | seats 16 | launched 19/32 | events: 313803
+Traces: finished 3 | stopped 1 | truncated 0 | abandoned 15
+Graduation probes: 64 fired (1264 probe tokens) | graduated early: 1
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 4   | ground truth: 4
+Total tokens generated (traces + probes, incl. discarded): 327333 (of which probes: 1264)
+Total time: 211.76s
+
+=== Voting Results Summary ===
+  majority: 4 [3 votes]
+  mean_confidence_weighted: 4 (conf: 13.612) [3 votes]
+  tail_confidence_weighted: 4 (conf: 14.823) [3 votes]
+  bottom_window_weighted: 4 (conf: 11.922) [3 votes]
+  min_window_weighted: 4 (conf: 11.751) [3 votes]
+  top10_tail_filtered: 4 (conf: 14.869) [1 votes]
+  top10_bottom_window_filtered: 4 (conf: 12.198) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      4           3      -           ✓
+mean_confidence_weighted      4           3      13.612      ✓
+tail_confidence_weighted      4           3      14.823      ✓
+bottom_window_weighted        4           3      11.922      ✓
+min_window_weighted           4           3      11.751      ✓
+top10_tail_filtered           4           1      14.869      ✓
+top10_bottom_window_filtered  4           1      12.198      ✓
+Q9 done | gt=4 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q9_bar_cs_loopc.pkl
+
+============================================================
+### Q10  (8 min into the sweep)
+============================================================
+Q10: What is the least positive integer multiple of 30 that can be written with only ...
+Ground truth: 2220
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 4: GRADUATED at 4096 tokens — conf 0.999, answer 2220
+Trace 4: finished EARLY at 4106 tokens (graduation probe) | answer=2220
+Bar ARMED at 14.027 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 4) | bar 14.027
+Trace 6: cut at the bar 14.027 (its low 13.674, 4104 tokens)
+Trace 17: seated (replacing 6) | bar 14.027
+Trace 12: cut at the bar 14.027 (its low 13.770, 4154 tokens)
+Trace 18: seated (replacing 12) | bar 14.027
+Trace 2: cut at the bar 14.027 (its low 14.027, 5131 tokens)
+Trace 19: seated (replacing 2) | bar 14.027
+Trace 9: cut at the bar 14.027 (its low 13.896, 5841 tokens)
+Trace 20: seated (replacing 9) | bar 14.027
+Trace 16: cut at the bar 14.027 (its low 13.924, 2048 tokens)
+Trace 21: seated (replacing 16) | bar 14.027
+Trace 18: cut at the bar 14.027 (its low 14.026, 2085 tokens)
+Trace 22: seated (replacing 18) | bar 14.027
+Trace 13: cut at the bar 14.027 (its low 14.023, 6439 tokens)
+Trace 23: seated (replacing 13) | bar 14.027
+Trace 10: cut at the bar 14.027 (its low 14.027, 7478 tokens)
+Trace 24: seated (replacing 10) | bar 14.027
+Trace 1: GRADUATED at 8192 tokens — conf 1.000, answer 2220
+Trace 1: finished EARLY at 8203 tokens (graduation probe) | answer=2220
+Trace 25: seated (replacing 1) | bar 14.216
+Trace 20: cut at the bar 14.216 (its low 14.174, 2343 tokens)
+Trace 26: seated (replacing 20) | bar 14.216
+Trace 3: GRADUATED at 8192 tokens — conf 1.000, answer 2220
+Trace 3: finished EARLY at 8206 tokens (graduation probe) | answer=2220
+Consensus after 3 finishers: '2220' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['2220', '2220', '2220']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 14.274 (keep top 10% of finishers' minima) | seats 16 | launched 27/32 | events: 122957
+Traces: finished 3 | stopped 9 | truncated 0 | abandoned 15
+Graduation probes: 24 fired (423 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 2220   | ground truth: 2220
+Total tokens generated (traces + probes, incl. discarded): 131520 (of which probes: 423)
+Total time: 73.67s
+
+=== Voting Results Summary ===
+  majority: 2220 [3 votes]
+  mean_confidence_weighted: 2220 (conf: 14.737) [3 votes]
+  tail_confidence_weighted: 2220 (conf: 14.749) [3 votes]
+  bottom_window_weighted: 2220 (conf: 14.266) [3 votes]
+  min_window_weighted: 2220 (conf: 14.182) [3 votes]
+  top10_tail_filtered: 2220 (conf: 14.982) [1 votes]
+  top10_bottom_window_filtered: 2220 (conf: 14.392) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      2220        3      -           ✓
+mean_confidence_weighted      2220        3      14.737      ✓
+tail_confidence_weighted      2220        3      14.749      ✓
+bottom_window_weighted        2220        3      14.266      ✓
+min_window_weighted           2220        3      14.182      ✓
+top10_tail_filtered           2220        1      14.982      ✓
+top10_bottom_window_filtered  2220        1      14.392      ✓
+Q10 done | gt=2220 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q10_bar_cs_loopc.pkl
+
+============================================================
+### Q11  (9 min into the sweep)
+============================================================
+Q11: Let $p(x)$ be a polynomial of degree 5 such that
+\[p(n) = \frac{n}{n^2 - 1}\]for...
+Ground truth: \frac{3}{56}
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 11: GRADUATED at 4096 tokens — conf 1.000, answer \dfrac{3}{56}
+Trace 11: finished EARLY at 4149 tokens (graduation probe) | answer=\dfrac{3}{56}
+Bar ARMED at 15.111 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 11) | bar 15.111
+Trace 15: cut at the bar 15.111 (its low 13.909, 4146 tokens)
+Trace 17: seated (replacing 15) | bar 15.111
+Trace 1: cut at the bar 15.111 (its low 14.475, 4157 tokens)
+Trace 18: seated (replacing 1) | bar 15.111
+Trace 3: cut at the bar 15.111 (its low 14.007, 4155 tokens)
+Trace 19: seated (replacing 3) | bar 15.111
+Trace 14: cut at the bar 15.111 (its low 14.590, 4145 tokens)
+Trace 20: seated (replacing 14) | bar 15.111
+Trace 4: cut at the bar 15.111 (its low 15.109, 6194 tokens)
+Trace 21: seated (replacing 4) | bar 15.111
+Trace 17: cut at the bar 15.111 (its low 14.941, 2048 tokens)
+Trace 22: seated (replacing 17) | bar 15.111
+Trace 20: cut at the bar 15.111 (its low 14.605, 2048 tokens)
+Trace 23: seated (replacing 20) | bar 15.111
+Trace 16: cut at the bar 15.111 (its low 15.110, 2055 tokens)
+Trace 24: seated (replacing 16) | bar 15.111
+Trace 18: cut at the bar 15.111 (its low 15.103, 2058 tokens)
+Trace 25: seated (replacing 18) | bar 15.111
+Trace 19: cut at the bar 15.111 (its low 15.111, 2124 tokens)
+Trace 26: seated (replacing 19) | bar 15.111
+Trace 12: cut at the bar 15.111 (its low 14.631, 7157 tokens)
+Trace 27: seated (replacing 12) | bar 15.111
+Trace 6: finished at 7348 tokens | answer=\dfrac{3}{56}
+Trace 28: seated (replacing 6) | bar 15.055
+Trace 10: cut at the bar 15.055 (its low 14.661, 8072 tokens)
+Trace 29: seated (replacing 10) | bar 15.055
+Trace 2: GRADUATED at 8192 tokens — conf 1.000, answer \dfrac{3}{56}
+Trace 2: finished EARLY at 8208 tokens (graduation probe) | answer=\dfrac{3}{56}
+Consensus after 3 finishers: '\dfrac{3}{56}' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['\\dfrac{3}{56}', '\\dfrac{3}{56}', '\\dfrac{3}{56}']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 14.998 (keep top 10% of finishers' minima) | seats 16 | launched 30/32 | events: 120475
+Traces: finished 3 | stopped 12 | truncated 0 | abandoned 15
+Graduation probes: 17 fired (308 probe tokens) | graduated early: 2
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: \dfrac{3}{56}   | ground truth: \frac{3}{56}
+Total tokens generated (traces + probes, incl. discarded): 131332 (of which probes: 308)
+Total time: 71.74s
+
+=== Voting Results Summary ===
+  majority: \dfrac{3}{56} [3 votes]
+  mean_confidence_weighted: \dfrac{3}{56} (conf: 16.336) [3 votes]
+  tail_confidence_weighted: \dfrac{3}{56} (conf: 16.553) [3 votes]
+  bottom_window_weighted: \dfrac{3}{56} (conf: 14.839) [3 votes]
+  min_window_weighted: \dfrac{3}{56} (conf: 14.682) [3 votes]
+  top10_tail_filtered: \dfrac{3}{56} (conf: 17.915) [1 votes]
+  top10_bottom_window_filtered: \dfrac{3}{56} (conf: 15.302) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \dfrac{3}{56}3      -           ✓
+mean_confidence_weighted      \dfrac{3}{56}3      16.336      ✓
+tail_confidence_weighted      \dfrac{3}{56}3      16.553      ✓
+bottom_window_weighted        \dfrac{3}{56}3      14.839      ✓
+min_window_weighted           \dfrac{3}{56}3      14.682      ✓
+top10_tail_filtered           \dfrac{3}{56}1      17.915      ✓
+top10_bottom_window_filtered  \dfrac{3}{56}1      15.302      ✓
+Q11 done | gt=\frac{3}{56} | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q11_bar_cs_loopc.pkl
+
+============================================================
+### Q12  (10 min into the sweep)
+============================================================
+Q12: The proper divisors of 12 are 1, 2, 3, 4 and 6. A proper divisor of an integer $...
+Ground truth: 284
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 8: finished at 3018 tokens | answer=284
+Bar ARMED at 15.940 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 8) | bar 15.940
+Trace 9: cut at the bar 15.940 (its low 15.762, 3017 tokens)
+Trace 17: seated (replacing 9) | bar 15.940
+Trace 2: cut at the bar 15.940 (its low 14.716, 3024 tokens)
+Trace 18: seated (replacing 2) | bar 15.940
+Trace 3: cut at the bar 15.940 (its low 14.414, 3023 tokens)
+Trace 19: seated (replacing 3) | bar 15.940
+Trace 14: cut at the bar 15.940 (its low 14.756, 3026 tokens)
+Trace 20: seated (replacing 14) | bar 15.940
+Trace 10: cut at the bar 15.940 (its low 14.478, 3017 tokens)
+Trace 21: seated (replacing 10) | bar 15.940
+Trace 1: cut at the bar 15.940 (its low 15.620, 3025 tokens)
+Trace 22: seated (replacing 1) | bar 15.940
+Trace 13: cut at the bar 15.940 (its low 14.945, 3014 tokens)
+Trace 23: seated (replacing 13) | bar 15.940
+Trace 11: cut at the bar 15.940 (its low 15.267, 3016 tokens)
+Trace 24: seated (replacing 11) | bar 15.940
+Trace 6: cut at the bar 15.940 (its low 14.995, 3021 tokens)
+Trace 25: seated (replacing 6) | bar 15.940
+Trace 7: cut at the bar 15.940 (its low 14.876, 3019 tokens)
+Trace 26: seated (replacing 7) | bar 15.940
+Trace 15: cut at the bar 15.940 (its low 14.514, 3027 tokens)
+Trace 27: seated (replacing 15) | bar 15.940
+Trace 12: cut at the bar 15.940 (its low 15.049, 3015 tokens)
+Trace 28: seated (replacing 12) | bar 15.940
+Trace 0: cut at the bar 15.940 (its low 15.290, 3026 tokens)
+Trace 29: seated (replacing 0) | bar 15.940
+Trace 4: cut at the bar 15.940 (its low 15.939, 3157 tokens)
+Trace 30: seated (replacing 4) | bar 15.940
+Trace 5: cut at the bar 15.940 (its low 15.937, 3194 tokens)
+Vote bar frozen at 15.938 (keep top 10% of 16 wave-1 minima)
+Trace 31: seated (replacing 5) | bar 15.940
+Trace 18: cut at the bar 15.940 (its low 15.745, 2048 tokens)
+Trace 16: cut at the bar 15.940 (its low 15.939, 2054 tokens)
+Trace 23: cut at the bar 15.940 (its low 15.936, 2132 tokens)
+Trace 17: cut at the bar 15.940 (its low 15.939, 2217 tokens)
+Trace 24: cut at the bar 15.940 (its low 15.936, 2335 tokens)
+Trace 19: cut at the bar 15.940 (its low 15.937, 2398 tokens)
+Trace 25: cut at the bar 15.940 (its low 15.936, 2393 tokens)
+Trace 27: cut at the bar 15.940 (its low 15.939, 2450 tokens)
+Trace 22: cut at the bar 15.940 (its low 15.938, 2504 tokens)
+Trace 21: cut at the bar 15.940 (its low 15.939, 2526 tokens)
+Trace 31: cut at the bar 15.940 (its low 15.939, 2440 tokens)
+Trace 28: cut at the bar 15.940 (its low 15.939, 2560 tokens)
+Trace 26: cut at the bar 15.940 (its low 15.938, 2720 tokens)
+Trace 30: cut at the bar 15.940 (its low 15.923, 2641 tokens)
+Trace 20: cut at the bar 15.940 (its low 15.938, 2739 tokens)
+Trace 29: cut at the bar 15.940 (its low 15.938, 2776 tokens)
+CERTIFICATE: '284' cannot be caught (margin exceeds all 0 outstanding) — run over
+
+Basic voting candidates: 1
+Sample voting answers: ['284']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.940 (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 83279
+Traces: finished 1 | stopped 31 | truncated 0 | abandoned 0
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 1
+Final answer: 284   | ground truth: 284
+Total tokens generated (traces + probes, incl. discarded): 87572
+Total time: 47.62s
+
+=== Voting Results Summary ===
+  majority: 284 [1 votes]
+  mean_confidence_weighted: 284 (conf: 16.362) [1 votes]
+  tail_confidence_weighted: 284 (conf: 16.112) [1 votes]
+  bottom_window_weighted: 284 (conf: 15.964) [1 votes]
+  min_window_weighted: 284 (conf: 15.940) [1 votes]
+  top10_tail_filtered: 284 (conf: 16.112) [1 votes]
+  top10_bottom_window_filtered: 284 (conf: 15.964) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      284         1      -           ✓
+mean_confidence_weighted      284         1      16.362      ✓
+tail_confidence_weighted      284         1      16.112      ✓
+bottom_window_weighted        284         1      15.964      ✓
+min_window_weighted           284         1      15.940      ✓
+top10_tail_filtered           284         1      16.112      ✓
+top10_bottom_window_filtered  284         1      15.964      ✓
+Q12 done | gt=284 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q12_bar_cs_loopc.pkl
+
+============================================================
+### Q13  (11 min into the sweep)
+============================================================
+Q13: The volume of the cylinder shown is $45\pi$ cubic cm. What is the height in cent...
+Ground truth: 5
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 14: finished at 576 tokens | answer=5
+Trace 16: seated (replacing 14) | bar unarmed
+Trace 4: finished at 629 tokens | answer=5
+Trace 17: seated (replacing 4) | bar unarmed
+Trace 0: finished at 686 tokens | answer=5
+Trace 18: seated (replacing 0) | bar unarmed
+Trace 3: finished at 744 tokens | answer=5
+Trace 19: seated (replacing 3) | bar unarmed
+Trace 2: finished at 757 tokens | answer=5
+Trace 20: seated (replacing 2) | bar unarmed
+Trace 12: finished at 816 tokens | answer=5
+Trace 21: seated (replacing 12) | bar unarmed
+Trace 10: finished at 884 tokens | answer=5
+Trace 22: seated (replacing 10) | bar unarmed
+Trace 11: finished at 961 tokens | answer=5
+Trace 23: seated (replacing 11) | bar unarmed
+Trace 8: finished at 1004 tokens | answer=5
+Trace 24: seated (replacing 8) | bar unarmed
+Trace 13: finished at 1001 tokens | answer=5
+Trace 25: seated (replacing 13) | bar unarmed
+Trace 7: finished at 1006 tokens | answer=5
+Trace 26: seated (replacing 7) | bar unarmed
+Trace 16: finished at 661 tokens | answer=5
+Trace 27: seated (replacing 16) | bar unarmed
+Trace 6: finished at 1369 tokens | answer=5
+Trace 28: seated (replacing 6) | bar unarmed
+Trace 20: finished at 718 tokens | answer=5
+Trace 29: seated (replacing 20) | bar unarmed
+Trace 5: finished at 1529 tokens | answer=5
+Trace 30: seated (replacing 5) | bar unarmed
+Trace 18: finished at 865 tokens | answer=5
+Trace 31: seated (replacing 18) | bar unarmed
+Trace 19: finished at 832 tokens | answer=5
+CERTIFICATE: '5' cannot be caught (margin exceeds all 15 outstanding) — run over
+
+Basic voting candidates: 17
+Sample voting answers: ['5', '5', '5', '5', '5', '5', '5', '5']
+
+=== PeerConf Summary (streaming) ===
+Final bar: None (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 24587
+Traces: finished 17 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 17
+Final answer: 5   | ground truth: 5
+Total tokens generated (traces + probes, incl. discarded): 25165
+Total time: 12.61s
+
+=== Voting Results Summary ===
+  majority: 5 [17 votes]
+  mean_confidence_weighted: 5 (conf: 0.000) [17 votes]
+  tail_confidence_weighted: 5 (conf: 0.000) [17 votes]
+  bottom_window_weighted: 5 (conf: 0.000) [17 votes]
+  min_window_weighted: 5 (conf: 0.000) [17 votes]
+  top10_tail_filtered: 5 (conf: 0.000) [17 votes]
+  top10_bottom_window_filtered: 5 (conf: 0.000) [17 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      5           17     -           ✓
+mean_confidence_weighted      5           17     0.000       ✓
+tail_confidence_weighted      5           17     0.000       ✓
+bottom_window_weighted        5           17     0.000       ✓
+min_window_weighted           5           17     0.000       ✓
+top10_tail_filtered           5           17     0.000       ✓
+top10_bottom_window_filtered  5           17     0.000       ✓
+Q13 done | gt=5 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q13_bar_cs_loopc.pkl
+
+============================================================
+### Q14  (11 min into the sweep)
+============================================================
+Q14: Suppose $\sin D = 0.7$ in the diagram below. What is $DE$? [asy]
+pair D,E,F;
+F =...
+Ground truth: \sqrt{51}
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 10: finished at 2772 tokens | answer=\sqrt{51}
+Bar ARMED at 13.040 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 10) | bar 13.040
+Trace 0: cut at the bar 13.040 (its low 12.897, 2784 tokens)
+Trace 17: seated (replacing 0) | bar 13.040
+Trace 12: cut at the bar 13.040 (its low 10.877, 2773 tokens)
+Trace 18: seated (replacing 12) | bar 13.040
+Trace 6: cut at the bar 13.040 (its low 12.700, 2778 tokens)
+Trace 19: seated (replacing 6) | bar 13.040
+Trace 5: cut at the bar 13.040 (its low 12.645, 2779 tokens)
+Trace 20: seated (replacing 5) | bar 13.040
+Trace 8: cut at the bar 13.040 (its low 13.040, 2842 tokens)
+Trace 21: seated (replacing 8) | bar 13.040
+Trace 14: cut at the bar 13.040 (its low 13.033, 3096 tokens)
+Trace 22: seated (replacing 14) | bar 13.040
+Trace 15: finished at 3231 tokens | answer=\sqrt{51}
+Trace 23: seated (replacing 15) | bar 13.285
+Trace 3: cut at the bar 13.285 (its low 13.282, 3328 tokens)
+Trace 24: seated (replacing 3) | bar 13.285
+Trace 4: finished at 3538 tokens | answer=\sqrt{51}
+Consensus after 3 finishers: '\sqrt{51}' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['\\sqrt{51}', '\\sqrt{51}', '\\sqrt{51}']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 13.840 (keep top 10% of finishers' minima) | seats 16 | launched 25/32 | events: 53335
+Traces: finished 3 | stopped 7 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: \sqrt{51}   | ground truth: \sqrt{51}
+Total tokens generated (traces + probes, incl. discarded): 56432
+Total time: 28.69s
+
+=== Voting Results Summary ===
+  majority: \sqrt{51} [3 votes]
+  mean_confidence_weighted: \sqrt{51} (conf: 13.803) [3 votes]
+  tail_confidence_weighted: \sqrt{51} (conf: 13.992) [3 votes]
+  bottom_window_weighted: \sqrt{51} (conf: 13.490) [3 votes]
+  min_window_weighted: \sqrt{51} (conf: 13.441) [3 votes]
+  top10_tail_filtered: \sqrt{51} (conf: 14.142) [1 votes]
+  top10_bottom_window_filtered: \sqrt{51} (conf: 14.024) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \sqrt{51}   3      -           ✓
+mean_confidence_weighted      \sqrt{51}   3      13.803      ✓
+tail_confidence_weighted      \sqrt{51}   3      13.992      ✓
+bottom_window_weighted        \sqrt{51}   3      13.490      ✓
+min_window_weighted           \sqrt{51}   3      13.441      ✓
+top10_tail_filtered           \sqrt{51}   1      14.142      ✓
+top10_bottom_window_filtered  \sqrt{51}   1      14.024      ✓
+Q14 done | gt=\sqrt{51} | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q14_bar_cs_loopc.pkl
+
+============================================================
+### Q15  (12 min into the sweep)
+============================================================
+Q15: Let $z = 2 + \sqrt{2} - (3 + 3 \sqrt{2})i$, and let $c = 2 - 3i$.  Let $w$ be th...
+Ground truth: 6 - 5i
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 11: finished at 3265 tokens | answer=6-5i
+Bar ARMED at 16.966 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 11) | bar 16.966
+Trace 8: cut at the bar 16.966 (its low 16.480, 3273 tokens)
+Trace 17: seated (replacing 8) | bar 16.966
+Trace 10: cut at the bar 16.966 (its low 15.968, 3272 tokens)
+Trace 18: seated (replacing 10) | bar 16.966
+Trace 0: cut at the bar 16.966 (its low 15.539, 3280 tokens)
+Trace 19: seated (replacing 0) | bar 16.966
+Trace 3: cut at the bar 16.966 (its low 16.081, 3279 tokens)
+Trace 20: seated (replacing 3) | bar 16.966
+Trace 14: cut at the bar 16.966 (its low 15.917, 3267 tokens)
+Trace 21: seated (replacing 14) | bar 16.966
+Trace 15: cut at the bar 16.966 (its low 15.749, 3266 tokens)
+Trace 22: seated (replacing 15) | bar 16.966
+Trace 13: cut at the bar 16.966 (its low 16.051, 3267 tokens)
+Trace 23: seated (replacing 13) | bar 16.966
+Trace 9: cut at the bar 16.966 (its low 15.796, 3270 tokens)
+Trace 24: seated (replacing 9) | bar 16.966
+Trace 5: cut at the bar 16.966 (its low 16.195, 3276 tokens)
+Trace 25: seated (replacing 5) | bar 16.966
+Trace 4: cut at the bar 16.966 (its low 15.829, 3277 tokens)
+Trace 26: seated (replacing 4) | bar 16.966
+Trace 2: cut at the bar 16.966 (its low 14.956, 3281 tokens)
+Trace 27: seated (replacing 2) | bar 16.966
+Trace 7: cut at the bar 16.966 (its low 15.214, 3274 tokens)
+Trace 28: seated (replacing 7) | bar 16.966
+Trace 12: cut at the bar 16.966 (its low 15.837, 3268 tokens)
+Trace 29: seated (replacing 12) | bar 16.966
+Trace 6: cut at the bar 16.966 (its low 15.972, 3275 tokens)
+Trace 30: seated (replacing 6) | bar 16.966
+Trace 1: cut at the bar 16.966 (its low 16.722, 3334 tokens)
+Vote bar frozen at 16.601 (keep top 10% of 16 wave-1 minima)
+Trace 31: seated (replacing 1) | bar 16.966
+Trace 18: cut at the bar 16.966 (its low 15.769, 2048 tokens)
+Trace 20: cut at the bar 16.966 (its low 16.908, 2049 tokens)
+Trace 21: cut at the bar 16.966 (its low 16.889, 2048 tokens)
+Trace 22: cut at the bar 16.966 (its low 16.413, 2049 tokens)
+Trace 23: cut at the bar 16.966 (its low 16.565, 2048 tokens)
+Trace 26: cut at the bar 16.966 (its low 16.610, 2049 tokens)
+Trace 25: cut at the bar 16.966 (its low 16.636, 2050 tokens)
+Trace 27: cut at the bar 16.966 (its low 16.136, 2048 tokens)
+Trace 17: cut at the bar 16.966 (its low 16.966, 2065 tokens)
+Trace 28: cut at the bar 16.966 (its low 16.651, 2048 tokens)
+Trace 29: cut at the bar 16.966 (its low 16.765, 2052 tokens)
+Trace 30: cut at the bar 16.966 (its low 16.796, 2051 tokens)
+Trace 31: cut at the bar 16.966 (its low 16.571, 2050 tokens)
+Trace 16: cut at the bar 16.966 (its low 16.965, 2375 tokens)
+Trace 19: cut at the bar 16.966 (its low 16.966, 2686 tokens)
+Trace 24: cut at the bar 16.966 (its low 16.965, 3826 tokens)
+CERTIFICATE: '6-5i' cannot be caught (margin exceeds all 0 outstanding) — run over
+
+Basic voting candidates: 1
+Sample voting answers: ['6-5i']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 16.966 (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 83750
+Traces: finished 1 | stopped 31 | truncated 0 | abandoned 0
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 1
+Final answer: 6-5i   | ground truth: 6 - 5i
+Total tokens generated (traces + probes, incl. discarded): 87966
+Total time: 56.09s
+
+=== Voting Results Summary ===
+  majority: 6-5i [1 votes]
+  mean_confidence_weighted: 6-5i (conf: 17.134) [1 votes]
+  tail_confidence_weighted: 6-5i (conf: 17.006) [1 votes]
+  bottom_window_weighted: 6-5i (conf: 16.984) [1 votes]
+  min_window_weighted: 6-5i (conf: 16.966) [1 votes]
+  top10_tail_filtered: 6-5i (conf: 17.006) [1 votes]
+  top10_bottom_window_filtered: 6-5i (conf: 16.984) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      6-5i        1      -           ✓
+mean_confidence_weighted      6-5i        1      17.134      ✓
+tail_confidence_weighted      6-5i        1      17.006      ✓
+bottom_window_weighted        6-5i        1      16.984      ✓
+min_window_weighted           6-5i        1      16.966      ✓
+top10_tail_filtered           6-5i        1      17.006      ✓
+top10_bottom_window_filtered  6-5i        1      16.984      ✓
+Q15 done | gt=6 - 5i | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q15_bar_cs_loopc.pkl
+
+============================================================
+### Q16  (13 min into the sweep)
+============================================================
+Q16: Compute: $1-2+3-4+5- \dots +99-100$....
+Ground truth: -50
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 9: finished at 1544 tokens | answer=-50
+Trace 16: seated (replacing 9) | bar unarmed
+Trace 7: finished at 1783 tokens | answer=-50
+Trace 17: seated (replacing 7) | bar unarmed
+Trace 12: finished at 1938 tokens | answer=-50
+Trace 18: seated (replacing 12) | bar unarmed
+Trace 2: finished at 1979 tokens | answer=-50
+Trace 19: seated (replacing 2) | bar unarmed
+Trace 4: finished at 2005 tokens | answer=-50
+Trace 20: seated (replacing 4) | bar unarmed
+Trace 8: finished at 2106 tokens | answer=-50
+Bar ARMED at 15.820 (1 finishers calibrating, keep top 10%)
+Consensus after 6 finishers: '-50' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 6
+Sample voting answers: ['-50', '-50', '-50', '-50', '-50', '-50']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.820 (keep top 10% of finishers' minima) | seats 16 | launched 21/32 | events: 32400
+Traces: finished 6 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 6
+Final answer: -50   | ground truth: -50
+Total tokens generated (traces + probes, incl. discarded): 33656
+Total time: 16.92s
+
+=== Voting Results Summary ===
+  majority: -50 [6 votes]
+  mean_confidence_weighted: -50 (conf: 2.639) [6 votes]
+  tail_confidence_weighted: -50 (conf: 2.644) [6 votes]
+  bottom_window_weighted: -50 (conf: 2.637) [6 votes]
+  min_window_weighted: -50 (conf: 2.637) [6 votes]
+  top10_tail_filtered: -50 (conf: 15.862) [1 votes]
+  top10_bottom_window_filtered: -50 (conf: 15.824) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      -50         6      -           ✓
+mean_confidence_weighted      -50         6      2.639       ✓
+tail_confidence_weighted      -50         6      2.644       ✓
+bottom_window_weighted        -50         6      2.637       ✓
+min_window_weighted           -50         6      2.637       ✓
+top10_tail_filtered           -50         1      15.862      ✓
+top10_bottom_window_filtered  -50         1      15.824      ✓
+Q16 done | gt=-50 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q16_bar_cs_loopc.pkl
+
+============================================================
+### Q17  (13 min into the sweep)
+============================================================
+Q17: Below is the graph of $y = a \sin (bx + c) + d$ for some positive constants $a,$...
+Ground truth: \pi
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 9: GRADUATED at 4096 tokens — conf 1.000, answer \pi
+Trace 9: finished EARLY at 4144 tokens (graduation probe) | answer=\pi
+Bar ARMED at 12.492 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 9) | bar 12.492
+Trace 15: GRADUATED at 4096 tokens — conf 0.999, answer \pi
+Trace 15: finished EARLY at 4171 tokens (graduation probe) | answer=\pi
+Trace 17: seated (replacing 15) | bar 12.464
+Trace 1: cut at the bar 12.464 (its low 11.554, 4667 tokens)
+Trace 18: seated (replacing 1) | bar 12.464
+Trace 18: cut at the bar 12.464 (its low 12.464, 2625 tokens)
+Trace 19: seated (replacing 18) | bar 12.464
+Trace 6: cut at the bar 12.464 (its low 12.057, 7629 tokens)
+Trace 20: seated (replacing 6) | bar 12.464
+Trace 11: cut at the bar 12.464 (its low 12.223, 8100 tokens)
+Trace 21: seated (replacing 11) | bar 12.464
+Trace 3: GRADUATED at 8192 tokens — conf 0.998, answer \pi
+Trace 3: finished EARLY at 8200 tokens (graduation probe) | answer=\pi
+Consensus after 3 finishers: '\pi' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['\\pi', '\\pi', '\\pi']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 12.946 (keep top 10% of finishers' minima) | seats 16 | launched 22/32 | events: 123050
+Traces: finished 3 | stopped 4 | truncated 0 | abandoned 15
+Graduation probes: 17 fired (303 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: \pi   | ground truth: \pi
+Total tokens generated (traces + probes, incl. discarded): 131367 (of which probes: 303)
+Total time: 73.53s
+
+=== Voting Results Summary ===
+  majority: \pi [3 votes]
+  mean_confidence_weighted: \pi (conf: 13.179) [3 votes]
+  tail_confidence_weighted: \pi (conf: 13.466) [3 votes]
+  bottom_window_weighted: \pi (conf: 12.653) [3 votes]
+  min_window_weighted: \pi (conf: 12.587) [3 votes]
+  top10_tail_filtered: \pi (conf: 13.941) [1 votes]
+  top10_bottom_window_filtered: \pi (conf: 13.146) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      \pi         3      -           ✓
+mean_confidence_weighted      \pi         3      13.179      ✓
+tail_confidence_weighted      \pi         3      13.466      ✓
+bottom_window_weighted        \pi         3      12.653      ✓
+min_window_weighted           \pi         3      12.587      ✓
+top10_tail_filtered           \pi         1      13.941      ✓
+top10_bottom_window_filtered  \pi         1      13.146      ✓
+Q17 done | gt=\pi | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q17_bar_cs_loopc.pkl
+
+============================================================
+### Q18  (14 min into the sweep)
+============================================================
+Q18: $\overline{BC}$ is parallel to the segment through $A$, and $AB = BC$. What is t...
+Ground truth: 28
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 5: GRADUATED at 8192 tokens — conf 0.963, answer 28
+Trace 5: finished EARLY at 8219 tokens (graduation probe) | answer=28
+Bar ARMED at 12.771 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 5) | bar 12.771
+Trace 3: cut at the bar 12.771 (its low 12.439, 8230 tokens)
+Trace 17: seated (replacing 3) | bar 12.771
+Trace 12: cut at the bar 12.771 (its low 12.368, 8221 tokens)
+Trace 18: seated (replacing 12) | bar 12.771
+Trace 1: cut at the bar 12.771 (its low 12.768, 10052 tokens)
+Trace 19: seated (replacing 1) | bar 12.771
+Trace 16: cut at the bar 12.771 (its low 12.771, 2206 tokens)
+Trace 20: seated (replacing 16) | bar 12.771
+Trace 18: cut at the bar 12.771 (its low 12.765, 3331 tokens)
+Trace 21: seated (replacing 18) | bar 12.771
+Trace 19: cut at the bar 12.771 (its low 12.770, 2316 tokens)
+Trace 22: seated (replacing 19) | bar 12.771
+Trace 13: GRADUATED at 12350 tokens — conf 0.985, answer 124
+Trace 13: finished EARLY at 12380 tokens (graduation probe) | answer=124
+Trace 23: seated (replacing 13) | bar 12.740
+Trace 6: GRADUATED at 12348 tokens — conf 0.968, answer 28
+Trace 6: finished EARLY at 12388 tokens (graduation probe) | answer=28
+Trace 24: seated (replacing 6) | bar 12.710
+Trace 9: GRADUATED at 12344 tokens — conf 1.000, answer 56
+Trace 4: GRADUATED at 12351 tokens — conf 0.970, answer 28
+Trace 9: finished EARLY at 12395 tokens (graduation probe) | answer=56
+Trace 25: seated (replacing 9) | bar 12.690
+Trace 4: finished EARLY at 12402 tokens (graduation probe) | answer=28
+Trace 26: seated (replacing 4) | bar 12.664
+Trace 20: cut at the bar 12.664 (its low 12.664, 2427 tokens)
+Trace 27: seated (replacing 20) | bar 12.664
+Trace 26: cut at the bar 12.664 (its low 12.661, 2474 tokens)
+Trace 28: seated (replacing 26) | bar 12.664
+Trace 27: cut at the bar 12.664 (its low 12.661, 3338 tokens)
+Trace 29: seated (replacing 27) | bar 12.664
+Trace 8: GRADUATED at 16551 tokens — conf 1.000, answer 28
+Trace 8: finished EARLY at 16593 tokens (graduation probe) | answer=28
+Trace 30: seated (replacing 8) | bar 12.693
+Trace 29: cut at the bar 12.693 (its low 12.691, 2917 tokens)
+Trace 31: seated (replacing 29) | bar 12.693
+Trace 23: cut at the bar 12.693 (its low 12.691, 7007 tokens)
+Trace 24: GRADUATED at 8227 tokens — conf 0.974, answer 56
+Trace 24: finished EARLY at 8238 tokens (graduation probe) | answer=56
+Trace 7: GRADUATED at 20647 tokens — conf 0.995, answer 28
+Trace 7: finished EARLY at 20680 tokens (graduation probe) | answer=28
+Trace 0: finished at 22175 tokens | answer=28
+Trace 10: finished at 24611 tokens | answer=56
+Trace 14: GRADUATED at 24746 tokens — conf 0.996, answer 28
+Trace 14: finished EARLY at 24764 tokens (graduation probe) | answer=28
+Trace 25: GRADUATED at 12322 tokens — conf 0.980, answer 62
+Trace 25: finished EARLY at 12353 tokens (graduation probe) | answer=62
+Trace 15: finished at 24862 tokens | answer=124
+Trace 2: finished at 28519 tokens | answer=28
+Trace 30: GRADUATED at 12303 tokens — conf 1.000, answer 124
+Trace 30: finished EARLY at 12330 tokens (graduation probe) | answer=124
+Trace 28: GRADUATED at 16384 tokens — conf 1.000, answer 28
+Trace 28: finished EARLY at 16394 tokens (graduation probe) | answer=28
+CERTIFICATE: '28' cannot be caught (margin exceeds all 5 outstanding) — run over
+
+Basic voting candidates: 16
+Sample voting answers: ['28', '28', '28', '28', '28', '28', '28', '56']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 12.977 (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 396794
+Traces: finished 16 | stopped 11 | truncated 0 | abandoned 5
+Graduation probes: 92 fired (924 probe tokens) | graduated early: 12
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 16
+Final answer: 28   | ground truth: 28
+Total tokens generated (traces + probes, incl. discarded): 427788 (of which probes: 924)
+Total time: 322.11s
+
+=== Voting Results Summary ===
+  majority: 28 [16 votes]
+  mean_confidence_weighted: 28 (conf: 14.175) [16 votes]
+  tail_confidence_weighted: 28 (conf: 14.428) [16 votes]
+  bottom_window_weighted: 28 (conf: 12.902) [16 votes]
+  min_window_weighted: 28 (conf: 12.682) [16 votes]
+  top10_tail_filtered: 62 (conf: 16.457) [2 votes]
+  top10_bottom_window_filtered: 56 (conf: 13.217) [2 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      28          16     -           ✓
+mean_confidence_weighted      28          16     14.175      ✓
+tail_confidence_weighted      28          16     14.428      ✓
+bottom_window_weighted        28          16     12.902      ✓
+min_window_weighted           28          16     12.682      ✓
+top10_tail_filtered           62          2      16.457      ✗
+top10_bottom_window_filtered  56          2      13.217      ✗
+Q18 done | gt=28 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✗, top10_bottom_window_filtered:✗
+Saved to /results/math500/peerconf_out/math500_q18_bar_cs_loopc.pkl
+
+============================================================
+### Q19  (20 min into the sweep)
+============================================================
+Q19: Let $a$ be a positive real number such that all the roots of
+\[x^3 + ax^2 + ax +...
+Ground truth: 3
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 1: GRADUATED at 4096 tokens — conf 1.000, answer 3
+Trace 1: finished EARLY at 4103 tokens (graduation probe) | answer=3
+Bar ARMED at 14.616 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 1) | bar 14.616
+Trace 5: GRADUATED at 4096 tokens — conf 1.000, answer 3
+Trace 5: finished EARLY at 4103 tokens (graduation probe) | answer=3
+Trace 17: seated (replacing 5) | bar 15.850
+Trace 10: cut at the bar 15.850 (its low 14.559, 4102 tokens)
+Trace 18: seated (replacing 10) | bar 15.850
+Trace 2: cut at the bar 15.850 (its low 14.104, 4104 tokens)
+Trace 19: seated (replacing 2) | bar 15.850
+Trace 9: cut at the bar 15.850 (its low 15.345, 4097 tokens)
+Trace 20: seated (replacing 9) | bar 15.850
+Trace 4: cut at the bar 15.850 (its low 14.343, 4106 tokens)
+Trace 21: seated (replacing 4) | bar 15.850
+Trace 11: cut at the bar 15.850 (its low 15.174, 4100 tokens)
+Trace 22: seated (replacing 11) | bar 15.850
+Trace 0: cut at the bar 15.850 (its low 15.164, 4110 tokens)
+Trace 23: seated (replacing 0) | bar 15.850
+Trace 13: cut at the bar 15.850 (its low 14.360, 4097 tokens)
+Trace 24: seated (replacing 13) | bar 15.850
+Trace 14: cut at the bar 15.850 (its low 15.042, 4095 tokens)
+Trace 25: seated (replacing 14) | bar 15.850
+Trace 6: cut at the bar 15.850 (its low 14.630, 4104 tokens)
+Trace 26: seated (replacing 6) | bar 15.850
+Trace 8: cut at the bar 15.850 (its low 14.912, 4098 tokens)
+Trace 27: seated (replacing 8) | bar 15.850
+Trace 7: cut at the bar 15.850 (its low 14.657, 4102 tokens)
+Trace 28: seated (replacing 7) | bar 15.850
+Trace 12: GRADUATED at 4098 tokens — conf 1.000, answer 3
+Trace 12: finished EARLY at 4154 tokens (graduation probe) | answer=3
+Consensus after 3 finishers: '3' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['3', '3', '3']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.837 (keep top 10% of finishers' minima) | seats 16 | launched 29/32 | events: 62533
+Traces: finished 3 | stopped 11 | truncated 0 | abandoned 15
+Graduation probes: 15 fired (195 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 3   | ground truth: 3
+Total tokens generated (traces + probes, incl. discarded): 66023 (of which probes: 195)
+Total time: 35.29s
+
+=== Voting Results Summary ===
+  majority: 3 [3 votes]
+  mean_confidence_weighted: 3 (conf: 15.917) [3 votes]
+  tail_confidence_weighted: 3 (conf: 15.894) [3 votes]
+  bottom_window_weighted: 3 (conf: 15.355) [3 votes]
+  min_window_weighted: 3 (conf: 15.280) [3 votes]
+  top10_tail_filtered: 3 (conf: 16.189) [1 votes]
+  top10_bottom_window_filtered: 3 (conf: 16.033) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      3           3      -           ✓
+mean_confidence_weighted      3           3      15.917      ✓
+tail_confidence_weighted      3           3      15.894      ✓
+bottom_window_weighted        3           3      15.355      ✓
+min_window_weighted           3           3      15.280      ✓
+top10_tail_filtered           3           1      16.189      ✓
+top10_bottom_window_filtered  3           1      16.033      ✓
+Q19 done | gt=3 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q19_bar_cs_loopc.pkl
+
+============================================================
+### Q20  (20 min into the sweep)
+============================================================
+Q20: Evaluate $(1+2i)6-3i$....
+Ground truth: 6+9i
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 5: finished at 639 tokens | answer=6+9i
+Trace 16: seated (replacing 5) | bar unarmed
+Trace 12: finished at 641 tokens | answer=6+9i
+Trace 17: seated (replacing 12) | bar unarmed
+Trace 2: finished at 654 tokens | answer=6+9i
+Trace 18: seated (replacing 2) | bar unarmed
+Trace 1: finished at 680 tokens | answer=6+9i
+Trace 19: seated (replacing 1) | bar unarmed
+Trace 6: finished at 697 tokens | answer=6+9i
+Trace 20: seated (replacing 6) | bar unarmed
+Trace 4: finished at 744 tokens | answer=6+9i
+Trace 21: seated (replacing 4) | bar unarmed
+Trace 15: finished at 743 tokens | answer=6+9i
+Trace 22: seated (replacing 15) | bar unarmed
+Trace 7: finished at 757 tokens | answer=6+9i
+Trace 23: seated (replacing 7) | bar unarmed
+Trace 11: finished at 775 tokens | answer=6+9i
+Trace 24: seated (replacing 11) | bar unarmed
+Trace 0: finished at 914 tokens | answer=6+9i
+Trace 25: seated (replacing 0) | bar unarmed
+Trace 3: finished at 954 tokens | answer=6+9i
+Trace 26: seated (replacing 3) | bar unarmed
+Trace 16: finished at 572 tokens | answer=6+9i
+Trace 27: seated (replacing 16) | bar unarmed
+Trace 17: finished at 569 tokens | answer=6+9i
+Trace 28: seated (replacing 17) | bar unarmed
+Trace 20: finished at 561 tokens | answer=6+9i
+Trace 29: seated (replacing 20) | bar unarmed
+Trace 10: finished at 1324 tokens | answer=6+9i
+Trace 30: seated (replacing 10) | bar unarmed
+Trace 9: finished at 1411 tokens | answer=6+9i
+Trace 31: seated (replacing 9) | bar unarmed
+Trace 22: finished at 685 tokens | answer=6+9i
+CERTIFICATE: '6+9i' cannot be caught (margin exceeds all 15 outstanding) — run over
+
+Basic voting candidates: 17
+Sample voting answers: ['6+9i', '6+9i', '6+9i', '6+9i', '6+9i', '6+9i', '6+9i', '6+9i']
+
+=== PeerConf Summary (streaming) ===
+Final bar: None (keep top 10% of finishers' minima) | seats 16 | launched 32/32 | events: 22508
+Traces: finished 17 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 17
+Final answer: 6+9i   | ground truth: 6+9i
+Total tokens generated (traces + probes, incl. discarded): 22929
+Total time: 11.45s
+
+=== Voting Results Summary ===
+  majority: 6+9i [17 votes]
+  mean_confidence_weighted: 6+9i (conf: 0.000) [17 votes]
+  tail_confidence_weighted: 6+9i (conf: 0.000) [17 votes]
+  bottom_window_weighted: 6+9i (conf: 0.000) [17 votes]
+  min_window_weighted: 6+9i (conf: 0.000) [17 votes]
+  top10_tail_filtered: 6+9i (conf: 0.000) [17 votes]
+  top10_bottom_window_filtered: 6+9i (conf: 0.000) [17 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      6+9i        17     -           ✓
+mean_confidence_weighted      6+9i        17     0.000       ✓
+tail_confidence_weighted      6+9i        17     0.000       ✓
+bottom_window_weighted        6+9i        17     0.000       ✓
+min_window_weighted           6+9i        17     0.000       ✓
+top10_tail_filtered           6+9i        17     0.000       ✓
+top10_bottom_window_filtered  6+9i        17     0.000       ✓
+Q20 done | gt=6+9i | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q20_bar_cs_loopc.pkl
+
+============================================================
+### Q21  (20 min into the sweep)
+============================================================
+Q21: Find the greatest integer less than $(\sqrt{7} + \sqrt{5})^6.$  (Do not use a ca...
+Ground truth: 13535
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 4: GRADUATED at 4096 tokens — conf 0.998, answer 13535
+Trace 5: GRADUATED at 4096 tokens — conf 1.000, answer 13535
+Trace 4: finished EARLY at 4129 tokens (graduation probe) | answer=13535
+Bar ARMED at 14.977 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 4) | bar 14.977
+Trace 5: finished EARLY at 4129 tokens (graduation probe) | answer=13535
+Trace 17: seated (replacing 5) | bar 15.625
+Trace 6: GRADUATED at 4096 tokens — conf 1.000, answer 13535
+Trace 8: cut at the bar 15.625 (its low 14.761, 4127 tokens)
+Trace 18: seated (replacing 8) | bar 15.625
+Trace 10: cut at the bar 15.625 (its low 14.575, 4123 tokens)
+Trace 19: seated (replacing 10) | bar 15.625
+Trace 6: finished EARLY at 4129 tokens (graduation probe) | answer=13535
+Consensus after 3 finishers: '13535' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['13535', '13535', '13535']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.709 (keep top 10% of finishers' minima) | seats 16 | launched 20/32 | events: 62922
+Traces: finished 3 | stopped 2 | truncated 0 | abandoned 15
+Graduation probes: 13 fired (212 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 13535   | ground truth: 13535
+Total tokens generated (traces + probes, incl. discarded): 66308 (of which probes: 212)
+Total time: 35.16s
+
+=== Voting Results Summary ===
+  majority: 13535 [3 votes]
+  mean_confidence_weighted: 13535 (conf: 16.006) [3 votes]
+  tail_confidence_weighted: 13535 (conf: 15.771) [3 votes]
+  bottom_window_weighted: 13535 (conf: 15.552) [3 votes]
+  min_window_weighted: 13535 (conf: 15.462) [3 votes]
+  top10_tail_filtered: 13535 (conf: 16.443) [1 votes]
+  top10_bottom_window_filtered: 13535 (conf: 15.778) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      13535       3      -           ✓
+mean_confidence_weighted      13535       3      16.006      ✓
+tail_confidence_weighted      13535       3      15.771      ✓
+bottom_window_weighted        13535       3      15.552      ✓
+min_window_weighted           13535       3      15.462      ✓
+top10_tail_filtered           13535       1      16.443      ✓
+top10_bottom_window_filtered  13535       1      15.778      ✓
+Q21 done | gt=13535 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q21_bar_cs_loopc.pkl
+
+============================================================
+### Q22  (21 min into the sweep)
+============================================================
+Q22: Denali and Nate work for a dog walking business and are paid for each dog they w...
+Ground truth: 5
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 8: finished at 2981 tokens | answer=5
+Bar ARMED at 12.625 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 8) | bar 12.625
+Trace 1: cut at the bar 12.625 (its low 12.351, 2987 tokens)
+Trace 17: seated (replacing 1) | bar 12.625
+Trace 15: cut at the bar 12.625 (its low 12.415, 2973 tokens)
+Trace 18: seated (replacing 15) | bar 12.625
+Trace 4: cut at the bar 12.625 (its low 12.269, 2984 tokens)
+Trace 19: seated (replacing 4) | bar 12.625
+Trace 11: cut at the bar 12.625 (its low 11.476, 2977 tokens)
+Trace 20: seated (replacing 11) | bar 12.625
+Trace 12: finished at 3134 tokens | answer=5
+Trace 21: seated (replacing 12) | bar 13.600
+Trace 7: cut at the bar 13.600 (its low 12.575, 3143 tokens)
+Trace 22: seated (replacing 7) | bar 13.600
+Trace 0: cut at the bar 13.600 (its low 12.895, 3151 tokens)
+Trace 23: seated (replacing 0) | bar 13.600
+Trace 13: cut at the bar 13.600 (its low 12.667, 3138 tokens)
+Trace 24: seated (replacing 13) | bar 13.600
+Trace 2: cut at the bar 13.600 (its low 13.595, 3310 tokens)
+Trace 25: seated (replacing 2) | bar 13.600
+Trace 10: cut at the bar 13.600 (its low 13.598, 3318 tokens)
+Trace 26: seated (replacing 10) | bar 13.600
+Trace 14: cut at the bar 13.600 (its low 13.595, 3364 tokens)
+Trace 27: seated (replacing 14) | bar 13.600
+Trace 3: cut at the bar 13.600 (its low 13.596, 3438 tokens)
+Trace 28: seated (replacing 3) | bar 13.600
+Trace 5: cut at the bar 13.600 (its low 13.600, 3908 tokens)
+Trace 29: seated (replacing 5) | bar 13.600
+Trace 6: cut at the bar 13.600 (its low 13.595, 3987 tokens)
+Trace 30: seated (replacing 6) | bar 13.600
+Trace 9: finished at 4620 tokens | answer=5
+Vote bar frozen at 13.599 (keep top 10% of 16 wave-1 minima)
+Consensus after 3 finishers: '5' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['5', '5', '5']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 13.576 (keep top 10% of finishers' minima) | seats 16 | launched 31/32 | events: 69034
+Traces: finished 3 | stopped 13 | truncated 0 | abandoned 15
+Graduation probes: 1 fired (20 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 5   | ground truth: 5
+Total tokens generated (traces + probes, incl. discarded): 73766 (of which probes: 20)
+Total time: 38.14s
+
+=== Voting Results Summary ===
+  majority: 5 [3 votes]
+  mean_confidence_weighted: 5 (conf: 13.670) [3 votes]
+  tail_confidence_weighted: 5 (conf: 14.123) [3 votes]
+  bottom_window_weighted: 5 (conf: 13.197) [3 votes]
+  min_window_weighted: 5 (conf: 13.127) [3 votes]
+  top10_tail_filtered: 5 (conf: 15.034) [1 votes]
+  top10_bottom_window_filtered: 5 (conf: 13.719) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      5           3      -           ✓
+mean_confidence_weighted      5           3      13.670      ✓
+tail_confidence_weighted      5           3      14.123      ✓
+bottom_window_weighted        5           3      13.197      ✓
+min_window_weighted           5           3      13.127      ✓
+top10_tail_filtered           5           1      15.034      ✓
+top10_bottom_window_filtered  5           1      13.719      ✓
+Q22 done | gt=5 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q22_bar_cs_loopc.pkl
+
+============================================================
+### Q23  (22 min into the sweep)
+============================================================
+Q23: Find all values of $x$ that satisfy the equation $x = \!\sqrt{11-2x} + 4$....
+Ground truth: x=5
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 9: finished at 2951 tokens | answer=5
+Bar ARMED at 15.400 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 9) | bar 15.400
+Trace 5: cut at the bar 15.400 (its low 14.550, 2955 tokens)
+Trace 17: seated (replacing 5) | bar 15.400
+Trace 14: cut at the bar 15.400 (its low 15.116, 2948 tokens)
+Trace 18: seated (replacing 14) | bar 15.400
+Trace 10: cut at the bar 15.400 (its low 14.389, 2953 tokens)
+Trace 19: seated (replacing 10) | bar 15.400
+Trace 6: cut at the bar 15.400 (its low 14.168, 2956 tokens)
+Trace 20: seated (replacing 6) | bar 15.400
+Trace 13: cut at the bar 15.400 (its low 14.771, 2950 tokens)
+Trace 21: seated (replacing 13) | bar 15.400
+Trace 1: cut at the bar 15.400 (its low 14.719, 2960 tokens)
+Trace 22: seated (replacing 1) | bar 15.400
+Trace 3: cut at the bar 15.400 (its low 14.784, 2962 tokens)
+Trace 23: seated (replacing 3) | bar 15.400
+Trace 8: cut at the bar 15.400 (its low 14.104, 2965 tokens)
+Trace 24: seated (replacing 8) | bar 15.400
+Trace 11: cut at the bar 15.400 (its low 14.748, 2954 tokens)
+Trace 25: seated (replacing 11) | bar 15.400
+Trace 2: finished at 2969 tokens | answer=5
+Trace 26: seated (replacing 2) | bar 15.399
+Trace 0: cut at the bar 15.399 (its low 15.392, 3059 tokens)
+Trace 27: seated (replacing 0) | bar 15.399
+Trace 4: finished at 3193 tokens | answer=5
+Consensus after 3 finishers: '5' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['5', '5', '5']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.398 (keep top 10% of finishers' minima) | seats 16 | launched 28/32 | events: 47795
+Traces: finished 3 | stopped 10 | truncated 0 | abandoned 15
+Graduation probes: 0 fired (0 probe tokens) | graduated early: 0
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 5   | ground truth: x=5
+Total tokens generated (traces + probes, incl. discarded): 50527
+Total time: 26.30s
+
+=== Voting Results Summary ===
+  majority: 5 [3 votes]
+  mean_confidence_weighted: 5 (conf: 15.626) [3 votes]
+  tail_confidence_weighted: 5 (conf: 15.847) [3 votes]
+  bottom_window_weighted: 5 (conf: 15.377) [3 votes]
+  min_window_weighted: 5 (conf: 15.344) [3 votes]
+  top10_tail_filtered: 5 (conf: 15.948) [1 votes]
+  top10_bottom_window_filtered: 5 (conf: 15.419) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      5           3      -           ✓
+mean_confidence_weighted      5           3      15.626      ✓
+tail_confidence_weighted      5           3      15.847      ✓
+bottom_window_weighted        5           3      15.377      ✓
+min_window_weighted           5           3      15.344      ✓
+top10_tail_filtered           5           1      15.948      ✓
+top10_bottom_window_filtered  5           1      15.419      ✓
+Q23 done | gt=x=5 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q23_bar_cs_loopc.pkl
+
+============================================================
+### Q24  (22 min into the sweep)
+============================================================
+Q24: A worker receives an annual wage of $\$20{,}000$, which he always deposits into ...
+Ground truth: 10
+
+Run start: 16 seats (cap 32), streaming (report every 1 tokens) | wave 1 line-free; replacements face the self-calibrating bar (keep top 10%, arms at 1 finishers, updates per finisher) | probes every 4096 (graduate at 0.95) | loop guard ON (cut) | close: landslide (95%) OR certificate
+Trace 1: GRADUATED at 4096 tokens — conf 1.000, answer 10
+Trace 1: finished EARLY at 4106 tokens (graduation probe) | answer=10
+Bar ARMED at 15.647 (1 finishers calibrating, keep top 10%)
+Trace 16: seated (replacing 1) | bar 15.647
+Trace 3: GRADUATED at 4096 tokens — conf 1.000, answer 10
+Trace 0: GRADUATED at 4096 tokens — conf 1.000, answer 10
+Trace 3: finished EARLY at 4105 tokens (graduation probe) | answer=10
+Trace 17: seated (replacing 3) | bar 15.494
+Trace 0: finished EARLY at 4106 tokens (graduation probe) | answer=10
+Consensus after 3 finishers: '10' holds 100% — killing 15 in-flight streams, no new launches
+
+Basic voting candidates: 3
+Sample voting answers: ['10', '10', '10']
+
+=== PeerConf Summary (streaming) ===
+Final bar: 15.670 (keep top 10% of finishers' minima) | seats 16 | launched 18/32 | events: 62109
+Traces: finished 3 | stopped 0 | truncated 0 | abandoned 15
+Graduation probes: 10 fired (102 probe tokens) | graduated early: 3
+Loop guard: 0 loops caught and ended (no ballots cast)
+Valid answers for voting: 3
+Final answer: 10   | ground truth: 10
+Total tokens generated (traces + probes, incl. discarded): 65704 (of which probes: 102)
+Total time: 35.05s
+
+=== Voting Results Summary ===
+  majority: 10 [3 votes]
+  mean_confidence_weighted: 10 (conf: 15.828) [3 votes]
+  tail_confidence_weighted: 10 (conf: 15.509) [3 votes]
+  bottom_window_weighted: 10 (conf: 15.214) [3 votes]
+  min_window_weighted: 10 (conf: 15.145) [3 votes]
+  top10_tail_filtered: 10 (conf: 15.714) [1 votes]
+  top10_bottom_window_filtered: 10 (conf: 15.767) [1 votes]
+
+=== Detailed Voting Results ===
+----------------------------------------------------------------------
+Method                        Answer      Votes  Confidence  Correct
+----------------------------------------------------------------------
+majority                      10          3      -           ✓
+mean_confidence_weighted      10          3      15.828      ✓
+tail_confidence_weighted      10          3      15.509      ✓
+bottom_window_weighted        10          3      15.214      ✓
+min_window_weighted           10          3      15.145      ✓
+top10_tail_filtered           10          1      15.714      ✓
+top10_bottom_window_filtered  10          1      15.767      ✓
+Q24 done | gt=10 | majority:✓, mean_confidence_weighted:✓, tail_confidence_weighted:✓, bottom_window_weighted:✓, min_window_weighted:✓, top10_tail_filtered:✓, top10_bottom_window_filtered:✓
+Saved to /results/math500/peerconf_out/math500_q24_bar_cs_loopc.pkl
+
+Sweep over: 25 questions requested, 23 min total
