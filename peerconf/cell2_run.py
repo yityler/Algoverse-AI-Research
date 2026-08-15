@@ -169,6 +169,7 @@ class Trace:
         self.retried   = False
         self.probes    = []      # graduation-probe history: one dict per probe
         self.probe_toks = 0      # tokens the probes themselves generated (accounted)
+        self.probe_fails = 0     # probes that never came back (they leave no record)
         self.probing   = False   # a probe is in flight for this trace right now
         self.last_probe_at = 0   # toks_gen at the last probe (schedule pacing)
         self.last_loop_check = 0 # toks_gen at the last loop-guard check
@@ -256,7 +257,9 @@ def fly_probe(t, prompt, at_toks):
     """Worker: one greedy non-streamed probe. conf = geometric mean over ONLY
     the answer tokens inside {...} (punctuation ~0.99 dilutes the blended mean
     upward); "blended" keeps the all-token score for comparison. Hitting the
-    "</think>" stop string = ended_with_think. A failed probe is skipped."""
+    "</think>" stop string = ended_with_think. A failed probe is skipped.
+    The completion and its per-token logprobs ride along, so the run's pkl keeps
+    the probe's raw evidence and not just the numbers read off it."""
     body = {"model": MODEL, "prompt": prompt, "max_tokens": PROBE_MAX_TOK,
             "temperature": 0.0, "logprobs": 1, "stop": ["</think>"]}
     try:
@@ -278,11 +281,17 @@ def fly_probe(t, prompt, at_toks):
         conf = float(np.exp(np.mean(ans_lps))) if ans_lps else blended
         events.put((t, {"kind": "probe", "at": at_toks, "text": text,
                         "conf": conf, "blended": blended, "ntok": len(tlps),
+                        "toks": toks, "tlps": tlps,
+                        # which score "conf" actually is: with no braces to
+                        # score it falls back to the punctuation-diluted blended
+                        # mean, and the record should say so rather than hide it
+                        "conf_src": "answer" if ans_lps else "blended",
                         "ewt": ch.get("finish_reason") == "stop"}, None))
     except Exception as e:
         events.put((t, {"kind": "probe", "at": at_toks, "failed": str(e),
                         "text": "", "conf": 0.0, "blended": 0.0,
-                        "ntok": 0, "ewt": False}, None))
+                        "ntok": 0, "toks": [], "tlps": [],
+                        "conf_src": "none", "ewt": False}, None))
 
 def launch_probe(t):
     """Main thread only. Snapshot the trace and fork its graduation probe."""
@@ -450,13 +459,21 @@ for QID in QIDS:
             t.probing = False
             t.probe_toks += payload["ntok"]
             if "failed" in payload:
+                t.probe_fails += 1
                 print(f"Trace {t.id}: probe failed at {payload['at']} tokens "
                       f"({payload['failed'][:60]}) — skipped")
                 continue
             p_ans = extract_answer("\\boxed" + payload["text"])
             rec = {"at": payload["at"], "conf": payload["conf"],
                    "blended": payload["blended"],
-                   "ewt": payload["ewt"], "answer": p_ans}
+                   "ewt": payload["ewt"], "answer": p_ans,
+                   # the raw evidence behind those numbers: the completion the
+                   # extractor read, and the logprobs the scorer scored. Keeping
+                   # it makes a changed extractor or a changed scoring rule a
+                   # re-read of this pkl instead of a fresh run.
+                   "text": payload["text"], "ntok": payload["ntok"],
+                   "toks": payload["toks"], "tlps": payload["tlps"],
+                   "conf_src": payload["conf_src"]}
             t.probes.append(rec)
             # graduate on ONE perfect probe: sure + closing + a real answer
             if (t.pending is None and not run_over and t.status == "running"
@@ -604,8 +621,10 @@ for QID in QIDS:
     print(f"Traces: finished {n_status('finished')} | stopped {n_status('stopped')} "
           f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
     if PROBE_EVERY > 0:
+        n_pfail = sum(t.probe_fails for t in done)
         print(f"Graduation probes: {sum(len(t.probes) for t in done)} fired "
-              f"({probe_tokens} probe tokens) | graduated early: {n_graduated}")
+              f"({probe_tokens} probe tokens) | graduated early: {n_graduated}"
+              + (f" | {n_pfail} failed" if n_pfail else ""))
     if LOOP_ACTION != "off":
         print(f"Loop guard: {n_looped} loops caught and ended (no ballots cast)")
     print(f"Valid answers for voting: {len(voters)}")
@@ -667,6 +686,7 @@ for QID in QIDS:
                                  "graduated": t.graduated,
                                  "probes": t.probes,
                                  "probe_toks": t.probe_toks,
+                                 "probe_fails": t.probe_fails,
                                  "text": t.gen_text,
                                  "prompt": t.prompt_text} for t in done]}, f)
     print(f"Saved to {save_path}")
