@@ -1,4 +1,4 @@
-# MATH-500 — every question, both arms
+# MATH-500 — Comparison of PeerConf and DeepConf
 
 All 25 questions from the WINDOW=256 run: the original problem, the gold answer,
 what each method answered, and both confidence timelines (50 charts).
