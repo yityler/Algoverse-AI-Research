@@ -87,8 +87,6 @@ wave launches.
 
 ## Graduation threshold
 
-Counts below predate the q9/q12 rerun.
-
 Every path that graduated on a commitment probe, scored against the ground truth,
 as GRAD_CONF varies. The end-of-thinking marker stays on throughout. The last two
 columns split the paths that graduate at 0.95 but not at this threshold, by
@@ -98,17 +96,17 @@ whether the answer they were carrying was right or wrong.
 
 | GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
 |---|---|---|---|---|---|
-| 0.90 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.91 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.92 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.93 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.94 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.95 | 107 | 87 | 81.3% | 0 | 0 |
-| 0.96 | 106 | 87 | 82.1% | 1 | 0 |
-| 0.97 | 105 | 87 | 82.9% | 2 | 0 |
-| 0.98 | 105 | 87 | 82.9% | 2 | 0 |
-| 0.99 | 101 | 84 | 83.2% | 3 | 3 |
-| 0.995 | 98 | 84 | 85.7% | 6 | 3 |
+| 0.90 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.91 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.92 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.93 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.94 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.95 | 110 | 87 | 79.1% | 0 | 0 |
+| 0.96 | 109 | 87 | 79.8% | 1 | 0 |
+| 0.97 | 108 | 87 | 80.6% | 2 | 0 |
+| 0.98 | 108 | 87 | 80.6% | 2 | 0 |
+| 0.99 | 104 | 84 | 80.8% | 3 | 3 |
+| 0.995 | 101 | 84 | 83.2% | 6 | 3 |
 
 ### Winnable questions
 
@@ -118,17 +116,17 @@ can rescue them.
 
 | GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
 |---|---|---|---|---|---|
-| 0.90 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.91 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.92 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.93 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.94 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.95 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.96 | 100 | 87 | 87.0% | 0 | 0 |
-| 0.97 | 99 | 87 | 87.9% | 1 | 0 |
-| 0.98 | 99 | 87 | 87.9% | 1 | 0 |
-| 0.99 | 95 | 84 | 88.4% | 2 | 3 |
-| 0.995 | 93 | 84 | 90.3% | 4 | 3 |
+| 0.90 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.91 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.92 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.93 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.94 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.95 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.96 | 103 | 87 | 84.5% | 0 | 0 |
+| 0.97 | 102 | 87 | 85.3% | 1 | 0 |
+| 0.98 | 102 | 87 | 85.3% | 1 | 0 |
+| 0.99 | 98 | 84 | 85.7% | 2 | 3 |
+| 0.995 | 96 | 84 | 87.5% | 4 | 3 |
 
 Raising the threshold never gains a correct graduation. It can only take paths
 away. Up to 0.98 the ones it takes are all wrong, which is why the correct column
@@ -137,6 +135,8 @@ thrown away 3 correct graduations to remove 6 wrong ones. The accuracy percentag
 still rises, but only because it dropped more wrong than correct, not because
 anything improved. The final answer stays 25/30 at every threshold, since those
 wrong graduations were already being outvoted.
+
+The two paragraphs below predate the q9/q12 rerun.
 
 The end-of-thinking marker does far more work than the threshold. At GRAD_CONF
 0.95, a probe that reached `</think>` is right 85.3% of the time; one that did not
