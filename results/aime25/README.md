@@ -6,10 +6,10 @@ peerconf-low and deepconf-low on all 30 questions, matched settings.
 
 | Method | Model | Dataset | Token | Acc | Mean token/Q |
 |---|---|---|---|---|---|
-| PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.34M | 86.7% | 345K |
+| PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.06M | 83.3% | 335K |
 | DeepConf-low | DeepSeek-8B | AIME25 (Q0-29) | 13.38M | 83.3% | 446K |
 
-PeerConf spends 22.8% fewer tokens and answers one more question.
+PeerConf spends 24.8% fewer tokens at the same accuracy.
 Accuracy is the min-window-weighted vote in both arms; the table below breaks
 it out by voting method.
 
@@ -42,10 +42,10 @@ w/o graduation - 27,763 (including probe tokens)
 | 6 | 821 | yes | yes | 491,089 | 403,087 | -21.8% |
 | 7 | 77 | yes | yes | 65,753 | 264,284 | 75.1% |
 | 8 | 62 | yes | yes | 197,347 | 626,990 | 68.5% |
-| 9 | 81 | yes | yes | 712,392 | 631,868 | -12.7% |
+| 9 | 81 | yes | yes | 397,161 | 631,868 | 37.1% |
 | 10 | 259 | yes | yes | 395,890 | 625,232 | 36.7% |
 | 11 | 510 | yes | yes | 329,661 | 566,452 | 41.8% |
-| 12 | 204 | yes | no (`\dfrac{487}{3}`) | 887,532 | 855,213 | -3.8% |
+| 12 | 204 | no (`\dfrac{487}{3}`) | no (`\dfrac{487}{3}`) | 925,584 | 855,213 | -8.2% |
 | 13 | 60 | no (`71`) | no (`62`) | 1,029,879 | 914,889 | -12.6% |
 | 14 | 735 | no (`147`) | no (`969`) | 981,134 | 1,026,611 | 4.4% |
 | 15 | 468 | yes | yes | 65,764 | 101,064 | 34.9% |
@@ -63,10 +63,10 @@ w/o graduation - 27,763 (including probe tokens)
 | 27 | 248 | no (`208`) | no (`208`) | 1,006,837 | 869,331 | -15.8% |
 | 28 | 104 | yes | yes | 197,950 | 461,639 | 57.1% |
 | 29 | 240 | no (`188`) | no (`188`) | 503,917 | 712,347 | 29.3% |
-| **overall** | | **26/30** | **25/30** | **10,335,377** | **13,382,853** | **22.8%** |
+| **overall** | | **25/30** | **25/30** | **10,058,198** | **13,382,853** | **24.8%** |
 
 Saving is PeerConf against DeepConf on that question; a negative number means
-PeerConf spent more. PeerConf is cheaper on 23 of the 30.
+PeerConf spent more. PeerConf is cheaper on 24 of the 30.
 
 Traces actually generated: PeerConf 21.9 per question, DeepConf 17.6.
 DeepConf closes on its warmup wave alone on 27 of the 30 questions, because
@@ -77,13 +77,13 @@ wave launches.
 
 | Method | PeerConf | DeepConf |
 |---|---|---|
-| majority | 26/30 | 25/30 |
-| mean_confidence_weighted | 26/30 | 25/30 |
-| tail_confidence_weighted | 26/30 | 25/30 |
-| bottom_window_weighted | 26/30 | 25/30 |
-| min_window_weighted | 26/30 | 25/30 |
-| top10_tail_filtered | 25/30 | 25/30 |
-| top10_bottom_window_filtered | 23/30 | 25/30 |
+| majority | 25/30 | 25/30 |
+| mean_confidence_weighted | 25/30 | 25/30 |
+| tail_confidence_weighted | 25/30 | 25/30 |
+| bottom_window_weighted | 25/30 | 25/30 |
+| min_window_weighted | 25/30 | 25/30 |
+| top10_tail_filtered | 24/30 | 25/30 |
+| top10_bottom_window_filtered | 22/30 | 25/30 |
 
 ## Graduation threshold
 
@@ -243,7 +243,7 @@ DeepConf: correct, 627K tokens
 
 ### Q9  ground truth 81
 
-PeerConf: correct, 712K tokens
+PeerConf: correct, 397K tokens
 
 ![Q9 peerconf](timelines/q09_peerconf_confidence_timeline.png)
 
@@ -273,7 +273,7 @@ DeepConf: correct, 566K tokens
 
 ### Q12  ground truth 204
 
-PeerConf: correct, 888K tokens
+PeerConf: WRONG, answered `\dfrac{487}{3}`, 926K tokens
 
 ![Q12 peerconf](timelines/q12_peerconf_confidence_timeline.png)
 
