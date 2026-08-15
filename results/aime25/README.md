@@ -87,6 +87,8 @@ wave launches.
 
 ## Graduation threshold
 
+Counts below predate the q9/q12 rerun.
+
 Every path that graduated on a commitment probe, scored against the ground truth,
 as GRAD_CONF varies. The end-of-thinking marker stays on throughout. The last two
 columns split the paths that graduate at 0.95 but not at this threshold, by
@@ -110,9 +112,8 @@ whether the answer they were carrying was right or wrong.
 
 ### Winnable questions
 
-Q13, Q14, Q27 and Q29 produced no correct graduation at any threshold. They are
-the four questions the run answers wrong, and no threshold can rescue them, so
-they are dropped here.
+Q13, Q14, Q27 and Q29 produced no correct graduation at any threshold, so no
+threshold can rescue them and they are dropped here.
 
 | GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
 |---|---|---|---|---|---|
@@ -133,7 +134,7 @@ away. Up to 0.98 the ones it takes are all wrong, which is why the correct colum
 stays at 87. From 0.99 it starts taking correct ones too, and by 0.995 it has
 thrown away 3 correct graduations to remove 6 wrong ones. The accuracy percentage
 still rises, but only because it dropped more wrong than correct, not because
-anything improved. The final answer stays 26/30 at every threshold, since those
+anything improved. The final answer stays 25/30 at every threshold, since those
 wrong graduations were already being outvoted.
 
 The end-of-thinking marker does far more work than the threshold. At GRAD_CONF
