@@ -21,13 +21,12 @@ DATASET = os.environ.get("DATASET", "aime25")         # aime25 | math500 | gsm8k
 QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 SEATS          = 16         # traces in flight at once
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
-                            # fresh one. Every path faces the bar from its first full
-                            # window (token 2048), once the bar has armed
+                            # fresh one. Wave 1 is never judged; a replacement faces
+                            # the armed bar from its first full window (token 2048)
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
-# SEATS traces) runs bar-free only until the bar arms, then it is judged like
-# every other path; each finisher votes and sends its lifetime-worst
+# SEATS traces) runs bar-free; each finisher votes and sends its lifetime-worst
 # window score to the calibration set (finishers ONLY — a cut path's minimum
 # never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
 # every new finisher and applied instantly to every new path
@@ -358,16 +357,20 @@ def launch(t):
     executor.submit(fly_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
 
 def judge(t, scores):
-    """Track the lifetime low; judge every path against the armed bar.
-    Wave 1 runs bar-free only until the bar arms: its early finishers ARE the
-    calibration, but once the bar exists a wave-1 path is judged like any other.
+    """Track the lifetime low; judge REPLACEMENTS against the armed bar.
+    Wave 1 (ids < SEATS) runs bar-free for its whole life: its finishers ARE the
+    calibration, and judging the paths that DEFINE the bar against that same bar
+    cuts most of wave 1. Measured on the 64k AIME25 run, doing so would end
+    287-381 of ~480 wave-1 paths and cost 2 of 30 questions, because the paths
+    it cuts include the correct ones (Q9 loses five traces answering 81 and
+    keeps the confidently wrong 75).
     A path's lifetime low only ever falls, so one below the bar can never climb
     back to clear the vote filter — finishing it buys an answer that gets
     discarded. One dip below the bar = instant cut.
     Returns the verdict: None (safe) | 'cut'."""
     if scores and min(scores) < t.judge_min:
         t.judge_min = min(scores)
-    if bar is None:
+    if t.id < SEATS or bar is None:
         return None
     for sc in scores:
         if sc < bar:
