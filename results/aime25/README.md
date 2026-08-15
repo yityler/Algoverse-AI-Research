@@ -112,8 +112,9 @@ whether the answer they were carrying was right or wrong.
 
 ### Winnable questions
 
-Q13, Q14, Q27 and Q29 produced no correct graduation at any threshold, so no
-threshold can rescue them and they are dropped here.
+Q13, Q14, Q27 and Q29 are dropped here. On those four not a single path ever
+reached the right answer, in a final answer or in any probe, so no threshold
+can rescue them.
 
 | GRAD_CONF | graduations | correct | accuracy | lost wrong | lost correct |
 |---|---|---|---|---|---|
