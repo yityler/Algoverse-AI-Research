@@ -528,7 +528,12 @@ for QID in QIDS:
                 if verdict is not None:
                     t.pending = verdict
 
-            ans = extract_answer(t.gen_text) if fin == "stop" else None
+            # DeepConf reads an answer off every trace whatever its stop reason
+            # (deepconf/utils.py process_output) and filters at the vote instead,
+            # so a path that wrote its answer and THEN ran out of budget still
+            # casts a ballot there. Gating on fin == "stop" here silently threw
+            # those away and made the two arms score different trace sets.
+            ans = extract_answer(t.gen_text)
 
             if run_over:                                     # landed after the certificate
                 t.status = "abandoned"
