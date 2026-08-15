@@ -1,4 +1,4 @@
-# Q18 — every trace, both arms
+# Q18 — Analysis of Traces
 
 The most expensive question in the run and the only one where the model genuinely
 disagreed with itself. Full trace-by-trace breakdown.
