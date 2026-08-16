@@ -9,7 +9,7 @@ peerconf-low and deepconf-low on all 30 questions, matched settings.
 | PeerConf-low | DeepSeek-8B | AIME25 (Q0-29) | 10.06M | 83.3% | 335K |
 | DeepConf-low | DeepSeek-8B | AIME25 (Q0-29) | 13.38M | 83.3% | 446K |
 
-PeerConf spends 24.8% fewer tokens at the same accuracy.
+PeerConf spends 24.4% fewer tokens at the same accuracy.
 Accuracy is the min-window-weighted vote in both arms; the table below breaks
 it out by voting method.
 
