@@ -60,12 +60,50 @@ DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so tw
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
+import re
+
 SESSION = requests.Session()
+
+_WS = re.compile(r"\s+")
+
+def tidy_tex(a):
+    """Cosmetic LaTeX only. Same value, fewer ways to write it. This exists
+    because math_equal parses some renderings and not others: a ",\\ " separator
+    between two roots defeats it even though ", " is fine."""
+    s = str(a)
+    for x, y in ((r"\dfrac", r"\frac"), (r"\tfrac", r"\frac"),
+                 (r"\left", ""), (r"\right", ""),
+                 (r"\!", ""), (r"\,", " "), (r"\;", " "), (r"\ ", " ")):
+        s = s.replace(x, y)
+    return _WS.sub(" ", s).strip()
+
+def same_answer(a, b):
+    """Do these two strings name the same value? Cheap tests first, then
+    math_equal, which is what catches 0.5 against \\frac{1}{2}. It does not
+    rationalise, so 9/\\sqrt{23} and 9\\sqrt{23}/23 stay apart."""
+    if a is None or b is None:
+        return False
+    a, b = tidy_tex(a), tidy_tex(b)
+    if a == b or _WS.sub("", a) == _WS.sub("", b):
+        return True
+    try:
+        return bool(math_equal(a, b))
+    except Exception:
+        return False
+
+def ballot_key(piles, ans):
+    """The pile this answer belongs in. Equivalent answers share a pile, so the
+    vote counts values rather than spellings. Piles hold at most one entry per
+    distinct answer in a run, so the scan is cheap."""
+    for k in piles:
+        if same_answer(ans, k):
+            return k
+    return str(ans)
+
 
 def is_correct(ans, gt):
     if ans is None: return False
-    try:    return math_equal(str(ans), gt)
-    except: return str(ans) == gt
+    return same_answer(ans, gt)
 
 def extract_answer(text):
     """DeepConf's own extractor (facebookresearch/deepconf, deepconf/utils.py),
@@ -188,7 +226,8 @@ def voters_now():
 def consensus_check():
     piles = {}
     for t in voters_now():
-        piles[str(t.answer)] = piles.get(str(t.answer), 0.0) + t.min_conf
+        _k = ballot_key(piles, t.answer)
+        piles[_k] = piles.get(_k, 0.0) + t.min_conf
     if not piles: return None, 0.0
     a = max(piles, key=piles.get)
     return a, piles[a] / sum(piles.values())
@@ -240,7 +279,8 @@ def weighted_vote(weight_key=None, only_traces=None):
     piles = {}
     for t in pool:
         w = 1.0 if weight_key is None else M[t.id][weight_key]
-        piles[str(t.answer)] = piles.get(str(t.answer), 0.0) + float(w)
+        _k = ballot_key(piles, t.answer)
+        piles[_k] = piles.get(_k, 0.0) + float(w)
     if not piles: return None, None, 0
     a = max(piles.keys(), key=lambda x: piles[x])
     conf = float(np.mean([M[t.id][weight_key] for t in pool])) if weight_key else None
