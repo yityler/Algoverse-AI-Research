@@ -20,13 +20,17 @@ DATASET = os.environ.get("DATASET", "aime25")         # aime25 | math500 | gsm8k
 
 QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 SEATS          = 16         # traces in flight at once
+WAVE           = SEATS      # opening wave: traces 0..WAVE-1 run unjudged and are
+                            # the sample the bar is calibrated from. Defaults to
+                            # SEATS; set it separately to size the calibration
+                            # batch independently of how many run at once
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
                             # fresh one. Wave 1 is never judged; a replacement faces
                             # the armed bar from its first full window (token 2048)
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
-# SEATS traces) runs bar-free; each finisher votes and sends its lifetime-worst
+# WAVE traces) runs bar-free; each finisher votes and sends its lifetime-worst
 # window score to the calibration set (finishers ONLY — a cut path's minimum
 # never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
 # every new finisher and applied instantly to every new path
@@ -246,9 +250,9 @@ def freeze_vote_bar():
     # on 3 finishers drains the rest of wave 1, and a drained path never reached
     # its own worst moment — calibrating on it would invent a bar out of paths
     # that were cut off mid-thought.
-    if any(t.status in ("running", "abandoned") for t in traces if t.id < SEATS):
+    if any(t.status in ("running", "abandoned") for t in traces if t.id < WAVE):
         return
-    mins = [min(t.confs) for t in traces if t.id < SEATS and t.confs]
+    mins = [min(t.confs) for t in traces if t.id < WAVE and t.confs]
     if mins:
         vote_bar = float(np.percentile(mins, 100 - BAR_KEEP_TOP))
         print(f"Vote bar frozen at {vote_bar:.3f} "
@@ -258,7 +262,7 @@ def consensus_check():
     piles = {}
     for t in traces:
         if t.status == "finished" and t.answer is not None and t.confs:
-            if vote_bar is not None and t.id < SEATS and min(t.confs) < vote_bar:
+            if vote_bar is not None and t.id < WAVE and min(t.confs) < vote_bar:
                 continue                      # wave-1 path below the vote bar
             _k = ballot_key(piles, t.answer)
             piles[_k] = piles.get(_k, 0.0) + min(t.confs)
@@ -398,7 +402,7 @@ def launch(t):
 
 def judge(t, scores):
     """Track the lifetime low; judge REPLACEMENTS against the armed bar.
-    Wave 1 (ids < SEATS) runs bar-free for its whole life: its finishers ARE the
+    Wave 1 (ids < WAVE) runs bar-free for its whole life: its finishers ARE the
     calibration, and judging the paths that DEFINE the bar against that same bar
     cuts most of wave 1. Measured on the 64k AIME25 run, doing so would end
     287-381 of ~480 wave-1 paths and cost 2 of 30 questions, because the paths
@@ -410,7 +414,7 @@ def judge(t, scores):
     Returns the verdict: None (safe) | 'cut'."""
     if scores and min(scores) < t.judge_min:
         t.judge_min = min(scores)
-    if t.id < SEATS or bar is None:
+    if t.id < WAVE or bar is None:
         return None
     for sc in scores:
         if sc < bar:
@@ -642,7 +646,7 @@ for QID in QIDS:
     # the vote bar filters the ballot the same way it filters consensus: a wave-1
     # path below it does not vote, exactly as DeepConf drops sub-bar warmup traces
     voters = [t for t in done if t.status == "finished" and t.answer is not None
-              and not (vote_bar is not None and t.id < SEATS
+              and not (vote_bar is not None and t.id < WAVE
                        and t.confs and min(t.confs) < vote_bar)]
     M = {t.id: trace_measures(t) for t in voters}
 
@@ -718,7 +722,7 @@ for QID in QIDS:
                                 "PROBE_MIN_TOKS": PROBE_MIN_TOKS,
                                 "GRAD_CONF": GRAD_CONF,
                                 "GRAD_EWT": GRAD_EWT,
-                                "SEATS": SEATS, "MAX_TRACES": MAX_TRACES,
+                                "SEATS": SEATS, "WAVE": WAVE, "MAX_TRACES": MAX_TRACES,
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar,
