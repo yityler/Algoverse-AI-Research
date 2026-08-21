@@ -639,7 +639,11 @@ for QID in QIDS:
 
     # -------- results + voting table --------
     done   = traces
-    voters = [t for t in done if t.status == "finished" and t.answer is not None]
+    # the vote bar filters the ballot the same way it filters consensus: a wave-1
+    # path below it does not vote, exactly as DeepConf drops sub-bar warmup traces
+    voters = [t for t in done if t.status == "finished" and t.answer is not None
+              and not (vote_bar is not None and t.id < SEATS
+                       and t.confs and min(t.confs) < vote_bar)]
     M = {t.id: trace_measures(t) for t in voters}
 
     print(f"\nBasic voting candidates: {len(voters)}")
