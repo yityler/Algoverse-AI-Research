@@ -2,8 +2,13 @@
 # Draws the game tape from saved runs: every trace's sliding-window confidence over
 # its life, colored by outcome, with the self-calibrating bar's armed and final
 # levels. One figure per question. Pick which questions with QIDS below.
-# Green = finished correct, red = the wrong majority, light red = other wrong
-# answers, gray + X = cut at the bar, khaki dashed = truncated with no answer,
+# Green = the trace's own answer is correct, crimson = it is wrong, both judged
+# with cell2's own grader so the figure can never disagree with the results table.
+# Which wrong answer happened to lead is deliberately not distinguished: one colour
+# for every wrong answer, because two reds for "wrong" and "also wrong" only made
+# the figure harder to read. Green never depends on the vote either, so a path that
+# answered correctly and was outvoted is still green.
+# gray + X = cut at the bar, khaki dashed = truncated with no answer,
 # blue dotted = drained when the run closed. Stars = graduated by a commitment
 # probe; triangles = loop-guard harvests; small black dots along a trace mark
 # where each graduation probe fired.
@@ -11,6 +16,43 @@ import os, re, pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from dynasor.core.evaluator import math_equal
+
+# ---- grading, kept identical to cell2's -------------------------------------
+# A figure that colours a trace green while the run counted it wrong is worse than
+# no figure. cell2 grades with tidy_tex + math_equal, so this does too, rather
+# than with the exact string match that used to live in is_right() below.
+#
+# These two functions are a VERBATIM copy of cell2's. cell2 is a script that runs
+# a whole sweep on import, so it cannot be imported from; the copy is the only way
+# to share the logic. If cell2's grading changes, change it here too -- the figure
+# silently disagreeing with the results table is exactly the failure this is meant
+# to prevent.
+_WS_G = re.compile(r"\s+")
+
+
+def tidy_tex(a):
+    """Cosmetic LaTeX only. Same value, fewer ways to write it."""
+    s = str(a)
+    for x, y in ((r"\dfrac", r"\frac"), (r"\tfrac", r"\frac"),
+                 (r"\left", ""), (r"\right", ""),
+                 (r"\!", ""), (r"\,", " "), (r"\;", " "), (r"\ ", " ")):
+        s = s.replace(x, y)
+    return _WS_G.sub(" ", s).strip()
+
+
+def same_answer(a, b):
+    """Do these two strings name the same value? Cheap tests first, then
+    math_equal, which is what catches 0.5 against \\frac{1}{2}."""
+    if a is None or b is None:
+        return False
+    a, b = tidy_tex(a), tidy_tex(b)
+    if a == b or _WS_G.sub("", a) == _WS_G.sub("", b):
+        return True
+    try:
+        return bool(math_equal(a, b))
+    except Exception:
+        return False
 
 OUT_DIR = os.environ.get("OUT_DIR", "peerconf_out")
 
@@ -47,7 +89,10 @@ def draw_timeline(fname):
     WINDOW  = cfg["WINDOW"]
 
     def is_right(ans):
-        return ans is not None and str(ans).strip() == gt
+        # the run's own grader, not a string compare: a trace that wrote
+        # \dfrac{14}{3} against a gold of \frac{14}{3} was counted correct by
+        # cell2 and must be drawn correct here
+        return same_answer(ans, gt)
 
     # one colour for every wrong answer: which wrong answer led is not the point,
     # and two reds for "wrong" and "also wrong" only made the figure harder to read
