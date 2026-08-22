@@ -238,11 +238,9 @@ def update_bar():
                          "t": time.time() - t_start})
 
 def freeze_vote_bar():
-    """DeepConf's voting filter. Once every wave-1 path has departed, freeze a
-    bar at the percentile of ALL their minima (truncated ones included, exactly
-    as DeepConf calibrates from its whole warmup), and from then on only wave-1
-    paths above it may vote. Replacements vote unfiltered, as DeepConf's online
-    traces do. The bar we cut with and the bar we vote with share BAR_KEEP_TOP."""
+    """DeepConf's voting filter. Once every wave-1 path has departed, freeze the
+    bar as it stands, and from then on only wave-1 paths above it may vote.
+    Replacements vote unfiltered, as DeepConf's online traces do."""
     global vote_bar
     if vote_bar is not None:
         return
@@ -252,11 +250,10 @@ def freeze_vote_bar():
     # that were cut off mid-thought.
     if any(t.status in ("running", "abandoned") for t in traces if t.id < WAVE):
         return
-    mins = [min(t.confs) for t in traces if t.id < WAVE and t.confs]
-    if mins:
-        vote_bar = float(np.percentile(mins, 100 - BAR_KEEP_TOP))
+    vote_bar = bar
+    if vote_bar is not None:
         print(f"Vote bar frozen at {vote_bar:.3f} "
-              f"(keep top {BAR_KEEP_TOP}% of {len(mins)} wave-1 minima)")
+              f"(keep top {BAR_KEEP_TOP}%)")
 
 def consensus_check():
     piles = {}
