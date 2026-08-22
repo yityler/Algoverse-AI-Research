@@ -221,3 +221,126 @@ The 30 unmanaged control traces are 8.2 min of that, about $1.25, and are
 reported here rather than folded into either arm. They are the only uncensored
 read on natural trace length in the run, and they are what identifies the six
 questions whose reasoning does not fit in 64k.
+
+## Confidence timelines
+
+### Q0
+![Q0 peerconf](timelines/q00_peerconf_confidence_timeline.png)
+![Q0 deepconf](timelines/q00_deepconf_confidence_timeline.png)
+
+### Q1
+![Q1 peerconf](timelines/q01_peerconf_confidence_timeline.png)
+![Q1 deepconf](timelines/q01_deepconf_confidence_timeline.png)
+
+### Q2
+![Q2 peerconf](timelines/q02_peerconf_confidence_timeline.png)
+![Q2 deepconf](timelines/q02_deepconf_confidence_timeline.png)
+
+### Q3
+![Q3 peerconf](timelines/q03_peerconf_confidence_timeline.png)
+![Q3 deepconf](timelines/q03_deepconf_confidence_timeline.png)
+
+### Q4
+![Q4 peerconf](timelines/q04_peerconf_confidence_timeline.png)
+![Q4 deepconf](timelines/q04_deepconf_confidence_timeline.png)
+
+### Q5
+![Q5 peerconf](timelines/q05_peerconf_confidence_timeline.png)
+![Q5 deepconf](timelines/q05_deepconf_confidence_timeline.png)
+
+### Q6
+![Q6 peerconf](timelines/q06_peerconf_confidence_timeline.png)
+![Q6 deepconf](timelines/q06_deepconf_confidence_timeline.png)
+
+### Q7
+![Q7 peerconf](timelines/q07_peerconf_confidence_timeline.png)
+![Q7 deepconf](timelines/q07_deepconf_confidence_timeline.png)
+
+### Q8
+![Q8 peerconf](timelines/q08_peerconf_confidence_timeline.png)
+![Q8 deepconf](timelines/q08_deepconf_confidence_timeline.png)
+
+### Q9
+![Q9 peerconf](timelines/q09_peerconf_confidence_timeline.png)
+![Q9 deepconf](timelines/q09_deepconf_confidence_timeline.png)
+
+### Q10
+![Q10 peerconf](timelines/q10_peerconf_confidence_timeline.png)
+![Q10 deepconf](timelines/q10_deepconf_confidence_timeline.png)
+
+### Q11
+![Q11 peerconf](timelines/q11_peerconf_confidence_timeline.png)
+![Q11 deepconf](timelines/q11_deepconf_confidence_timeline.png)
+
+### Q12
+![Q12 peerconf](timelines/q12_peerconf_confidence_timeline.png)
+![Q12 deepconf](timelines/q12_deepconf_confidence_timeline.png)
+
+### Q13
+![Q13 peerconf](timelines/q13_peerconf_confidence_timeline.png)
+![Q13 deepconf](timelines/q13_deepconf_confidence_timeline.png)
+
+### Q14
+![Q14 peerconf](timelines/q14_peerconf_confidence_timeline.png)
+![Q14 deepconf](timelines/q14_deepconf_confidence_timeline.png)
+
+### Q15
+![Q15 peerconf](timelines/q15_peerconf_confidence_timeline.png)
+![Q15 deepconf](timelines/q15_deepconf_confidence_timeline.png)
+
+### Q16
+![Q16 peerconf](timelines/q16_peerconf_confidence_timeline.png)
+![Q16 deepconf](timelines/q16_deepconf_confidence_timeline.png)
+
+### Q17
+![Q17 peerconf](timelines/q17_peerconf_confidence_timeline.png)
+![Q17 deepconf](timelines/q17_deepconf_confidence_timeline.png)
+
+### Q18
+![Q18 peerconf](timelines/q18_peerconf_confidence_timeline.png)
+![Q18 deepconf](timelines/q18_deepconf_confidence_timeline.png)
+
+### Q19
+![Q19 peerconf](timelines/q19_peerconf_confidence_timeline.png)
+![Q19 deepconf](timelines/q19_deepconf_confidence_timeline.png)
+
+### Q20
+![Q20 peerconf](timelines/q20_peerconf_confidence_timeline.png)
+![Q20 deepconf](timelines/q20_deepconf_confidence_timeline.png)
+
+### Q21
+![Q21 peerconf](timelines/q21_peerconf_confidence_timeline.png)
+![Q21 deepconf](timelines/q21_deepconf_confidence_timeline.png)
+
+### Q22
+![Q22 peerconf](timelines/q22_peerconf_confidence_timeline.png)
+![Q22 deepconf](timelines/q22_deepconf_confidence_timeline.png)
+
+### Q23
+![Q23 peerconf](timelines/q23_peerconf_confidence_timeline.png)
+![Q23 deepconf](timelines/q23_deepconf_confidence_timeline.png)
+
+### Q24
+![Q24 peerconf](timelines/q24_peerconf_confidence_timeline.png)
+![Q24 deepconf](timelines/q24_deepconf_confidence_timeline.png)
+
+### Q25
+![Q25 peerconf](timelines/q25_peerconf_confidence_timeline.png)
+![Q25 deepconf](timelines/q25_deepconf_confidence_timeline.png)
+
+### Q26
+![Q26 peerconf](timelines/q26_peerconf_confidence_timeline.png)
+![Q26 deepconf](timelines/q26_deepconf_confidence_timeline.png)
+
+### Q27
+![Q27 peerconf](timelines/q27_peerconf_confidence_timeline.png)
+![Q27 deepconf](timelines/q27_deepconf_confidence_timeline.png)
+
+### Q28
+![Q28 peerconf](timelines/q28_peerconf_confidence_timeline.png)
+![Q28 deepconf](timelines/q28_deepconf_confidence_timeline.png)
+
+### Q29
+![Q29 peerconf](timelines/q29_peerconf_confidence_timeline.png)
+![Q29 deepconf](timelines/q29_deepconf_confidence_timeline.png)
+

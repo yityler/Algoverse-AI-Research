@@ -96,7 +96,19 @@ def draw_timeline(fname):
 
     # one colour for every wrong answer: which wrong answer led is not the point,
     # and two reds for "wrong" and "also wrong" only made the figure harder to read
-    finished = [t for t in r["traces"] if t["status"] == "finished" and t["answer"] is not None]
+    # A path with no full window has no sliding-window confidence to plot -- there
+    # is no y value for it and none can be invented -- so it is dropped. Dropped
+    # OUT LOUD, though: every count below, the title, and a legend line all come
+    # from `drawn`, so the figure never claims to show a path it left out. Two
+    # different things land here and the key names them separately: a seat that
+    # was never filled generated nothing at all, while a path that answered
+    # inside the first window did real work the window simply never covered.
+    drawn   = [t for t in r["traces"] if t["confs"]]
+    undrawn = [t for t in r["traces"] if not t["confs"]]
+    n_never = sum(1 for t in undrawn if not t.get("toks_gen"))
+    n_short = len(undrawn) - n_never
+
+    finished = [t for t in drawn if t["status"] == "finished" and t["answer"] is not None]
     n_right  = sum(1 for t in finished if is_right(t["answer"]))
     n_wrong  = len(finished) - n_right
 
@@ -131,12 +143,14 @@ def draw_timeline(fname):
         else:
             ax.plot(x_end, y_end, "o", ms=6, **style)
 
-    for t in r["traces"]:
+    for t in drawn:
         confs = t["confs"]
-        if not confs: continue
         x = np.arange(len(confs)) + WINDOW         # confs[0] = the first full window
         step = max(1, len(confs) // 2000)          # downsample for the figure
-        xs, ys = x[::step], np.asarray(confs)[::step]
+        idx = np.arange(0, len(confs), step)
+        if idx[-1] != len(confs) - 1:              # never let downsampling drop the
+            idx = np.append(idx, len(confs) - 1)   # true end: the line and the marker
+        xs, ys = x[idx], np.asarray(confs)[idx]    # that caps it must stop together
 
         # weight says WHICH GROUP the path is in; colour still says how it ended.
         # wave 1 = the SEATS opening paths, drawn light; a replacement takes a
@@ -162,28 +176,28 @@ def draw_timeline(fname):
             # its confidence, so these can land well above the line
             ax.plot(xs, ys, color="dimgray", lw=lw, alpha=al)
             seen_labels.add("__loop__")
-            ax.plot(x[-1], confs[-1], "^", color="black", ms=10, mew=1.0,
+            ax.plot(xs[-1], ys[-1], "^", color="black", ms=10, mew=1.0,
                     mfc="none")
         elif t["status"] == "stopped":             # cut at the bar
             ax.plot(xs, ys, color="gray", lw=lw, alpha=al,
                     label=label_once("cut at the bar"))
-            ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
+            ax.plot(xs[-1], ys[-1], "x", color="black", ms=10, mew=2.2)
         elif t["status"] == "finished" and is_right(t["answer"]):
             ax.plot(xs, ys, color="forestgreen", lw=lw, alpha=al,
                     label=label_once(f"correct = {gt} (n={n_right})"))
-            end_marker(t, x[-1], confs[-1], "forestgreen")
+            end_marker(t, xs[-1], ys[-1], "forestgreen")
         elif t["status"] == "finished":
             ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
                     label=label_once(f"wrong (n={n_wrong})"))
-            end_marker(t, x[-1], confs[-1], "crimson")
+            end_marker(t, xs[-1], ys[-1], "crimson")
         elif t["status"] == "abandoned":           # drained when the run closed
             ax.plot(xs, ys, color="royalblue", lw=lw_dot, ls=":", alpha=al_broken,
                     label=label_once("drained (run closed early)"))
-            ax.plot(x[-1], confs[-1], "s", color="royalblue", ms=4)
+            ax.plot(xs[-1], ys[-1], "s", color="royalblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
             ax.plot(xs, ys, color="darkgoldenrod", lw=lw_dash, ls="--", alpha=al_broken,
                     label=label_once("no answer (truncated)"))
-            ax.plot(x[-1], confs[-1], "o", color="darkgoldenrod", ms=4)
+            ax.plot(xs[-1], ys[-1], "o", color="darkgoldenrod", ms=4)
 
     # the self-calibrating bar: armed level and final level, with the drift band.
     # (new pkls: line_history = bar updates; old pkls: the live line — the
@@ -235,7 +249,7 @@ def draw_timeline(fname):
     # the generation cap, when the pkl recorded it: a khaki trace that ends here
     # was truncated by the budget, not by anything the run decided
     cap = cfg.get("MAX_TOK_TRACE")
-    if cap and any(len(t["confs"]) + WINDOW >= cap * 0.98 for t in r["traces"] if t["confs"]):
+    if cap and any(len(t["confs"]) + WINDOW >= cap * 0.98 for t in drawn):
         ax.axvline(cap, color="darkgoldenrod", ls=":", lw=1.2, alpha=0.8)
         ax.annotate(f"cap {cap:,}", xy=(cap, 1.0), xycoords=("data", "axes fraction"),
                     xytext=(-4, -12), textcoords="offset points",
@@ -251,9 +265,12 @@ def draw_timeline(fname):
     ax.set_xlabel(f"tokens generated (each point = sliding-window average: "
                   f"the confidence of the previous {WINDOW} tokens)")
     ax.set_ylabel("sliding-window confidence")
+    # "all N" only when it really is all of them
+    traces_phrase = (f"all {len(r['traces'])} traces" if not undrawn
+                     else f"{len(drawn)} of {len(r['traces'])} traces")
     ax.set_title(
         f"PeerConf, {cfg.get('DATASET', DATASET).upper()} Q{qid}: "
-        f"sliding-window confidence of all {len(r['traces'])} traces "
+        f"sliding-window confidence of {traces_phrase} "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"{sub} | model: {cfg['MODEL']}")
     handles, labels = ax.get_legend_handles_labels()
@@ -269,6 +286,13 @@ def draw_timeline(fname):
         handles.append(Line2D([], [], ls="none", marker="o", ms=7,
                               mfc="none", mec="0.25", mew=1.6))
         labels.append("finished but under the vote bar: not counted")
+    if n_never:
+        handles.append(Line2D([], [], ls="none"))
+        labels.append(f"{n_never} seat(s) never filled: nothing generated, not drawn")
+    if n_short:
+        handles.append(Line2D([], [], ls="none"))
+        labels.append(f"{n_short} path(s) ended inside the first {WINDOW}-token "
+                      f"window: no window confidence exists, so not drawn")
     if "__loop__" in seen_labels:
         handles.append(Line2D([], [], color="dimgray", lw=1.2, marker="^",
                               ms=9, mfc="none", mec="black", mew=1.0))

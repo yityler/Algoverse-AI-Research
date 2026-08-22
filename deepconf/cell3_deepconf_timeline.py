@@ -94,7 +94,16 @@ def draw_timeline(fname):
 
     # one colour for every wrong answer: which wrong answer led is not the point,
     # and two reds for "wrong" and "also wrong" only made the figure harder to read
-    finished = [t for t in r["traces"] if t["status"] == "finished" and t["answer"] is not None]
+    # A trace that ended before the first full window has no sliding-window
+    # confidence at all -- traj carries None in the conf slot for every one of its
+    # samples -- so there is no y value to draw and none can be invented. It is
+    # dropped, but dropped OUT LOUD: every count below, the title, and a legend
+    # line are all computed from `drawn`, so the figure never claims to show a
+    # trace it left out.
+    drawn   = [t for t in r["traces"] if t["confs"]]
+    n_short = len(r["traces"]) - len(drawn)
+
+    finished = [t for t in drawn if t["status"] == "finished" and t["answer"] is not None]
     n_right  = sum(1 for t in finished if is_right(t["answer"]))
     n_wrong  = len(finished) - n_right
 
@@ -104,12 +113,14 @@ def draw_timeline(fname):
         if lab in seen_labels: return None
         seen_labels.add(lab); return lab
 
-    for t in r["traces"]:
+    for t in drawn:
         confs = t["confs"]
-        if not confs: continue
         x = np.arange(len(confs)) + WINDOW         # confs[0] = the first full window
         step = max(1, len(confs) // 2000)          # downsample for the figure
-        xs, ys = x[::step], np.asarray(confs)[::step]
+        idx = np.arange(0, len(confs), step)
+        if idx[-1] != len(confs) - 1:              # never let downsampling drop the
+            idx = np.append(idx, len(confs) - 1)   # true end: the line and the marker
+        xs, ys = x[idx], np.asarray(confs)[idx]    # that caps it must stop together
         # weight says WHICH PHASE the trace is in; colour still says how it
         # ended. warmup runs uncut, the online wave is judged at the frozen bar
         warm   = t.get("phase") == "warmup"
@@ -124,23 +135,23 @@ def draw_timeline(fname):
         if t["status"] == "stopped":               # cut at the bar
             ax.plot(xs, ys, color="gray", lw=lw, alpha=al,
                     label=label_once("cut at the bar"))
-            ax.plot(x[-1], confs[-1], "x", color="black", ms=10, mew=2.2)
+            ax.plot(xs[-1], ys[-1], "x", color="black", ms=10, mew=2.2)
         elif t["status"] == "finished" and is_right(t["answer"]):
             ax.plot(xs, ys, color="forestgreen", lw=lw, alpha=al,
                     label=label_once(f"correct = {gt} (n={n_right})"))
-            ax.plot(x[-1], confs[-1], "o", color="forestgreen", ms=5)
+            ax.plot(xs[-1], ys[-1], "o", color="forestgreen", ms=5)
         elif t["status"] == "finished":
             ax.plot(xs, ys, color="crimson", lw=lw, alpha=al,
                     label=label_once(f"wrong (n={n_wrong})"))
-            ax.plot(x[-1], confs[-1], "o", color="crimson", ms=5)
+            ax.plot(xs[-1], ys[-1], "o", color="crimson", ms=5)
         elif t["status"] == "abandoned":           # drained when consensus closed the run
             ax.plot(xs, ys, color="steelblue", lw=lw_dot, ls=":", alpha=al_broken,
                     label=label_once("drained (consensus stop)"))
-            ax.plot(x[-1], confs[-1], "s", color="steelblue", ms=4)
+            ax.plot(xs[-1], ys[-1], "s", color="steelblue", ms=4)
         else:                                      # truncated — cap or EOS, no answer
             ax.plot(xs, ys, color="darkkhaki", lw=lw_dash, ls="--", alpha=al_broken,
                     label=label_once("no answer (truncated)"))
-            ax.plot(x[-1], confs[-1], "o", color="darkkhaki", ms=4)
+            ax.plot(xs[-1], ys[-1], "o", color="darkkhaki", ms=4)
 
     if bar is not None:
         keep = cfg.get("CONFIDENCE_PERCENTILE", "?")
@@ -156,8 +167,11 @@ def draw_timeline(fname):
     ax.set_xlabel(f"tokens generated (each point = sliding-window average: "
                   f"the confidence of the previous {WINDOW} tokens)")
     ax.set_ylabel("sliding-window confidence")
+    # "all N" only when it really is all of them
+    traces_phrase = (f"all {len(r['traces'])} traces" if not n_short
+                     else f"{len(drawn)} of {len(r['traces'])} traces")
     ax.set_title(
-        f"DeepConf, AIME25 Q{qid}: sliding-window confidence of all {len(r['traces'])} traces "
+        f"DeepConf, AIME25 Q{qid}: sliding-window confidence of {traces_phrase} "
         f"(window = {WINDOW} tokens, ground truth {gt})\n"
         f"warmup {cfg.get('WARMUP_TRACES', '?')} (thin) -> frozen bar -> online wave (thick), "
         f"instant cut below the bar | tau = {cfg.get('CONSENSUS', '?')} | model: {cfg['MODEL']}")
@@ -168,6 +182,10 @@ def draw_timeline(fname):
         handles.append(Line2D([], [], color="black", lw=1.1, alpha=0.55))
         labels.append(f"warmup: the {cfg.get('WARMUP_TRACES', '?')} opening traces, "
                       f"never cut (thin)")
+    if n_short:
+        handles.append(Line2D([], [], ls="none"))
+        labels.append(f"{n_short} trace(s) answered inside the first {WINDOW}-token "
+                      f"window: no window confidence exists, so not drawn")
     if "__online__" in seen_labels:
         handles.append(Line2D([], [], color="black", lw=2.1, alpha=0.9))
         labels.append("online wave: judged at the bar (thick)")
