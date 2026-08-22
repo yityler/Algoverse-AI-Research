@@ -2,6 +2,21 @@
 
 peerconf-low and deepconf-low on all 30 questions, matched settings.
 
+## Also on GPT-OSS-20B
+
+The same 30 questions, same two arms, run on GPT-OSS-20B instead of DeepSeek-8B:
+[results/aime25_gptoss](../aime25_gptoss/README.md).
+
+| Model | PeerConf | DeepConf | PeerConf token | DeepConf token |
+|---|---|---|---|---|
+| DeepSeek-8B (this page) | 25/30 | 25/30 | 10.06M | 13.38M |
+| GPT-OSS-20B | 26/30 | 25/30 | 9.84M | 18.26M |
+
+Accuracy is the min-window-weighted vote on both pages. The gap between the arms
+is wider on GPT-OSS-20B: its traces run long enough that DeepConf's warmup, which
+cannot close early, spends 1.9x the tokens, and on four questions it returns no
+answer at all because every trace hits the 64k cap before boxing one.
+
 ## Results
 
 | Method | Model | Dataset | Token | Acc | Mean token/Q |
