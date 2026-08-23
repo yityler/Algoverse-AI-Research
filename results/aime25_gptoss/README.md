@@ -3,6 +3,7 @@
 peerconf-low and deepconf-low on all 30 questions, matched settings.
 
 The DeepSeek-8B run on the same benchmark is in [../aime25](../aime25/README.md).
+The DeepSeek-8B run on HMMT25 is in [../hmmt25_deepseek](../hmmt25_deepseek/README.md).
 
 ## Results
 
