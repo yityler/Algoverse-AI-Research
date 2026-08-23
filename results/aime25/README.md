@@ -2,6 +2,14 @@
 
 peerconf-low and deepconf-low on all 30 questions, matched settings.
 
+## Also on HMMT25
+
+The same two arms and same model on the harder HMMT25 benchmark:
+[results/hmmt25_deepseek](../hmmt25_deepseek/README.md). PeerConf spends 23.2%
+fewer tokens there, close to the 24.8% on this page, so the token saving
+reproduces; the accuracy tie on this page does not, with DeepConf one question
+ahead. Note that page's caveat about this row mixing two implementations.
+
 ## Also on GPT-OSS-20B
 
 The same 30 questions, same two arms, run on GPT-OSS-20B instead of DeepSeek-8B:
