@@ -27,6 +27,10 @@ WAVE           = SEATS      # opening wave: traces 0..WAVE-1 run unjudged and ar
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
                             # fresh one. Wave 1 is never judged; a replacement faces
                             # the armed bar from its first full window (token 2048)
+REPLACEMENT_SEATS = SEATS   # how many replacements generate at once. Defaults to
+                            # SEATS, where it never binds because a replacement can
+                            # only take a seat a departure just freed; set it lower
+                            # to run fewer replacements at once than the opening wave
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
@@ -631,7 +635,9 @@ for QID in QIDS:
                         x.kill.set()
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
                       f"(margin exceeds all {len(live_ids)} outstanding) — run over")
-        if not run_over and launched < MAX_TRACES:
+        reps_live = sum(1 for x in traces if x.id >= WAVE and x.id in inflight)
+        if (not run_over and launched < MAX_TRACES
+                and reps_live < REPLACEMENT_SEATS):
             nt = Trace(launched); traces.append(nt)
             print(f"Trace {launched}: seated (replacing {t.id})"
                   + (f" | bar {bar:.3f}" if bar is not None else " | bar unarmed"))
@@ -720,6 +726,7 @@ for QID in QIDS:
                                 "GRAD_CONF": GRAD_CONF,
                                 "GRAD_EWT": GRAD_EWT,
                                 "SEATS": SEATS, "WAVE": WAVE, "MAX_TRACES": MAX_TRACES,
+                                "REPLACEMENT_SEATS": REPLACEMENT_SEATS,
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
                                 "final_bar": bar,
