@@ -241,24 +241,6 @@ def update_bar():
     LINE_HISTORY.append({"tid": -1, "line": bar, "n_traces": len(mins),
                          "t": time.time() - t_start})
 
-def freeze_vote_bar():
-    """DeepConf's voting filter. Once every wave-1 path has departed, freeze the
-    bar as it stands, and from then on only wave-1 paths above it may vote.
-    Replacements vote unfiltered, as DeepConf's online traces do."""
-    global vote_bar
-    if vote_bar is not None:
-        return
-    # "departed" has to mean the path ended on its own terms. A run that closes
-    # on 3 finishers drains the rest of wave 1, and a drained path never reached
-    # its own worst moment — calibrating on it would invent a bar out of paths
-    # that were cut off mid-thought.
-    if any(t.status in ("running", "abandoned") for t in traces if t.id < WAVE):
-        return
-    vote_bar = bar
-    if vote_bar is not None:
-        print(f"Vote bar frozen at {vote_bar:.3f} "
-              f"(keep top {BAR_KEEP_TOP}%)")
-
 def consensus_check():
     piles = {}
     for t in traces:
@@ -479,7 +461,7 @@ for QID in QIDS:
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
     bar       = None             # armed by update_bar() at BAR_MIN_CALIBRATORS finishers
-    vote_bar  = None             # frozen once wave 1 has departed; filters who votes
+    vote_bar  = None             # the bar itself, read once the opening wave is in
     LINE_HISTORY = []            # game tape: the bar at every update, for the figure
     t_start   = time.time()
     events    = queue.Queue()    # (trace, payload|None, error|None) from worker threads
@@ -613,7 +595,19 @@ for QID in QIDS:
         # ---- this trace departed: per-trace pit stop ----
         if t.status == "finished":
             update_bar()                                      # finishers calibrate
-        freeze_vote_bar()                                     # wave 1 done: filter votes
+        # DeepConf's voting filter. Not a second bar: the same bar, read once, at
+        # the moment the whole opening wave is in. Wave 1 ran unjudged, so the
+        # ballot holds it to the bar as it stood then, and the bar goes on moving
+        # afterwards. "Departed" has to mean the path ended on its own terms — a
+        # run that closes on 3 finishers drains the rest of wave 1, and a drained
+        # path never reached its own worst moment. Replacements vote unfiltered,
+        # as DeepConf's online traces do.
+        if vote_bar is None and not any(
+                x.status in ("running", "abandoned") for x in traces if x.id < WAVE):
+            vote_bar = bar
+            if vote_bar is not None:
+                print(f"Opening wave in: wave-1 ballots meet the bar at "
+                      f"{vote_bar:.3f} (keep top {BAR_KEEP_TOP}%)")
         if CONSENSUS <= 1.0 and not run_over:
             lead, share = consensus_check()
             n_fin = sum(1 for x in traces if x.status == "finished")
