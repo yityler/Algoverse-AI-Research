@@ -148,7 +148,7 @@ class Trace:
     def min_conf(self):
         return min(self.confs) if self.confs else 0.0
 
-def fly_stream(t, prompt_text, max_toks):
+def run_stream(t, prompt_text, max_toks):
     # one streamed request: every token arrives with its top-20 logprobs, the
     # window mean is reported per token, the kill switch closes the stream.
     # the prompt and the budget are arguments so a retry can pick up from what
@@ -192,7 +192,7 @@ def launch(t):
     t.pending = False
     inflight.add(t.id)
     budget = MAX_TOK_TRACE - t.toks_gen        # a first launch spends nothing yet
-    executor.submit(fly_stream, t, PROMPT + t.gen_text, max(budget, 1))
+    executor.submit(run_stream, t, PROMPT + t.gen_text, max(budget, 1))
 
 def land(t, fin):
     # DeepConf reads an answer off every trace whatever its stop reason

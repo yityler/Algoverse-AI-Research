@@ -297,7 +297,7 @@ def looping(text):
         return False
     return text[-LOOP_TAIL_CHARS:].count(unit) >= LOOP_REPEATS
 
-def fly_probe(t, prompt, at_toks):
+def run_probe(t, prompt, at_toks):
     """Worker: one greedy non-streamed probe. conf = geometric mean over ONLY
     the answer tokens inside {...} (punctuation ~0.99 dilutes the blended mean
     upward); "blended" keeps the all-token score for comparison. Hitting the
@@ -341,9 +341,9 @@ def launch_probe(t):
     """Main thread only. Snapshot the trace and fork its graduation probe."""
     t.probing = True
     t.last_probe_at = t.toks_gen
-    executor.submit(fly_probe, t, t.prompt_text + t.gen_text + PROBE_TEXT, t.toks_gen)
+    executor.submit(run_probe, t, t.prompt_text + t.gen_text + PROBE_TEXT, t.toks_gen)
 
-def fly_stream(t, prompt_text, max_toks):
+def run_stream(t, prompt_text, max_toks):
     """Worker thread: ONE streaming leg. Tokens arrive live with their top-20
     logprobs; the worker keeps the window math locally, reports to the main thread
     every STREAM_BATCH tokens, and honors the kill switch by closing the stream
@@ -399,7 +399,7 @@ def launch(t):
     t.kill = threading.Event()
     t.pending = None
     inflight.add(t.id)
-    executor.submit(fly_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
+    executor.submit(run_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
 
 def judge(t, scores):
     """Track the lifetime low; judge REPLACEMENTS against the armed bar.
