@@ -1,7 +1,4 @@
 # ======================= CELL 1 — START THE SERVER (run once) =======================
-# Stock vLLM server. It shards across whatever GPUs the box has; the runs in the
-# paper used 4x L40S (AWS g6e.12xlarge, 192GB), where 16 traces at a 64k cap need
-# ~150GB of KV cache.
 # Stock vLLM server. CELL 2 streams tokens over HTTP and judges the confidence
 # window client-side, so no logits processor is loaded here.
 import subprocess, time, requests, os
@@ -12,9 +9,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
 MODEL  = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER = "http://localhost:8000"
 
-# Shard over every GPU this box exposes instead of the 4 the paper ran on, so the
-# cell runs anywhere. TP=<n> overrides. The 8B model needs ~16GB for weights plus
-# ~10GB of KV cache per 64k trace, so one 40GB card runs but preempts heavily.
+# Shard over every GPU this box exposes. TP=<n> overrides.
 try:
     import torch
     _gpus = torch.cuda.device_count()
