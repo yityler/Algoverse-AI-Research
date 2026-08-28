@@ -1,7 +1,4 @@
 # ======================= CELL 2 — THE LIVE RUN (streaming) =======================
-# Loops over every question in QIDS: one full run per question, one pkl per question.
-# A question whose pkl already exists in OUT_DIR is skipped, so an interrupted sweep
-# resumes with a simple rerun (delete a pkl to redo that question from scratch).
 import json, re, time, pickle, os, queue, threading
 import numpy as np, requests
 from collections import deque
@@ -80,10 +77,14 @@ FORCE_BOXED    = False    # True = append "Please put your final answer within
 # ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
                           # holds this share of the weighted votes among finished
-                          # traces (and >=3 have finished), stop launching AND end
-                          # the in-flight streams on the spot.
+                          # traces, stop launching AND end the in-flight streams
+                          # on the spot.
                           # Anything > 1.0 = DISABLED (a fraction of the votes can never beat 1.0;
                           # exactly 1.0 = stop only on unanimity).
+CONSENSUS_MIN_FINISHERS = 3   # how many traces must have finished before the rule
+                              # may fire at all. One trace agreeing with itself is
+                              # a unanimous 100%, so a share alone would close the
+                              # run on its first finisher
 
 # ----- generation -----
 TEMPERATURE    = 0.6
@@ -537,7 +538,8 @@ for QID in QIDS:
         if CONSENSUS <= 1.0 and not run_over:
             lead, share = consensus_check()
             n_fin = sum(1 for x in traces if x.status == "finished")
-            if lead is not None and share >= CONSENSUS and n_fin >= 3:
+            if (lead is not None and share >= CONSENSUS
+                    and n_fin >= CONSENSUS_MIN_FINISHERS):
                 run_over = True
                 live_ids = [x.id for x in traces if x.id in inflight]
                 for x in traces:
@@ -646,6 +648,7 @@ for QID in QIDS:
                                 "REPLACEMENT_SEATS": REPLACEMENT_SEATS,
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
+                                "CONSENSUS_MIN_FINISHERS": CONSENSUS_MIN_FINISHERS,
                                 "final_bar": bar,
                                 "vote_bar": vote_bar},
                      "voting": voting_results, "tokens": total_tokens,
