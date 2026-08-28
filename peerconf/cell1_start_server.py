@@ -10,14 +10,17 @@ MODEL  = "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B"
 SERVER = "http://localhost:8000"
 TP     = 0               # GPUs to shard across; 0 = use every GPU on the machine
 
-if not TP:
-    try:
-        import torch
-        TP = torch.cuda.device_count()
-    except Exception as e:
-        raise SystemExit(f"Could not count the GPUs ({e}) - set TP by hand above")
-    if TP == 0:
-        raise SystemExit("No GPU found - vLLM needs one")
+try:
+    import torch
+    _gpus = torch.cuda.device_count()
+except Exception as e:
+    raise SystemExit(f"Could not count the GPUs ({e})")
+if _gpus == 0:
+    raise SystemExit("No GPU found - vLLM needs one")
+if TP == 0:
+    TP = _gpus
+elif TP > _gpus:
+    raise SystemExit(f"TP is {TP} but this machine has {_gpus} GPU(s)")
 
 # PeerConf judges on the client side, no custom logits processor
 server_proc = subprocess.Popen(
