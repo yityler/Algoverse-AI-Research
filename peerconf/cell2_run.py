@@ -36,7 +36,7 @@ REPLACEMENT_SEATS = SEATS   # how many of those seats may hold replacements at o
                             # while replacements are at this cap does not queue —
                             # the seat refills at the next departure instead
 
-# the bar (PeerConf-low/high, from DeepConf-low/high)
+# ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
 # WAVE traces) runs bar-free; each finisher votes and sends its lifetime-worst
 # window score to the calibration set (finishers ONLY — a cut path's minimum
@@ -54,7 +54,7 @@ STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the w
                           # A path is judged from its first full window (token 2048). The bar itself only
                           # moves when a finisher ends and sends its minimum.
 
-# the loop guard (text repetition; confidence is blind to loops)
+# ----- the loop guard (text repetition; confidence is blind to loops) -----
 LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
                               # (a looping trace casts NO ballot: its text is
                               # pathology, not evidence)
@@ -63,7 +63,7 @@ LOOP_UNIT_CHARS  = 120        # repeat unit: the trace's last this-many chars
 LOOP_TAIL_CHARS  = 2400       # ...searched within this much trailing text
 LOOP_REPEATS     = 3          # fire at this many exact copies in the tail
 
-# the graduation probe (CoDE-Stop-style forced answer, fixed schedule)
+# ----- the graduation probe (CoDE-Stop-style forced answer, fixed schedule) -----
 PROBE_EVERY      = 4096       # probe each trace every this-many tokens. 0 = off
 PROBE_TEXT       = "\n**Final Answer**\n\nThe final answer is \\boxed"
 PROBE_MAX_TOK    = 20         # greedy tokens per probe
@@ -74,11 +74,11 @@ GRAD_EWT         = True       # ...that also reached </think> or <|end|> (ready 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
 
-# the certificate (second close): if (leader − runner-up) > (live +
+# ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner: even if every path still
 # out there voted runner-up, the leader still wins — so unlike the landslide's (MARS at gamma=1).
 
-# early stopping (the landslide rule)
+# ----- early stopping (the landslide rule) -----
 CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
                           # holds this share of the weighted votes among finished
                           # traces (and >=3 have finished), stop launching AND end
@@ -86,12 +86,13 @@ CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading a
                           # Anything > 1.0 = DISABLED (a fraction of the votes can never beat 1.0;
                           # exactly 1.0 = stop only on unanimity).
 
-# generation
+# ----- generation -----
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
 TOP_K          = -1
 LOGPROBS       = 20       # top-20 candidates per token — the confidence data
 MAX_TOK_TRACE  = 64000    # total generation cap per trace, counted in tokens GENERATED
+# ================================================================
 
 tok    = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
@@ -110,8 +111,6 @@ if _bench_path is None:
 with open(_bench_path, encoding="utf-8") as f:
     data = [json.loads(l) for l in f]
 
-# ask for a question the benchmark doesn't have and nothing runs: a sweep that
-# quietly shortened itself would read as a full one in the results
 QIDS = list(QIDS)
 _bad = [q for q in QIDS if not 0 <= q < len(data)]
 if _bad:
@@ -119,7 +118,6 @@ if _bad:
                      f"QIDS asks for {_bad}")
 
 DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so two
-                         # benchmarks can share an output dir without colliding
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
@@ -204,15 +202,11 @@ class Trace:
         self.prompt_text = BASE_PROMPT
         self.gen_text  = ""      # generated text for the CURRENT prompt
         self.confs     = []      # full-window score per token (whole life) — the
-                                 # confidence timeline, saved for the figure
         self.win       = None    # window deque, carried across legs (worker-owned in flight)
         self.toks_gen  = 0       # every token the GPU generated, across all prompts
         self.judge_min = float("inf")  # lifetime low of the window score — a
-                                 # finisher sends this to the bar's calibration
         self.kill      = threading.Event()  # the kill switch: set by the main thread,
-                                 # honored by the worker, which closes the stream
         self.pending   = None    # None | "cut" | "graduate"
-                                 # — verdict awaiting stream close
         self.retried   = False
         self.probes    = []      # graduation-probe history: one dict per probe
         self.probe_toks = 0      # tokens the probes themselves generated (accounted)
@@ -310,9 +304,6 @@ def run_probe(t, prompt, at_toks):
         events.put((t, {"kind": "probe", "at": at_toks, "text": text,
                         "conf": conf, "blended": blended, "ntok": len(tlps),
                         "toks": toks, "tlps": tlps,
-                        # which score "conf" actually is: with no braces to
-                        # score it falls back to the punctuation-diluted blended
-                        # mean, and the record should say so rather than hide it
                         "conf_src": "answer" if ans_lps else "blended",
                         "ewt": ch.get("finish_reason") == "stop"}, None))
     except Exception as e:
@@ -406,7 +397,7 @@ def judge(t, scores):
             return "cut"
     return None
 
-# voting helpers (used once per question, after its run)
+# ---------------- voting helpers (used once per question, after its run) ----------------
 def trace_measures(t):
     c = np.array(t.confs) if t.confs else np.array([0.0])
     k = max(1, int(len(c) * 0.10))
@@ -439,13 +430,11 @@ executor = ThreadPoolExecutor(max_workers=SEATS + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
 t_sweep = time.time()
 
-# THE SWEEP: one run per question
+# ==================== THE SWEEP: one run per question ====================
 for QID in QIDS:
-    # the new arms go in the filename so a sweep never overwrites its own results
     _extras = (("_cs" if PROBE_EVERY > 0 else "")
                + (f"_loop{LOOP_ACTION[0]}" if LOOP_ACTION != "off" else ""))
     save_path = f"{OUT_DIR}/{DS_TAG}q{QID}_bar{_extras}.pkl"
-    # aime25 runs saved before the prefix existed are bare q<N>_ — still done
     _legacy = f"{OUT_DIR}/q{QID}_bar{_extras}.pkl" if DATASET == "aime25" else None
     _done = next((p for p in (save_path, _legacy) if p and os.path.exists(p)), None)
     if _done:
@@ -459,7 +448,7 @@ for QID in QIDS:
     print(f"Q{QID}: {question[:80]}...\nGround truth: {ground_truth}\n")
     BASE_PROMPT = render_chat(question)
 
-    # fresh run state (mutated ONLY by the main thread)
+    # -------- fresh run state (mutated ONLY by the main thread) --------
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
     bar       = None             # armed by update_bar() at BAR_MIN_CALIBRATORS finishers
@@ -471,7 +460,7 @@ for QID in QIDS:
     run_over = False
     n_events  = 0
 
-    # the run loop: stream in, judge live
+    # -------- the run loop: stream in, judge live --------
     print(f"Run start: {SEATS} seats (cap {MAX_TRACES}), streaming (report every "
           f"{STREAM_BATCH} tokens) | wave 1 line-free; replacements face the "
           f"self-calibrating bar (keep top {BAR_KEEP_TOP}%, arms at "
@@ -487,7 +476,7 @@ for QID in QIDS:
         t, payload, err = events.get()
         n_events += 1
 
-        # graduation-probe verdicts
+        # ---- graduation-probe verdicts ----
         if payload is not None and payload.get("kind") == "probe":
             t.probing = False
             t.probe_toks += payload["ntok"]
@@ -500,15 +489,10 @@ for QID in QIDS:
             rec = {"at": payload["at"], "conf": payload["conf"],
                    "blended": payload["blended"],
                    "ewt": payload["ewt"], "answer": p_ans,
-                   # the raw evidence behind those numbers: the completion the
-                   # extractor read, and the logprobs the scorer scored. Keeping
-                   # it makes a changed extractor or a changed scoring rule a
-                   # re-read of this pkl instead of a fresh run.
                    "text": payload["text"], "ntok": payload["ntok"],
                    "toks": payload["toks"], "tlps": payload["tlps"],
                    "conf_src": payload["conf_src"]}
             t.probes.append(rec)
-            # graduate on ONE perfect probe: sure + closing + a real answer
             if (t.pending is None and not run_over and t.status == "running"
                     and rec["conf"] >= GRAD_CONF and (rec["ewt"] or not GRAD_EWT)
                     and p_ans is not None):
@@ -535,7 +519,6 @@ for QID in QIDS:
                 if verdict is not None:
                     t.pending = verdict
                     t.kill.set()                              # stream closes within a chunk
-            # the loop guard
             if (LOOP_ACTION != "off" and t.pending is None and not run_over
                     and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
                 t.last_loop_check = t.toks_gen
@@ -545,7 +528,6 @@ for QID in QIDS:
                     t.kill.set()
                     print(f"Trace {t.id}: LOOPING at {t.toks_gen} tokens "
                           f"(tail unit repeats >= {LOOP_REPEATS}x) -> ended, no ballot")
-            # the probe: fixed schedule, nothing else
             if (PROBE_EVERY > 0 and not t.probing and t.pending is None
                     and not run_over and t.toks_gen >= PROBE_MIN_TOKS
                     and t.toks_gen - t.last_probe_at >= PROBE_EVERY):
@@ -561,11 +543,6 @@ for QID in QIDS:
                 if verdict is not None:
                     t.pending = verdict
 
-            # DeepConf reads an answer off every trace whatever its stop reason
-            # (deepconf/utils.py process_output) and filters at the vote instead,
-            # so a path that wrote its answer and THEN ran out of budget still
-            # casts a ballot there. Gating on fin == "stop" here silently threw
-            # those away and made the two arms score different trace sets.
             ans = extract_answer(t.gen_text)
 
             if run_over:                                     # landed after the certificate
@@ -594,16 +571,9 @@ for QID in QIDS:
                 t.status = "truncated"
                 print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
 
-        # this trace departed: per-trace pit stop
+        # ---- this trace departed: per-trace pit stop ----
         if t.status == "finished":
             update_bar()                                      # finishers calibrate
-        # DeepConf's voting filter. Not a second bar: the same bar, read once, at
-        # the moment the whole opening wave is in. Wave 1 ran unjudged, so the
-        # ballot holds it to the bar as it stood then, and the bar goes on moving
-        # afterwards. "Departed" has to mean the path ended on its own terms — a
-        # run that closes on 3 finishers drains the rest of wave 1, and a drained
-        # path never reached its own worst moment. Replacements vote unfiltered,
-        # as DeepConf's online traces do.
         if vote_bar is None and not any(
                 x.status in ("running", "abandoned") for x in traces if x.id < WAVE):
             vote_bar = bar
@@ -640,10 +610,8 @@ for QID in QIDS:
             launched += 1
             launch(nt)
 
-    # results + voting table
+    # -------- results + voting table --------
     done   = traces
-    # the vote bar filters the ballot the same way it filters consensus: a wave-1
-    # path below it does not vote, exactly as DeepConf drops sub-bar warmup traces
     voters = [t for t in done if t.status == "finished" and t.answer is not None
               and not (vote_bar is not None and t.id < WAVE
                        and t.confs and min(t.confs) < vote_bar)]
@@ -663,7 +631,6 @@ for QID in QIDS:
 
     probe_tokens = sum(t.probe_toks for t in done)
     total_tokens = sum(t.toks_gen for t in done) + probe_tokens  # EVERYTHING the
-                                                       # GPU generated, probes included
     n_status     = lambda s: sum(1 for x in done if x.status == s)
     n_graduated  = sum(1 for t in done if t.graduated)
     n_looped     = sum(1 for t in done if t.looped)
@@ -702,7 +669,7 @@ for QID in QIDS:
     marks = ", ".join(f"{m}:{'✓' if is_correct(r[0], ground_truth) else '✗'}" for m, r in voting_results.items())
     print(f"Q{QID} done | gt={ground_truth} | {marks}")
 
-    # save (results + the confidence-timeline game tape)
+    # -------- save (results + the confidence-timeline game tape) --------
     with open(save_path, "wb") as f:
         pickle.dump({"qid": QID, "gt": ground_truth,
                      "config": {"MODE": "server-stream", "MODEL": MODEL,

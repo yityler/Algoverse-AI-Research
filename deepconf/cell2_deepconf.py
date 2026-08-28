@@ -18,17 +18,13 @@ MODEL   = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER  = "http://localhost:8000"
 OUT_DIR = globals().get("OUT_DIR") or os.environ.get("OUT_DIR", "deepconf_out")
 DATASET = os.environ.get("DATASET", "aime25")   # aime25 | math500 | gsm8k | hmmt25
-                                                # = benchmarks/<name>.jsonl; any file
-                                                # of {"question","answer"} lines works
 
 QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
 WARMUP_TRACES  = 16     # offline warmup: run fully, never judged
 TOTAL_BUDGET   = 32     # warmup + online traces
 CONFIDENCE_PERCENTILE = 10   # keep-percent: bar = percentile(warmup minima, 100 - this)
-                             # 10 = DeepConf-low, 90 = DeepConf-high
 WINDOW         = 2048   # sliding window; a token's score = mean conf of its last 2048
 CONSENSUS      = 0.95   # paper's tau: stop when the leading answer holds this share
-                        # of the min-conf-weighted votes (anything > 1.0 = disabled)
 
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
@@ -47,8 +43,6 @@ if _bench_path is None:
 with open(_bench_path, encoding="utf-8") as f:
     data = [json.loads(l) for l in f]
 
-# ask for a question the benchmark doesn't have and nothing runs: a sweep that
-# quietly shortened itself would read as a full one in the results
 QIDS = list(QIDS)
 _bad = [q for q in QIDS if not 0 <= q < len(data)]
 if _bad:
@@ -56,7 +50,6 @@ if _bad:
                      f"QIDS asks for {_bad}")
 
 DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so two
-                         # benchmarks can share an output dir without colliding
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
@@ -148,10 +141,6 @@ class Trace:
         return min(self.confs) if self.confs else 0.0
 
 def run_stream(t, prompt_text, max_toks):
-    # one streamed request: every token arrives with its top-20 logprobs, the
-    # window mean is reported per token, the kill switch closes the stream.
-    # the prompt and the budget are arguments so a retry can pick up from what
-    # the trace already generated instead of paying for the trace twice
     body = {"model": MODEL, "prompt": prompt_text, "max_tokens": int(max_toks),
             "temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K,
             "logprobs": LOGPROBS, "stream": True}
@@ -194,11 +183,6 @@ def launch(t):
     executor.submit(run_stream, t, PROMPT + t.gen_text, max(budget, 1))
 
 def land(t, fin):
-    # DeepConf reads an answer off every trace whatever its stop reason
-    # (deepconf/utils.py process_output) and filters at the vote instead,
-    # so a path that wrote its answer and THEN ran out of budget still
-    # casts a ballot there. Gating on fin == "stop" here silently threw
-    # those away and made the two arms score different trace sets.
     ans = extract_answer(t.gen_text)
     if run_over and t.status == "running" and not t.pending:
         t.status = "abandoned"
@@ -214,7 +198,6 @@ def land(t, fin):
         print(f"Trace {t.id} ({t.phase}): truncated at {t.toks_gen} tokens")
 
 def voters_now():
-    # paper semantics: warmup traces above the bar + online finishers
     v = []
     for t in traces:
         if t.status != "finished" or t.answer is None or not t.confs: continue
@@ -264,7 +247,7 @@ def drain(phase_traces):
                     print(f"Consensus: '{lead}' holds {share:.0%} — "
                           f"ending {len(live)} in-flight streams")
 
-# voting helpers (used once per question)
+# ---------------- voting helpers (used once per question) ----------------
 def trace_measures(t):
     c = np.array(t.confs) if t.confs else np.array([0.0])
     k = max(1, int(len(c) * 0.10))
@@ -294,11 +277,10 @@ executor = ThreadPoolExecutor(max_workers=TOTAL_BUDGET + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
 t_sweep = time.time()
 
-# THE SWEEP: one run per question
+# ==================== THE SWEEP: one run per question ====================
 for QID in QIDS:
     _name = f"q{QID}_deepconf_p{CONFIDENCE_PERCENTILE}_c{int(CONSENSUS*100)}.pkl"
     save_path = f"{OUT_DIR}/{DS_TAG}{_name}"
-    # aime25 runs saved before the prefix existed are bare q<N>_ — still done
     _legacy = f"{OUT_DIR}/{_name}" if DATASET == "aime25" else None
     _done = next((p for p in (save_path, _legacy) if p and os.path.exists(p)), None)
     if _done:
@@ -311,14 +293,14 @@ for QID in QIDS:
     PROMPT = tok.apply_chat_template([{"role": "user", "content": question}],
                                      tokenize=False, add_generation_prompt=True)
 
-    # fresh run state
+    # -------- fresh run state --------
     events   = queue.Queue()
     inflight = set()
     t_start  = time.time()
     conf_bar = None
     run_over = False
 
-    # phase 1: warmup, never judged
+    # ---- phase 1: warmup, never judged ----
     print(f"Warmup: {WARMUP_TRACES} traces, streaming per token")
     traces = [Trace(i, "warmup") for i in range(WARMUP_TRACES)]
     for t in traces: launch(t)
@@ -329,7 +311,7 @@ for QID in QIDS:
     print(f"\nWarmup done: bar frozen at {conf_bar:.3f} "
           f"(keep top {CONFIDENCE_PERCENTILE}% of {len(wmins)} warmup minima)")
 
-    # phase 2: online wave, judged per token at the frozen bar
+    # ---- phase 2: online wave, judged per token at the frozen bar ----
     if CONSENSUS <= 1.0:
         lead, share = consensus_check()
         if lead is not None and share >= CONSENSUS:
@@ -343,7 +325,7 @@ for QID in QIDS:
         for t in wave: launch(t)
         drain(wave)
 
-    # voting: the repo's seven methods over the voting pool
+    # -------- voting: the repo's seven methods over the voting pool --------
     voters = voters_now()
     M = {t.id: trace_measures(t) for t in voters}
 
