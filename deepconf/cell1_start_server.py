@@ -8,14 +8,14 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 MODEL  = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER = "http://localhost:8000"
+TP     = 0               # GPUs to shard across; 0 = use every GPU on the machine
 
-# Shard over every GPU this box exposes. TP=<n> overrides.
 try:
     import torch
     _gpus = torch.cuda.device_count()
 except Exception:
-    _gpus = 0
-TP = int(os.environ.get("TP", 0)) or _gpus or 1
+    _gpus = 0            # no torch or no CUDA, so the count is unknown
+TP = TP or _gpus or 1
 
 server_proc = subprocess.Popen(
     ["vllm", "serve", MODEL,
