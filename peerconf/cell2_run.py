@@ -56,8 +56,7 @@ STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the w
 
 # ----- the loop guard (text repetition; confidence is blind to loops) -----
 LOOP_ACTION      = "cut"      # "off" | "cut" = end the stuck trace on the spot
-                              # (a looping trace casts NO ballot: its text is
-                              # pathology, not evidence)
+                            
 LOOP_CHECK_EVERY = 256        # tokens between checks
 LOOP_UNIT_CHARS  = 120        # repeat unit: the trace's last this-many chars
 LOOP_TAIL_CHARS  = 2400       # ...searched within this much trailing text
@@ -69,7 +68,7 @@ PROBE_TEXT       = "\n**Final Answer**\n\nThe final answer is \\boxed"
 PROBE_MAX_TOK    = 20         # greedy tokens per probe
 PROBE_MIN_TOKS   = 2048       # no probes before the first full window
 GRAD_CONF        = 0.95       # graduate on ONE probe: answer-token conf >= this...
-GRAD_EWT         = True       # ...that also reached </think> or <|end|> (ready to conclude and still need to add "<|end|>")
+GRAD_EWT         = True       # ...that also reached </think> or <|end|> (</think> is used in this code)
 
 FORCE_BOXED    = False    # True = append "Please put your final answer within
                           # \boxed{}." to the prompt.
