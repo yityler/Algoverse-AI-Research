@@ -19,18 +19,22 @@ DATASET = os.environ.get("DATASET", "aime25")         # aime25 | math500 | gsm8k
                                                       # of {"question","answer"} lines works
 
 QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
-SEATS          = 16         # traces in flight at once
-WAVE           = SEATS      # opening wave: traces 0..WAVE-1 run unjudged and are
-                            # the sample the bar is calibrated from. Defaults to
-                            # SEATS; set it separately to size the calibration
-                            # batch independently of how many run at once
+SEATS          = 16         # seats: how many traces run at once. One departure
+                            # buys one replacement, so the run holds this many in
+                            # flight from the first token to the last
+WAVE           = SEATS      # how many of those seats the opening wave takes. Traces
+                            # 0..WAVE-1 run unjudged and are the sample the bar is
+                            # calibrated from. Set it below SEATS to calibrate on a
+                            # smaller batch than the run generates at once
 MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat for a
                             # fresh one. Wave 1 is never judged; a replacement faces
                             # the armed bar from its first full window (token 2048)
-REPLACEMENT_SEATS = SEATS   # how many replacements generate at once. Defaults to
-                            # SEATS, where it never binds because a replacement can
-                            # only take a seat a departure just freed; set it lower
-                            # to run fewer replacements at once than the opening wave
+REPLACEMENT_SEATS = SEATS   # how many of those seats may hold replacements at once.
+                            # At the default a freed seat refills straight away; set
+                            # it lower to keep fewer replacements running at once
+                            # than the opening wave did. A departure that lands
+                            # while replacements are at this cap does not queue —
+                            # the seat refills at the next departure instead
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
