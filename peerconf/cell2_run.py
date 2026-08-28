@@ -29,9 +29,7 @@ MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat 
 REPLACEMENT_SEATS = SEATS   # how many of those seats may hold replacements at once.
                             # At the default a freed seat refills straight away; set
                             # it lower to keep fewer replacements running at once
-                            # than the opening wave did. A departure that lands
-                            # while replacements are at this cap does not queue —
-                            # the seat refills at the next departure instead
+                            # than the opening wave did.
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
