@@ -361,7 +361,7 @@ def top_filtered(measure, top_percent=0.1):
     elite = [t for t in voters if M[t.id][measure] >= thr]
     return weighted_vote(measure, only_traces=elite)
 
-executor = ThreadPoolExecutor(max_workers=SEATS + 4)
+executor = ThreadPoolExecutor(max_workers=WAVE + REPLACEMENT_SEATS + 4)
 os.makedirs(OUT_DIR, exist_ok=True)
 t_sweep = time.time()
 
@@ -384,7 +384,6 @@ for QID in QIDS:
     # -------- fresh run state (mutated ONLY by the main thread) --------
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
-    free_seats = 0
     bar       = None
     LINE_HISTORY = []
     t_start   = time.time()
@@ -525,16 +524,14 @@ for QID in QIDS:
                         x.kill.set()
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
                       f"(margin exceeds all {len(live_ids)} outstanding) — run over")
-        free_seats += 1
         reps_live = sum(1 for x in traces if x.id >= WAVE and x.id in inflight)
-        while (not run_over and launched < MAX_TRACES and free_seats > 0
+        while (not run_over and launched < MAX_TRACES
                and reps_live < REPLACEMENT_SEATS):
             nt = Trace(launched); traces.append(nt)
             print(f"Trace {launched}: seated"
                   + (f" | bar {bar:.3f}" if bar is not None else " | bar unarmed"))
             launched += 1
             launch(nt)
-            free_seats -= 1
             reps_live += 1
 
     # -------- results + voting table --------
