@@ -12,10 +12,11 @@ TP     = 0               # GPUs to shard across; 0 = use every GPU on the machin
 
 try:
     import torch
-    _gpus = torch.cuda.device_count()
-except Exception:
-    _gpus = 0            # no torch or no CUDA, so the count is unknown
-TP = TP or _gpus or 1
+    _gpus = torch.cuda.device_count() or 1
+except Exception as e:
+    _gpus = 1
+    print(f"Could not count the GPUs ({e}) - falling back to 1")
+TP = TP or _gpus
 
 # PeerConf judges on the client side, no custom logits processor
 server_proc = subprocess.Popen(
