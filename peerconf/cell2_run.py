@@ -44,8 +44,7 @@ BAR_MIN_CALIBRATORS = 1   # the first finisher arms the bar (its worst moment IS
                           # the bar); every later finisher refines it
 
 WINDOW         = 2048     # sliding window: a token's score = avg confidence of its
-                          # last 2048 tokens. FULL windows only — partial-window
-                          # means are startup noise.
+                          # last 2048 tokens. FULL windows only.
 STREAM_BATCH   = 1        # tokens are STREAMED: every STREAM_BATCH tokens the worker
                           # reports in and the main thread judges. At 1 a cut lands exactly at the crossing.
                           # A path is judged from its first full window (token 2048). The bar itself only
