@@ -4,9 +4,6 @@
 # percentile of their worst window scores, then the online wave streams token by
 # token and a trace is cut the instant its sliding-window confidence drops below
 # the bar. Consensus stop (tau) from the paper included.
-# Loops over every question in QIDS: one run per question, one pkl per question.
-# A question whose pkl already exists in OUT_DIR is skipped, so an interrupted
-# sweep resumes with a simple rerun (delete a pkl to redo that question).
 import json, re, time, pickle, os, queue, threading
 import numpy as np, requests
 from collections import deque
