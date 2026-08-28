@@ -36,9 +36,9 @@ REPLACEMENT_SEATS = SEATS   # how many of those seats may hold replacements at o
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
 # WAVE traces) runs bar-free; each finisher votes and sends its lifetime-worst
-# window score to the calibration set (finishers ONLY — a cut path's minimum
-# never joins it). The bar = keep top BAR_KEEP_TOP% of those minima, updated on
-# every new finisher and applied instantly to every new path
+# window score to the calibration set. The bar = keep top BAR_KEEP_TOP% of
+# those minima, updated on every new finisher and applied instantly to every
+# new path
 BAR_KEEP_TOP        = 10  # 10 = PeerConf-low, 90 = PeerConf-high 
 BAR_MIN_CALIBRATORS = 1   # the first finisher arms the bar (its worst moment IS
                           # the bar); every later finisher refines it
@@ -58,13 +58,13 @@ LOOP_UNIT_CHARS  = 120        # repeat unit: the trace's last this-many chars
 LOOP_TAIL_CHARS  = 2400       # ...searched within this much trailing text
 LOOP_REPEATS     = 3          # fire at this many exact copies in the tail
 
-# ----- the graduation probe (CoDE-Stop-style forced answer, fixed schedule) -----
+# ----- the completion probe (CoDE-Stop-style forced answer, fixed schedule) -----
 PROBE_EVERY      = 4096       # probe each trace every this-many tokens. 0 = off
 PROBE_TEXT       = "\n**Final Answer**\n\nThe final answer is \\boxed"
 PROBE_MAX_TOK    = 20         # greedy tokens per probe
 PROBE_MIN_TOKS   = 2048       # no probes before the first full window
-GRAD_CONF        = 0.95       # graduate on ONE probe: answer-token conf >= this...
-GRAD_EWT         = True       # ...that also reached </think> or <|end|> (</think> is used in this code)
+COMMIT_CONF        = 0.95       # commit on ONE probe: answer-token conf >= this...
+COMMIT_EWT         = True       # ...that also reached </think> or <|end|> (</think> is used in this code)
 
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner: even if every path still
@@ -193,9 +193,9 @@ class Trace:
         self.probing   = False
         self.last_probe_at = 0
         self.last_loop_check = 0
-        self.grad_answer = None
+        self.commit_answer = None
         self.looped    = False
-        self.graduated = False
+        self.committed = False
         self.status    = "running"
         self.answer    = None
 
@@ -410,7 +410,7 @@ for QID in QIDS:
           f"{STREAM_BATCH} tokens) | wave 1 line-free; replacements face the "
           f"self-calibrating bar (keep top {BAR_KEEP_TOP}%, arms at "
           f"{BAR_MIN_CALIBRATORS} finishers, updates per finisher)"
-          + (f" | probes every {PROBE_EVERY} (graduate at {GRAD_CONF})"
+          + (f" | probes every {PROBE_EVERY} (commit at {COMMIT_CONF})"
              if PROBE_EVERY > 0 else "")
           + (f" | loop guard ON ({LOOP_ACTION})" if LOOP_ACTION != "off" else "")
           + f" | close: landslide ({CONSENSUS:.0%}) OR certificate")
@@ -421,7 +421,7 @@ for QID in QIDS:
         t, payload, err = events.get()
         n_events += 1
 
-        # ---- graduation-probe verdicts ----
+        # ---- completion-probe verdicts ----
         if payload is not None and payload.get("kind") == "probe":
             t.probing = False
             t.probe_toks += payload["ntok"]
@@ -439,12 +439,12 @@ for QID in QIDS:
                    "conf_src": payload["conf_src"]}
             t.probes.append(rec)
             if (t.pending is None and not run_over and t.status == "running"
-                    and rec["conf"] >= GRAD_CONF and (rec["ewt"] or not GRAD_EWT)
+                    and rec["conf"] >= COMMIT_CONF and (rec["ewt"] or not COMMIT_EWT)
                     and p_ans is not None):
-                t.grad_answer = p_ans
-                t.pending = "graduate"
+                t.commit_answer = p_ans
+                t.pending = "commit"
                 t.kill.set()
-                print(f"Trace {t.id}: GRADUATED at {payload['at']} tokens — "
+                print(f"Trace {t.id}: COMMITTED at {payload['at']} tokens — "
                       f"conf {rec['conf']:.3f}, answer {p_ans}")
             continue
 
@@ -488,11 +488,11 @@ for QID in QIDS:
 
             if run_over:
                 t.status = "abandoned"
-            elif t.pending == "graduate":
-                t.status, t.answer = "finished", t.grad_answer
-                t.graduated = True
+            elif t.pending == "commit":
+                t.status, t.answer = "finished", t.commit_answer
+                t.committed = True
                 print(f"Trace {t.id}: finished EARLY at {t.toks_gen} tokens "
-                      f"(graduation probe) | answer={t.answer}")
+                      f"(completion probe) | answer={t.answer}")
             elif t.pending == "cut":
                 t.status = "stopped"
                 if t.looped:
@@ -574,7 +574,7 @@ for QID in QIDS:
     probe_tokens = sum(t.probe_toks for t in done)
     total_tokens = sum(t.toks_gen for t in done) + probe_tokens
     n_status     = lambda s: sum(1 for x in done if x.status == s)
-    n_graduated  = sum(1 for t in done if t.graduated)
+    n_committed  = sum(1 for t in done if t.committed)
     n_looped     = sum(1 for t in done if t.looped)
     print("\n=== PeerConf Summary (streaming) ===")
     print(f"Final bar: {bar if bar is None else f'{bar:.3f}'} "
@@ -584,8 +584,8 @@ for QID in QIDS:
           f"| truncated {n_status('truncated')} | abandoned {n_status('abandoned')}")
     if PROBE_EVERY > 0:
         n_pfail = sum(t.probe_fails for t in done)
-        print(f"Graduation probes: {sum(len(t.probes) for t in done)} fired "
-              f"({probe_tokens} probe tokens) | graduated early: {n_graduated}"
+        print(f"Completion probes: {sum(len(t.probes) for t in done)} fired "
+              f"({probe_tokens} probe tokens) | committed early: {n_committed}"
               + (f" | {n_pfail} failed" if n_pfail else ""))
     if LOOP_ACTION != "off":
         print(f"Loop guard: {n_looped} loops caught and ended (no ballots cast)")
@@ -627,8 +627,8 @@ for QID in QIDS:
                                 "PROBE_EVERY": PROBE_EVERY,
                                 "PROBE_MAX_TOK": PROBE_MAX_TOK,
                                 "PROBE_MIN_TOKS": PROBE_MIN_TOKS,
-                                "GRAD_CONF": GRAD_CONF,
-                                "GRAD_EWT": GRAD_EWT,
+                                "COMMIT_CONF": COMMIT_CONF,
+                                "COMMIT_EWT": COMMIT_EWT,
                                 "SEATS": SEATS, "WAVE": WAVE, "MAX_TRACES": MAX_TRACES,
                                 "REPLACEMENT_SEATS": REPLACEMENT_SEATS,
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
@@ -646,7 +646,7 @@ for QID in QIDS:
                                  "toks_gen": t.toks_gen,
                                  "confs": t.confs,
                                  "looped": t.looped,
-                                 "graduated": t.graduated,
+                                 "committed": t.committed,
                                  "probes": t.probes,
                                  "probe_toks": t.probe_toks,
                                  "probe_fails": t.probe_fails,
