@@ -205,7 +205,7 @@ def consensus_check():
     piles = {}
     for t in traces:
         if t.status == "finished" and t.answer is not None and t.confs:
-            if vote_bar is not None and t.id < WAVE and min(t.confs) < vote_bar:
+            if bar is not None and t.id < WAVE and min(t.confs) < bar:
                 continue
             _k = ballot_key(piles, t.answer)
             piles[_k] = piles.get(_k, 0.0) + min(t.confs)
@@ -385,7 +385,6 @@ for QID in QIDS:
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
     bar       = None
-    vote_bar  = None
     LINE_HISTORY = []
     t_start   = time.time()
     events    = queue.Queue()
@@ -503,12 +502,6 @@ for QID in QIDS:
         # ---- this trace departed: per-trace pit stop ----
         if t.status == "finished":
             update_bar()
-        if vote_bar is None and not any(
-                x.status in ("running", "abandoned") for x in traces if x.id < WAVE):
-            vote_bar = bar
-            if vote_bar is not None:
-                print(f"Opening wave in: wave-1 ballots meet the bar at "
-                      f"{vote_bar:.3f} (keep top {BAR_KEEP_TOP}%)")
         if CONSENSUS <= 1.0 and not run_over:
             lead, share = consensus_check()
             n_fin = sum(1 for x in traces if x.status == "finished")
@@ -543,8 +536,8 @@ for QID in QIDS:
     # -------- results + voting table --------
     done   = traces
     voters = [t for t in done if t.status == "finished" and t.answer is not None
-              and not (vote_bar is not None and t.id < WAVE
-                       and t.confs and min(t.confs) < vote_bar)]
+              and not (bar is not None and t.id < WAVE
+                       and t.confs and min(t.confs) < bar)]
     M = {t.id: trace_measures(t) for t in voters}
 
     print(f"\nBasic voting candidates: {len(voters)}")
@@ -622,8 +615,7 @@ for QID in QIDS:
                                 "MAX_TOK_TRACE": MAX_TOK_TRACE,
                                 "CONSENSUS": CONSENSUS,
                                 "CONSENSUS_MIN_FINISHERS": CONSENSUS_MIN_FINISHERS,
-                                "final_bar": bar,
-                                "vote_bar": vote_bar},
+                                "final_bar": bar},
                      "voting": voting_results, "tokens": total_tokens,
                      "time_s": round(time.time() - t_start, 2),
                      "probe_tokens": probe_tokens,
