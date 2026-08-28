@@ -120,7 +120,6 @@ class Trace:
         self.toks_gen = 0
         self.kill     = threading.Event()
         self.pending  = False
-        self.retried  = False
         self.status   = "running"
         self.answer   = None
     @property
@@ -207,12 +206,8 @@ def drain(phase_traces):
         t, payload, err = events.get()
         if err:
             inflight.discard(t.id)
-            if not t.retried:
-                t.retried = True
-                print(f"Trace {t.id}: stream error, retrying ({err})")
-                launch(t); continue
             t.status = "truncated"
-            print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
+            print(f"Trace {t.id}: stream failed -> truncated ({err})")
         elif payload["kind"] == "tok":
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]

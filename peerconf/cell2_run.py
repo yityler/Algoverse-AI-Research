@@ -29,7 +29,9 @@ MAX_TRACES     = 32         # total launch cap: a departed trace frees its seat 
 REPLACEMENT_SEATS = SEATS   # how many of those seats may hold replacements at once.
                             # At the default a freed seat refills straight away; set
                             # it lower to keep fewer replacements running at once
-                            # than the opening wave did.
+                            # than the opening wave did. A departure that lands
+                            # while replacements are at this cap does not queue —
+                            # the seat refills at the next departure instead
 
 # ----- the bar (PeerConf-low/high, from DeepConf-low/high) -----
 # Self-calibrating: the run's own finishers are the warmup. Wave 1 (the first
@@ -192,7 +194,6 @@ class Trace:
         self.judge_min = float("inf")
         self.kill      = threading.Event()
         self.pending   = None
-        self.retried   = False
         self.probes    = []
         self.probe_toks = 0
         self.probe_fails = 0
@@ -458,12 +459,8 @@ for QID in QIDS:
 
         if err:
             inflight.discard(t.id)
-            if not t.retried:
-                t.retried = True
-                print(f"Trace {t.id}: stream error, retrying ({err})")
-                launch(t); continue
             t.status = "truncated"
-            print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
+            print(f"Trace {t.id}: stream failed -> truncated ({err})")
         elif payload["kind"] == "batch":
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]
