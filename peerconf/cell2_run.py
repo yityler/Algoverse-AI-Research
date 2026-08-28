@@ -66,9 +66,6 @@ PROBE_MIN_TOKS   = 2048       # no probes before the first full window
 GRAD_CONF        = 0.95       # graduate on ONE probe: answer-token conf >= this...
 GRAD_EWT         = True       # ...that also reached </think> or <|end|> (</think> is used in this code)
 
-FORCE_BOXED    = False    # True = append "Please put your final answer within
-                          # \boxed{}." to the prompt.
-
 # ----- the certificate (second close): if (leader − runner-up) > (live +
 # unlaunched), no possible future changes the winner: even if every path still
 # out there voted runner-up, the leader still wins — so unlike the landslide's (MARS at gamma=1).
@@ -393,8 +390,6 @@ for QID in QIDS:
 
     print(f"\n{'=' * 60}\n### Q{QID}  ({(time.time() - t_sweep) / 60:.0f} min into the sweep)\n{'=' * 60}")
     question, ground_truth = data[QID]["question"], str(data[QID]["answer"]).strip()
-    if FORCE_BOXED:
-        question += "\n\nPlease put your final answer within \\boxed{}."
     print(f"Q{QID}: {question[:80]}...\nGround truth: {ground_truth}\n")
     BASE_PROMPT = render_chat(question)
 
@@ -624,7 +619,6 @@ for QID in QIDS:
                                 "BAR_KEEP_TOP": BAR_KEEP_TOP,
                                 "BAR_MIN_CALIBRATORS": BAR_MIN_CALIBRATORS,
                                 "WINDOW": WINDOW, "STREAM_BATCH": STREAM_BATCH,
-                                "FORCE_BOXED": FORCE_BOXED,
                                 "LOOP_ACTION": LOOP_ACTION,
                                 "LOOP_CHECK_EVERY": LOOP_CHECK_EVERY,
                                 "LOOP_UNIT_CHARS": LOOP_UNIT_CHARS,
