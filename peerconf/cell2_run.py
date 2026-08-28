@@ -59,7 +59,7 @@ COMMIT_EWT         = True       # ...that also reached </think> or <|end|> (</th
 # out there voted runner-up, the leader still wins — so unlike the landslide's (MARS at gamma=1).
 
 # ----- early stopping (the landslide rule) -----
-CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading answer
+CONSENSUS      = 0.95     # checked after EVERY departured trace; if the leading answer
                           # holds this share of the weighted votes among finished
                           # traces, stop launching AND end the in-flight streams
                           # on the spot.
