@@ -525,8 +525,9 @@ for QID in QIDS:
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
                       f"(margin exceeds all {len(live_ids)} outstanding) — run over")
         reps_live = sum(1 for x in traces if x.id >= WAVE and x.id in inflight)
-        while (not run_over and launched < MAX_TRACES
-               and reps_live < REPLACEMENT_SEATS):
+        wave_done = all(x.status != "running" for x in traces if x.id < WAVE)
+        target = REPLACEMENT_SEATS if wave_done else min(reps_live + 1, REPLACEMENT_SEATS)
+        while (not run_over and launched < MAX_TRACES and reps_live < target):
             nt = Trace(launched); traces.append(nt)
             print(f"Trace {launched}: seated"
                   + (f" | bar {bar:.3f}" if bar is not None else " | bar unarmed"))
