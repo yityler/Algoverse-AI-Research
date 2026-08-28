@@ -81,10 +81,7 @@ CONSENSUS      = 0.95     # checked after EVERY finished trace; if the leading a
                           # Anything > 1.0 = DISABLED (a fraction of the votes can never beat 1.0;
                           # exactly 1.0 = stop only on unanimity).
 CONSENSUS_MIN_FINISHERS = 3   # how many traces must have finished before the rule
-                              # may fire at all. One trace agreeing with itself is
-                              # a unanimous 100%, so a share alone would close the
-                              # run on its first finisher
-
+                              # may fire at all. 
 # ----- generation -----
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
