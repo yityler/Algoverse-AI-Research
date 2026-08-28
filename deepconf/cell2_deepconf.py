@@ -17,20 +17,20 @@ from dynasor.core.evaluator import math_equal
 MODEL   = os.environ.get("MODEL", "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B")
 SERVER  = "http://localhost:8000"
 OUT_DIR = globals().get("OUT_DIR") or os.environ.get("OUT_DIR", "deepconf_out")
-DATASET = os.environ.get("DATASET", "aime25")   # aime25 | math500 | gsm8k | hmmt25
+DATASET = os.environ.get("DATASET", "aime25")
 
-QIDS           = range(30)  # which questions to run — the first 30, or a set like [6, 9]
-WARMUP_TRACES  = 16     # offline warmup: run fully, never judged
-TOTAL_BUDGET   = 32     # warmup + online traces
-CONFIDENCE_PERCENTILE = 10   # keep-percent: bar = percentile(warmup minima, 100 - this)
-WINDOW         = 2048   # sliding window; a token's score = mean conf of its last 2048
-CONSENSUS      = 0.95   # paper's tau: stop when the leading answer holds this share
+QIDS           = range(30)
+WARMUP_TRACES  = 16
+TOTAL_BUDGET   = 32
+CONFIDENCE_PERCENTILE = 10
+WINDOW         = 2048
+CONSENSUS      = 0.95
 
 TEMPERATURE    = 0.6
 TOP_P          = 0.95
 TOP_K          = -1
 LOGPROBS       = 20
-MAX_TOK_TRACE  = 64000    # total generation cap per trace, counted in tokens GENERATED
+MAX_TOK_TRACE  = 64000
 
 tok = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
@@ -49,7 +49,7 @@ if _bad:
     raise SystemExit(f"{DATASET} has {len(data)} questions (0-{len(data) - 1}); "
                      f"QIDS asks for {_bad}")
 
-DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so two
+DS_TAG = f"{DATASET}_"
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
@@ -60,9 +60,6 @@ SESSION = requests.Session()
 _WS = re.compile(r"\s+")
 
 def tidy_tex(a):
-    """Cosmetic LaTeX only. Same value, fewer ways to write it. This exists
-    because math_equal parses some renderings and not others: a ",\\ " separator
-    between two roots defeats it even though ", " is fine."""
     s = str(a)
     for x, y in ((r"\dfrac", r"\frac"), (r"\tfrac", r"\frac"),
                  (r"\left", ""), (r"\right", ""),
@@ -71,9 +68,6 @@ def tidy_tex(a):
     return _WS.sub(" ", s).strip()
 
 def same_answer(a, b):
-    """Do these two strings name the same value? Cheap tests first, then
-    math_equal, which is what catches 0.5 against \\frac{1}{2}. It does not
-    rationalise, so 9/\\sqrt{23} and 9\\sqrt{23}/23 stay apart."""
     if a is None or b is None:
         return False
     a, b = tidy_tex(a), tidy_tex(b)
@@ -85,9 +79,6 @@ def same_answer(a, b):
         return False
 
 def ballot_key(piles, ans):
-    """The pile this answer belongs in. Equivalent answers share a pile, so the
-    vote counts values rather than spellings. Piles hold at most one entry per
-    distinct answer in a run, so the scan is cheap."""
     for k in piles:
         if same_answer(ans, k):
             return k
@@ -98,10 +89,6 @@ def is_correct(ans, gt):
     return same_answer(ans, gt)
 
 def extract_answer(text):
-    """DeepConf's own extractor (facebookresearch/deepconf, deepconf/utils.py),
-    so both arms read answers exactly the way the baseline does. Counting braces
-    reads a nested \\boxed{\\dfrac{a}{b}}, which a [^{}] regex cannot. Empty
-    comes back as None, not "", because callers test `is not None`."""
     if "boxed" not in text:
         return None
     ans = text.split("boxed")[-1]
@@ -127,14 +114,14 @@ def extract_answer(text):
 class Trace:
     def __init__(self, tid, phase):
         self.id       = tid
-        self.phase    = phase        # "warmup" | "online"
+        self.phase    = phase
         self.gen_text = ""
-        self.confs    = []           # full-window score per token
+        self.confs    = []
         self.toks_gen = 0
         self.kill     = threading.Event()
-        self.pending  = False        # cut verdict awaiting stream close
+        self.pending  = False
         self.retried  = False
-        self.status   = "running"     # running|finished|stopped|truncated|abandoned
+        self.status   = "running"
         self.answer   = None
     @property
     def min_conf(self):
@@ -179,7 +166,7 @@ def launch(t):
     t.kill = threading.Event()
     t.pending = False
     inflight.add(t.id)
-    budget = MAX_TOK_TRACE - t.toks_gen        # a first launch spends nothing yet
+    budget = MAX_TOK_TRACE - t.toks_gen
     executor.submit(run_stream, t, PROMPT + t.gen_text, max(budget, 1))
 
 def land(t, fin):

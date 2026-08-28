@@ -99,12 +99,12 @@ tok    = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 _bench = f"{DATASET}.jsonl"
 _bench_paths = [_bench, os.path.join("benchmarks", _bench),
                 os.path.join("..", "benchmarks", _bench)]
-try:                                       # repo-root benchmarks/, found from the
-    _here = os.path.dirname(os.path.abspath(__file__))   # script rather than the cwd
+try:
+    _here = os.path.dirname(os.path.abspath(__file__))
     _bench_paths[:0] = [os.path.join(_here, *([".."] * up), "benchmarks", _bench)
                         for up in (1, 2)]
 except NameError:
-    pass                                   # exec'd without __file__ (Modal)
+    pass
 _bench_path = next((p for p in _bench_paths if os.path.exists(p)), None)
 if _bench_path is None:
     raise FileNotFoundError(f"{_bench} not found — looked in {_bench_paths}")
@@ -117,7 +117,7 @@ if _bad:
     raise SystemExit(f"{DATASET} has {len(data)} questions (0-{len(data) - 1}); "
                      f"QIDS asks for {_bad}")
 
-DS_TAG = f"{DATASET}_"   # every result says which benchmark it came from, so two
+DS_TAG = f"{DATASET}_"
 print(f"Benchmark: {DATASET} — {len(data)} questions from {_bench_path}, "
       f"running {len(QIDS)}")
 
@@ -132,9 +132,6 @@ SESSION = requests.Session()
 _WS = re.compile(r"\s+")
 
 def tidy_tex(a):
-    """Cosmetic LaTeX only. Same value, fewer ways to write it. This exists
-    because math_equal parses some renderings and not others: a ",\\ " separator
-    between two roots defeats it even though ", " is fine."""
     s = str(a)
     for x, y in ((r"\dfrac", r"\frac"), (r"\tfrac", r"\frac"),
                  (r"\left", ""), (r"\right", ""),
@@ -143,9 +140,6 @@ def tidy_tex(a):
     return _WS.sub(" ", s).strip()
 
 def same_answer(a, b):
-    """Do these two strings name the same value? Cheap tests first, then
-    math_equal, which is what catches 0.5 against \\frac{1}{2}. It does not
-    rationalise, so 9/\\sqrt{23} and 9\\sqrt{23}/23 stay apart."""
     if a is None or b is None:
         return False
     a, b = tidy_tex(a), tidy_tex(b)
@@ -157,9 +151,6 @@ def same_answer(a, b):
         return False
 
 def ballot_key(piles, ans):
-    """The pile this answer belongs in. Equivalent answers share a pile, so the
-    vote counts values rather than spellings. Piles hold at most one entry per
-    distinct answer in a run, so the scan is cheap."""
     for k in piles:
         if same_answer(ans, k):
             return k
@@ -170,10 +161,6 @@ def is_correct(ans, gt):
     return same_answer(ans, gt)
 
 def extract_answer(text):
-    """DeepConf's own extractor (facebookresearch/deepconf, deepconf/utils.py),
-    so both arms read answers exactly the way the baseline does. Counting braces
-    reads a nested \\boxed{\\dfrac{a}{b}}, which a [^{}] regex cannot. Empty
-    comes back as None, not "", because callers test `is not None`."""
     if "boxed" not in text:
         return None
     ans = text.split("boxed")[-1]
@@ -200,30 +187,27 @@ class Trace:
     def __init__(self, tid):
         self.id = tid
         self.prompt_text = BASE_PROMPT
-        self.gen_text  = ""      # generated text for the CURRENT prompt
-        self.confs     = []      # full-window score per token (whole life) — the
-        self.win       = None    # window deque, carried across legs (worker-owned in flight)
-        self.toks_gen  = 0       # every token the GPU generated, across all prompts
-        self.judge_min = float("inf")  # lifetime low of the window score — a
-        self.kill      = threading.Event()  # the kill switch: set by the main thread,
-        self.pending   = None    # None | "cut" | "graduate"
+        self.gen_text  = ""
+        self.confs     = []
+        self.win       = None
+        self.toks_gen  = 0
+        self.judge_min = float("inf")
+        self.kill      = threading.Event()
+        self.pending   = None
         self.retried   = False
-        self.probes    = []      # graduation-probe history: one dict per probe
-        self.probe_toks = 0      # tokens the probes themselves generated (accounted)
-        self.probe_fails = 0     # probes that never came back (they leave no record)
-        self.probing   = False   # a probe is in flight for this trace right now
-        self.last_probe_at = 0   # toks_gen at the last probe (schedule pacing)
-        self.last_loop_check = 0 # toks_gen at the last loop-guard check
-        self.grad_answer = None  # the answer a successful probe read out
-        self.looped    = False   # loop guard fired
-        self.graduated = False   # finished early via the graduation probe
-        self.status    = "running"   # running|finished|stopped|truncated|abandoned
+        self.probes    = []
+        self.probe_toks = 0
+        self.probe_fails = 0
+        self.probing   = False
+        self.last_probe_at = 0
+        self.last_loop_check = 0
+        self.grad_answer = None
+        self.looped    = False
+        self.graduated = False
+        self.status    = "running"
         self.answer    = None
 
 def update_bar():
-    """Recompute the bar from the finishers' lifetime minima — the run's own
-    finishers are the warmup, and the calibration sharpens with every new
-    vote. Called after every finish."""
     global bar
     mins = [x.judge_min for x in traces
             if x.status == "finished" and x.confs]
@@ -242,7 +226,7 @@ def consensus_check():
     for t in traces:
         if t.status == "finished" and t.answer is not None and t.confs:
             if vote_bar is not None and t.id < WAVE and min(t.confs) < vote_bar:
-                continue                      # wave-1 path below the vote bar
+                continue
             _k = ballot_key(piles, t.answer)
             piles[_k] = piles.get(_k, 0.0) + min(t.confs)
     if not piles: return None, 0.0
@@ -250,9 +234,6 @@ def consensus_check():
     return a, piles[a] / sum(piles.values())
 
 def certificate():
-    """Election-calling: the run is over when the leader's ballot margin
-    exceeds every vote that could still arrive. Exact counting — a wrong
-    early call is arithmetically impossible."""
     piles = {}
     for x in traces:
         if x.status == "finished" and x.answer is not None:
@@ -268,20 +249,12 @@ def certificate():
     return None
 
 def looping(text):
-    """Is the trace's tail an exact repeat? (Loops repeat verbatim at HIGH
-    confidence, so text is the only guard that sees them.)"""
     unit = text[-LOOP_UNIT_CHARS:]
     if len(unit) < LOOP_UNIT_CHARS:
         return False
     return text[-LOOP_TAIL_CHARS:].count(unit) >= LOOP_REPEATS
 
 def run_probe(t, prompt, at_toks):
-    """Worker: one greedy non-streamed probe. conf = geometric mean over ONLY
-    the answer tokens inside {...} (punctuation ~0.99 dilutes the blended mean
-    upward); "blended" keeps the all-token score for comparison. Hitting the
-    "</think>" stop string = ended_with_think. A failed probe is skipped.
-    The completion and its per-token logprobs ride along, so the run's pkl keeps
-    the probe's raw evidence and not just the numbers read off it."""
     body = {"model": MODEL, "prompt": prompt, "max_tokens": PROBE_MAX_TOK,
             "temperature": 0.0, "logprobs": 1, "stop": ["</think>"]}
     try:
@@ -313,16 +286,11 @@ def run_probe(t, prompt, at_toks):
                         "conf_src": "none", "ewt": False}, None))
 
 def launch_probe(t):
-    """Main thread only. Snapshot the trace and fork its graduation probe."""
     t.probing = True
     t.last_probe_at = t.toks_gen
     executor.submit(run_probe, t, t.prompt_text + t.gen_text + PROBE_TEXT, t.toks_gen)
 
 def run_stream(t, prompt_text, max_toks):
-    """Worker thread: ONE streaming leg. Tokens arrive live with their top-20
-    logprobs; the worker keeps the window math locally, reports to the main thread
-    every STREAM_BATCH tokens, and honors the kill switch by closing the stream
-    (the server aborts generation on disconnect)."""
     body = {"model": MODEL, "prompt": prompt_text,
             "max_tokens": int(max_toks), "temperature": TEMPERATURE,
             "top_p": TOP_P, "top_k": TOP_K, "logprobs": LOGPROBS, "stream": True}
@@ -334,7 +302,7 @@ def run_stream(t, prompt_text, max_toks):
         b_scores, b_text, b_toks = [], [], 0
         fin = None
         for raw in r.iter_lines():
-            if t.kill.is_set():                      # the kill switch
+            if t.kill.is_set():
                 r.close()
                 fin = fin or "killed"
                 break
@@ -348,11 +316,11 @@ def run_stream(t, prompt_text, max_toks):
             for d in lps:
                 if not d: continue
                 vals = sorted(d.values(), reverse=True)[:LOGPROBS]
-                c = -float(np.mean(vals))                          # -sum(top-20)/20
+                c = -float(np.mean(vals))
                 if len(win) == WINDOW: s -= win[0]
                 win.append(c); s += c
                 b_toks += 1
-                if len(win) == WINDOW:            # full windows only
+                if len(win) == WINDOW:
                     b_scores.append(s / len(win))
             if ch.get("finish_reason"):
                 fin = ch["finish_reason"]
@@ -360,7 +328,7 @@ def run_stream(t, prompt_text, max_toks):
                 events.put((t, {"kind": "batch", "text": "".join(b_text),
                                 "scores": b_scores, "ntok": b_toks}, None))
                 b_scores, b_text, b_toks = [], [], 0
-        t.win = win                                   # carried to the next leg
+        t.win = win
         events.put((t, {"kind": "end", "text": "".join(b_text),
                         "scores": b_scores, "ntok": b_toks,
                         "finish": fin or "stop"}, None))
@@ -368,8 +336,6 @@ def run_stream(t, prompt_text, max_toks):
         events.put((t, None, e))
 
 def launch(t):
-    """Main thread only. One streaming leg: the whole remaining budget.
-    Judgment happens live."""
     budget = MAX_TOK_TRACE - t.toks_gen
     t.kill = threading.Event()
     t.pending = None
@@ -377,17 +343,6 @@ def launch(t):
     executor.submit(run_stream, t, t.prompt_text + t.gen_text, max(budget, 1))
 
 def judge(t, scores):
-    """Track the lifetime low; judge REPLACEMENTS against the armed bar.
-    Wave 1 (ids < WAVE) runs bar-free for its whole life: its finishers ARE the
-    calibration, and judging the paths that DEFINE the bar against that same bar
-    cuts most of wave 1. Measured on the 64k AIME25 run, doing so would end
-    287-381 of ~480 wave-1 paths and cost 2 of 30 questions, because the paths
-    it cuts include the correct ones (Q9 loses five traces answering 81 and
-    keeps the confidently wrong 75).
-    A path's lifetime low only ever falls, so one below the bar can never climb
-    back to clear the vote filter — finishing it buys an answer that gets
-    discarded. One dip below the bar = instant cut.
-    Returns the verdict: None (safe) | 'cut'."""
     if scores and min(scores) < t.judge_min:
         t.judge_min = min(scores)
     if t.id < WAVE or bar is None:
@@ -451,11 +406,11 @@ for QID in QIDS:
     # -------- fresh run state (mutated ONLY by the main thread) --------
     traces    = [Trace(i) for i in range(SEATS)]
     launched  = SEATS
-    bar       = None             # armed by update_bar() at BAR_MIN_CALIBRATORS finishers
-    vote_bar  = None             # the bar itself, read once the opening wave is in
-    LINE_HISTORY = []            # game tape: the bar at every update, for the figure
+    bar       = None
+    vote_bar  = None
+    LINE_HISTORY = []
     t_start   = time.time()
-    events    = queue.Queue()    # (trace, payload|None, error|None) from worker threads
+    events    = queue.Queue()
     inflight  = set()
     run_over = False
     n_events  = 0
@@ -503,7 +458,7 @@ for QID in QIDS:
                       f"conf {rec['conf']:.3f}, answer {p_ans}")
             continue
 
-        if err:                                               # one retry, then truncate
+        if err:
             inflight.discard(t.id)
             if not t.retried:
                 t.retried = True
@@ -511,14 +466,14 @@ for QID in QIDS:
                 launch(t); continue
             t.status = "truncated"
             print(f"Trace {t.id}: stream failed twice -> truncated ({err})")
-        elif payload["kind"] == "batch":                      # mid-flight report
+        elif payload["kind"] == "batch":
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             t.confs += payload["scores"]
             if t.pending is None and not run_over:
                 verdict = judge(t, payload["scores"])
                 if verdict is not None:
                     t.pending = verdict
-                    t.kill.set()                              # stream closes within a chunk
+                    t.kill.set()
             if (LOOP_ACTION != "off" and t.pending is None and not run_over
                     and t.toks_gen - t.last_loop_check >= LOOP_CHECK_EVERY):
                 t.last_loop_check = t.toks_gen
@@ -532,8 +487,8 @@ for QID in QIDS:
                     and not run_over and t.toks_gen >= PROBE_MIN_TOKS
                     and t.toks_gen - t.last_probe_at >= PROBE_EVERY):
                 launch_probe(t)
-            continue                                          # trace still in flight
-        else:                                                 # "end": the leg is over
+            continue
+        else:
             inflight.discard(t.id)
             t.gen_text += payload["text"]; t.toks_gen += payload["ntok"]
             fin = payload["finish"]
@@ -545,14 +500,14 @@ for QID in QIDS:
 
             ans = extract_answer(t.gen_text)
 
-            if run_over:                                     # landed after the certificate
+            if run_over:
                 t.status = "abandoned"
-            elif t.pending == "graduate":                     # the probe called it home
+            elif t.pending == "graduate":
                 t.status, t.answer = "finished", t.grad_answer
                 t.graduated = True
                 print(f"Trace {t.id}: finished EARLY at {t.toks_gen} tokens "
                       f"(graduation probe) | answer={t.answer}")
-            elif t.pending == "cut":                          # the bar (or the loop guard)
+            elif t.pending == "cut":
                 t.status = "stopped"
                 if t.looped:
                     print(f"Trace {t.id}: loop ended at {t.toks_gen} tokens (no ballot)")
@@ -560,20 +515,20 @@ for QID in QIDS:
                     print(f"Trace {t.id}: cut at the bar "
                           + (f"{bar:.3f} " if bar is not None else "")
                           + f"(its low {t.judge_min:.3f}, {t.toks_gen} tokens)")
-            elif ans is not None:                             # crossed the finish line
+            elif ans is not None:
                 t.status, t.answer = "finished", ans
                 print(f"Trace {t.id}: finished at {t.toks_gen} tokens | answer={ans}")
-            elif fin == "stop":                               # EOS without a boxed answer
+            elif fin == "stop":
                 t.status = "truncated"
                 print(f"Trace {t.id}: ended without a boxed answer at {t.toks_gen} "
                       f"tokens -> truncated")
-            else:                                             # hit its budget
+            else:
                 t.status = "truncated"
                 print(f"Trace {t.id}: truncated at {t.toks_gen} tokens (cap)")
 
         # ---- this trace departed: per-trace pit stop ----
         if t.status == "finished":
-            update_bar()                                      # finishers calibrate
+            update_bar()
         if vote_bar is None and not any(
                 x.status in ("running", "abandoned") for x in traces if x.id < WAVE):
             vote_bar = bar
@@ -586,7 +541,7 @@ for QID in QIDS:
             if lead is not None and share >= CONSENSUS and n_fin >= 3:
                 run_over = True
                 live_ids = [x.id for x in traces if x.id in inflight]
-                for x in traces:                              # drain INSTANTLY
+                for x in traces:
                     if x.id in inflight:
                         x.kill.set()
                 print(f"Consensus after {n_fin} finishers: '{lead}' holds {share:.0%} — "
@@ -596,7 +551,7 @@ for QID in QIDS:
             if winner is not None:
                 run_over = True
                 live_ids = [x.id for x in traces if x.id in inflight]
-                for x in traces:                              # drain INSTANTLY
+                for x in traces:
                     if x.id in inflight:
                         x.kill.set()
                 print(f"CERTIFICATE: '{winner}' cannot be caught "
@@ -630,7 +585,7 @@ for QID in QIDS:
     }
 
     probe_tokens = sum(t.probe_toks for t in done)
-    total_tokens = sum(t.toks_gen for t in done) + probe_tokens  # EVERYTHING the
+    total_tokens = sum(t.toks_gen for t in done) + probe_tokens
     n_status     = lambda s: sum(1 for x in done if x.status == s)
     n_graduated  = sum(1 for t in done if t.graduated)
     n_looped     = sum(1 for t in done if t.looped)
