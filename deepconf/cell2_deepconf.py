@@ -54,21 +54,36 @@ import re
 
 SESSION = requests.Session()
 
+_WS = re.compile(r"\s+")
+
+def tidy_tex(a):
+    s = str(a)
+    for x, y in ((r"\dfrac", r"\frac"), (r"\tfrac", r"\frac"),
+                 (r"\left", ""), (r"\right", ""),
+                 (r"\!", ""), (r"\,", " "), (r"\;", " "), (r"\ ", " ")):
+        s = s.replace(x, y)
+    return _WS.sub(" ", s).strip()
+
+def same_answer(a, b):
+    if a is None or b is None:
+        return False
+    a, b = tidy_tex(a), tidy_tex(b)
+    if a == b or _WS.sub("", a) == _WS.sub("", b):
+        return True
+    try:
+        return bool(math_equal(a, b))
+    except Exception:
+        return False
+
 def ballot_key(piles, ans):
     for k in piles:
-        try:
-            if math_equal(str(ans), str(k)):
-                return k
-        except Exception:
-            pass
+        if same_answer(ans, k):
+            return k
     return str(ans)
 
 def is_correct(ans, gt):
     if ans is None: return False
-    try:
-        return bool(math_equal(str(ans), str(gt)))
-    except Exception:
-        return False
+    return same_answer(ans, gt)
 
 def extract_answer(text):
     if "boxed" not in text:
