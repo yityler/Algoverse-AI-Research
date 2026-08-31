@@ -131,6 +131,13 @@ where the online wave never ran, which is where the two must agree by
 construction. The unfiltered SC@16 vote then differs from DeepConf on exactly
 the questions the filter changes.
 
+The 30 raw DeepConf-low pkls these numbers come from are committed under
+[`deepconf_pkls/`](deepconf_pkls/README.md), with the per-path answer and token
+count for all 16 warmup traces on every question. Raw pkls are otherwise kept
+off git in this repo; that directory is a deliberate exception, made so the
+warmup paths can be combined with a separate SC@32 run into a plain majority
+vote over all 32 paths per question.
+
 ## SC@32 pilot — 5 of 30 questions, evidence only
 
 A native SC@32 arm (`sc/cell2_sc.py`, new in this run) was piloted on five
