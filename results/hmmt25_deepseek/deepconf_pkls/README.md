@@ -57,13 +57,3 @@ bar-filtered ballot pool reproduces its reported majority on all 18 questions
 where the online wave never ran, which is where the two must agree by
 construction. See "SC@16, computed from DeepConf's own warmup traces" in
 [../README.md](../README.md).
-
-## Why they are here
-
-Tyler is combining these 16 warmup paths per question with a separate SC@32 run
-to form a plain majority vote over all 32 paths per question. That needs the
-per-path answers and token counts, which the summary tables do not carry.
-
-Note that these warmup traces share the DeepConf run's sampling stream; they are
-not an independent SC draw. Any vote combining them with a separate run should
-say so.
